@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace APIAccountServer.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class LoginController : ControllerBase
     {
+        
     }
 }
