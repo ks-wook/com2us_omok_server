@@ -7,6 +7,6 @@ namespace APIAccountServer.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
-        
+        LoginController() { }
     }
 }
