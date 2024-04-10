@@ -119,5 +119,4 @@ src/.vs/config/applicationhost.config
 
 
 .idea/
-appsettings.*
-**/appsettings.*
+./APIAccountServer/appsettings.*
