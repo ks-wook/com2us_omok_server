@@ -1,3 +1,8 @@
+using SqlKata;
+using SqlKata.Execution;
+
+
+
 var builder = WebApplication.CreateBuilder(args);
 IConfiguration configuration = builder.Configuration; // Config data
 
