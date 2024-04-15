@@ -1,12 +1,22 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace APIAccountServer.Controllers
+
+[ApiController]
+[Route("[controller]")]
+public class LoginController : ControllerBase
 {
-    [Route("[controller]")]
-    [ApiController]
-    public class LoginController : ControllerBase
+    public LoginController()
     {
-        LoginController() { }
+        
+    }
+
+
+    [HttpPost]
+    public string TestAPI([FromHeader] string message)
+    {
+        Console.WriteLine(message);
+        return "hello client";
     }
 }
+
