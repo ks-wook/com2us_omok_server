@@ -6,7 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 [Route("[controller]")]
 public class LoginController : ControllerBase
 {
-    public LoginController() { }
+    public LoginController()
+    {
+        
+    }
 
 
     [HttpPost]
