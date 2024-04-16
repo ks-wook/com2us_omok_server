@@ -18,5 +18,8 @@ public enum ErrorCode : short
     NullAccountDbConnectionStr = 3001,
     InsertAccountFail = 3002,
 
+
+    // Token 4001 ~
+    NullToken = 4001,
 }
 
