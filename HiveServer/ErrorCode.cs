@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Tracing;
 
-namespace APIAccountServer;
+namespace HiveServer;
 
 public enum ErrorCode : short
 {
@@ -9,8 +9,8 @@ public enum ErrorCode : short
 
     // Account 2001 ~ 
     CreateAccountFail = 2001,
-    
-
+    InvalidEmailFormat = 2002,
+    DuplicatedEmail = 2003,
 
 
 

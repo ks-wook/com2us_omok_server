@@ -3,6 +3,7 @@ using SqlKata.Compilers;
 using SqlKata.Execution;
 using System.Data;
 using MySqlConnector;
+using HiveServer;
 
 namespace APIAccountServer.Services;
 
@@ -29,13 +30,13 @@ public class HiveDb : IHiveDb
     // create connection with db
     private ErrorCode DbConnect()
     {
-        string? connectionStr = _dbConfig.Value.AccountDb;
+        string? connectionStr = _dbConfig.Value.HiveDb;
         if(connectionStr == null) // db 연결문자열 가져오기 실패
         {
             return ErrorCode.NullAccountDbConnectionStr;
         }
 
-        _dbConnector = new MySqlConnection(_dbConfig.Value.AccountDb);
+        _dbConnector = new MySqlConnection(_dbConfig.Value.HiveDb);
         _dbConnector.Open();
 
         return ErrorCode.None;
@@ -49,9 +50,29 @@ public class HiveDb : IHiveDb
 
 
 
-    public Task<ErrorCode> CreateAsync(string id, string password)
+    public async Task<ErrorCode> CreateAccountAsync(string email, string password)
     {
-        throw new NotImplementedException();
+        // TODO 패스워드 salting
+
+
+
+
+
+
+        // TODO 이메일 중복 검사
+        var data = _queryFactory.Query("account").Select("email").Where(email).FirstOrDefault();
+
+
+
+
+        // TEST 쌩 패스워드 삽입
+
+
+
+
+
+
+        return ErrorCode.None;
     }
 
     public void Dispose()
@@ -61,12 +82,10 @@ public class HiveDb : IHiveDb
 }
 
 
-// Appseggins 파일에 정의된 내용을 이름 그대로 가져온다
+// Appsettings 파일에 정의된 내용을 이름 그대로 가져온다
 public class DbConfig
 {
 
-    public string? AccountDb { get; set; }
-
-    public string? GameDb { get; set; }
+    public string? HiveDb { get; set; }
 
 }
