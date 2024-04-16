@@ -1,8 +1,10 @@
-﻿namespace APIAccountServer.Services;
+﻿using HiveServer;
+
+namespace APIAccountServer.Services;
 
 public interface IHiveDb : IDisposable
 {
-    public Task<ErrorCode> CreateAsync(string id, string password);
+    public Task<ErrorCode> CreateAccountAsync(string id, string password);
 
 
 }

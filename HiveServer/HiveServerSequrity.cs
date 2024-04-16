@@ -17,7 +17,7 @@ public class HiveServerSequrity
 
 
 
-    static bool IsValidEmail(string email)
+    public static bool IsValidEmail(string email)
     {
         // 이메일 주소 형식을 검사하기 위한 정규식 패턴
         string pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";

@@ -3,6 +3,7 @@ using SqlKata.Compilers;
 using SqlKata.Execution;
 using System.Data;
 using MySqlConnector;
+using HiveServer;
 
 namespace APIAccountServer.Services;
 
@@ -49,9 +50,29 @@ public class HiveDb : IHiveDb
 
 
 
-    public Task<ErrorCode> CreateAccount(string id, string password)
+    public async Task<ErrorCode> CreateAccountAsync(string email, string password)
     {
-        throw new NotImplementedException();
+        // TODO 패스워드 salting
+
+
+
+
+
+
+        // TODO 이메일 중복 검사
+        var data = _queryFactory.Query("account").Select("email").Where(email).FirstOrDefault();
+
+
+
+
+        // TEST 쌩 패스워드 삽입
+
+
+
+
+
+
+        return ErrorCode.None;
     }
 
     public void Dispose()
