@@ -16,7 +16,7 @@ public enum ErrorCode : short
 
     // AccountDb 3001 ~ 
     NullAccountDbConnectionStr = 3001,
-
+    InsertAccountFail = 3002,
 
 }
 

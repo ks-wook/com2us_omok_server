@@ -1,27 +1,20 @@
-using APIAccountServer.Services;
+using HiveServer.Services;
 using SqlKata;
 using SqlKata.Execution;
 using ZLogger;
 
 
-
-
-
 var builder = WebApplication.CreateBuilder(args);
-IConfiguration configuration = builder.Configuration; // Config data
-
-
-
-// Init?
-// Service -> builder 
-// Middleware -> app
+IConfiguration configuration = builder.Configuration;
 
 // Service Init, DI
+builder.Services.Configure<DbConfig>(configuration.GetSection(nameof(DbConfig)));
+
 builder.Services.AddTransient<IHiveDb,  HiveDb>();
 builder.Services.AddControllers();
 
 
-// Log Setting
+// Logger Setting
 Host.CreateDefaultBuilder()
     .ConfigureLogging(logging =>
     {

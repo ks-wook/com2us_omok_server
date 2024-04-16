@@ -1,6 +1,6 @@
 ﻿using HiveServer;
 
-namespace APIAccountServer.Services;
+namespace HiveServer.Services;
 
 public interface IHiveDb : IDisposable
 {
