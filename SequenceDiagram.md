@@ -5,10 +5,8 @@ sequenceDiagram
     
     participant Client
     participant GameAPIServer
-    participant Redis
     participant HiveServer
     participant HiveDb
-    participant GameDb
 
 
     Client             ->> HiveServer:        하이브 계정 생성 요청 ( /CreateAccount )
