@@ -1,4 +1,8 @@
-# __HiveDb__
+# __GameDb__
+### schema
+![스크린샷(154)](https://github.com/ks-wook/com2us_omok_server/assets/76806695/23804df1-9ea8-4735-bd6b-96bc86685049)
+---
+
 
 ## *account*
 
@@ -20,10 +24,6 @@ CREATE TABLE account
 
 
 ---
-
-
-
-# __GameDb__
 
 
 ## *user*
@@ -118,7 +118,4 @@ CREATE TABLE mailbox_item
 
 
 ---
-
-
-
 
