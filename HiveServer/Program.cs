@@ -2,7 +2,7 @@ using HiveServer.Services;
 using SqlKata;
 using SqlKata.Execution;
 using ZLogger;
-
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 IConfiguration configuration = builder.Configuration;
@@ -37,13 +37,6 @@ Host.CreateDefaultBuilder()
 
 
 var app = builder.Build();
-
-
-
-
-// TODO Middleware Setting
-
-
 
 
 
