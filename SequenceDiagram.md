@@ -17,7 +17,7 @@ sequenceDiagram
     APIAccountServer  -->> Client:             계정 생성 실패 응답
     end
 
-    APIAccountServer   ->> 
+    APIAccountServer   ->> Database:          하이브 계정 생성
     APIAccountServer  -->> Client:            계정 생성 성공 응답
 
 ```
