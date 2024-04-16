@@ -6,16 +6,16 @@ using MySqlConnector;
 
 namespace APIAccountServer.Services;
 
-public class AccountDb : IAccountDb
+public class HiveDb : IHiveDb
 {
     readonly IOptions<DbConfig> _dbConfig;
-    readonly ILogger<AccountDb> _logger;
+    readonly ILogger<HiveDb> _logger;
 
     IDbConnection _dbConnector;
     SqlKata.Compilers.MySqlCompiler _dbCompiler;
     QueryFactory _queryFactory;
 
-    public AccountDb(ILogger<AccountDb> logger, IOptions<DbConfig> dbConfig)
+    public HiveDb(ILogger<HiveDb> logger, IOptions<DbConfig> dbConfig)
     {
         _dbConfig = dbConfig;
         _logger = logger;
