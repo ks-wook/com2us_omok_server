@@ -1,4 +1,4 @@
-# 하이브 게정 생성
+# 하이브 계정 생성
 
 ```mermaid
 sequenceDiagram
