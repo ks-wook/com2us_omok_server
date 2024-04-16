@@ -5,7 +5,7 @@ sequenceDiagram
     
     participant Client
     participant GameAPIServer
-    participant GameRedisCache
+    participant Redis
     participant HiveServer
     participant HiveDb
     participant GameDb
@@ -27,14 +27,14 @@ sequenceDiagram
 ---
 
 
-# 하이브 계정이 있는 유저의 게임 로그인
+# 게임 API 서버 로그인
 
 ```mermaid
 sequenceDiagram
     
     participant Client
     participant GameAPIServer
-    participant GameRedisCache
+    participant Redis
     participant HiveServer
     participant HiveDb
     participant GameDb
@@ -52,7 +52,7 @@ sequenceDiagram
     GameAPIServer      ->> HiveServer:        토큰 유효성 검증 요청 ( /AuthCheck )
     HiveServer        -->> GameAPIServer:     토큰 유효성 검증 결과 응답
     alt 토큰이 유효하지 않은 경우
-        APIGameServer -->> Client:            토큰 유효성 검증 실패
+        GameAPIServer -->> Client:            토큰 유효성 검증 실패
     end
 
     GameAPIServer      ->> GameDb:            유저 아이디를 통해 유저의 게임 데이터 검색
@@ -63,8 +63,8 @@ sequenceDiagram
         GameAPIServer -->> GameDb:            게임을 처음 시작한 유저의 기본 데이터 생성
         GameAPIServer -->> Client:            기본 유저 데이터 전달 및 로그인 성공 응답
     end
-    GameAPIServer      ->> GameRedisCache:    Redis에 로그인 성공한 토큰을 저장, 이후의 요청은 Redis를 통해 처리
-    
+    GameAPIServer      ->> Redis:    Redis에 로그인 성공한 토큰을 저장, 이후의 요청은 Redis를 통해 처리
+
 ```
 
 ---
