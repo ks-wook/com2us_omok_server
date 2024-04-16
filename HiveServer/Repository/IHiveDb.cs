@@ -1,6 +1,6 @@
 ﻿namespace APIAccountServer.Services;
 
-public interface IAccountDb : IDisposable
+public interface IHiveDb : IDisposable
 {
     public Task<ErrorCode> CreateAsync(string id, string password);
 
