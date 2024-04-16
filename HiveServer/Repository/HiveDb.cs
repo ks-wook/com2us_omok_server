@@ -4,8 +4,11 @@ using SqlKata.Execution;
 using System.Data;
 using MySqlConnector;
 using HiveServer;
+using Microsoft.AspNetCore.SignalR.Protocol;
+using HiveServer.Model.DAO;
+using ZLogger;
 
-namespace APIAccountServer.Services;
+namespace HiveServer.Services;
 
 public class HiveDb : IHiveDb
 {
@@ -31,16 +34,21 @@ public class HiveDb : IHiveDb
     private ErrorCode DbConnect()
     {
         string? connectionStr = _dbConfig.Value.HiveDb;
-        if(connectionStr == null) // db 연결문자열 가져오기 실패
+        if (connectionStr == null) // db 연결문자열 가져오기 실패
         {
+            _logger.ZLogError(
+                $"[DbConnect] Null Db Connection String");
+
+            Console.WriteLine("연결 문자열이 존재하지 않음.");
             return ErrorCode.NullAccountDbConnectionStr;
         }
 
-        _dbConnector = new MySqlConnection(_dbConfig.Value.HiveDb);
+        _dbConnector = new MySqlConnection(connectionStr);
         _dbConnector.Open();
 
         return ErrorCode.None;
     }
+
 
     // disconnect with db
     private void DbDisconnect()
@@ -52,32 +60,56 @@ public class HiveDb : IHiveDb
 
     public async Task<ErrorCode> CreateAccountAsync(string email, string password)
     {
-        // TODO 패스워드 salting
+        try
+        {
+            // 이메일 중복 check
+            dynamic? data = await _queryFactory.Query("account")
+                .Where("email", "=", email).FirstOrDefaultAsync();
+
+            if (data != null)
+            {
+                return ErrorCode.DuplicatedEmail;
+            }
 
 
+            // 패스워드 salting
+            string saltValue, hashedPassword;
+            (saltValue, hashedPassword) = HiveServerSequrity.HashPasswordWithSalt(password);
 
+            // 계정 정보 삽입
+            var insertSuccess = await _queryFactory.Query("account").InsertAsync(new
+            {
+                Email = email,
+                Password = hashedPassword,
+                SaltValue = saltValue,
+            });
 
+            _logger.ZLogDebug(
+                $"[CreateAccount] email: {email}, salt_value : {saltValue}, hashed_pw:{hashedPassword}");
 
+            if (insertSuccess != 1)
+            {
+                _logger.ZLogError(
+                    $"[CreateAccount] ErrorCode: {ErrorCode.InsertAccountFail}");
+                return ErrorCode.InsertAccountFail;
+            }
 
-        // TODO 이메일 중복 검사
-        var data = _queryFactory.Query("account").Select("email").Where(email).FirstOrDefault();
-
-
-
-
-        // TEST 쌩 패스워드 삽입
-
-
-
-
-
-
+        }
+        catch (Exception e) 
+        {
+            _logger.ZLogError(
+                $"[CreateAccount] ErrorCode: {ErrorCode.CreateAccountFail}");
+            return ErrorCode.CreateAccountFail;
+        }
+        
+        // 하이브 계정 생성 성공
         return ErrorCode.None;
     }
 
+    // distructor
     public void Dispose()
     {
-        throw new NotImplementedException();
+        DbDisconnect();
     }
 }
 
@@ -85,7 +117,5 @@ public class HiveDb : IHiveDb
 // Appsettings 파일에 정의된 내용을 이름 그대로 가져온다
 public class DbConfig
 {
-
-    public string? HiveDb { get; set; }
-
+    public string HiveDb { get; set; }
 }

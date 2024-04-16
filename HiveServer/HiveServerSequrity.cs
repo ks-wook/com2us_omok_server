@@ -1,7 +1,9 @@
-﻿using System.Security.Cryptography;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 
-namespace APIAccountServer;
+namespace HiveServer;
 
 
 public class HiveServerSequrity
@@ -13,8 +15,29 @@ public class HiveServerSequrity
 
 
 
-    // TODO 비밀번호 복호화 함수
+    public static (string saltString, string hashedPasswordString) HashPasswordWithSalt(string password)
+    {
+        byte[] salt = GenerateSalt();
 
+        using (var sha256 = SHA256.Create())
+        {
+            // 비밀번호와 salt를 연결하여 byte 배열로 변환
+            byte[] saltedPassword = Encoding.UTF8.GetBytes(password + Convert.ToBase64String(salt));
+
+            string hashedPasswordString = Convert.ToBase64String(sha256.ComputeHash(saltedPassword));
+            string saltString = Convert.ToBase64String(salt);
+
+            return (saltString, hashedPasswordString);
+        }
+    }
+
+
+    private static byte[] GenerateSalt()
+    {
+        byte[] salt;
+        new RNGCryptoServiceProvider().GetBytes(salt = new byte[16]);
+        return salt;
+    }
 
 
     public static bool IsValidEmail(string email)

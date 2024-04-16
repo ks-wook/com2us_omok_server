@@ -34,7 +34,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "AccountAPIServer": {
+    "HiveServer": {
       "commandName": "Project",
       "launchBrowser": false,
       "environmentVariables": {

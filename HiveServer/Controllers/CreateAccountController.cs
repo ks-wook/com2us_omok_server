@@ -1,6 +1,6 @@
-﻿using APIAccountServer;
-using APIAccountServer.Services;
-using HiveServer.Model.DTO;
+﻿using HiveServer;
+using HiveServer.Services;
+using HiveServer.Model.DAO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,21 +19,20 @@ public class CreateAccountController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<CreateAccountRes> CreateAccount([FromBody] CreateAccountReq req)
+    public async Task<CreateAccountRes> CreateAccount([FromBody]CreateAccountReq req)
     {
         CreateAccountRes res = new CreateAccountRes();
-
-        if(!HiveServerSequrity.IsValidEmail(req.email))
+        await Console.Out.WriteLineAsync(req.Email + req.Password);
+        if (!HiveServerSequrity.IsValidEmail(req.Email))
         {
             res.result = HiveServer.ErrorCode.InvalidEmailFormat;
+            return res;
         }
 
         // DB 최소 저장 데이터 이메일, 패스워드
-        res.result = await _hiveDb.CreateAccountAsync(req.email, req.password);
+        res.result = await _hiveDb.CreateAccountAsync(req.Email, req.Password);
 
         return res;
     }
-
-
 }
 
