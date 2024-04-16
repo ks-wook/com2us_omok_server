@@ -16,7 +16,7 @@ CREATE TABLE account
     `password`          VARCHAR(30)     NOT NULL    COMMENT '해싱된 비밀번호',
     `created_at`        DATETIME        NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '계정 생성 일시',
     `recent_login_at`   DATETIME        NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '가장 최근 로그인 일시',
-     PRIMARY KEY (player_id),
+     PRIMARY KEY (account_id),
      UNIQUE KEY (email)
 );
 ```
