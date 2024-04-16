@@ -29,13 +29,13 @@ public class HiveDb : IHiveDb
     // create connection with db
     private ErrorCode DbConnect()
     {
-        string? connectionStr = _dbConfig.Value.AccountDb;
+        string? connectionStr = _dbConfig.Value.HiveDb;
         if(connectionStr == null) // db 연결문자열 가져오기 실패
         {
             return ErrorCode.NullAccountDbConnectionStr;
         }
 
-        _dbConnector = new MySqlConnection(_dbConfig.Value.AccountDb);
+        _dbConnector = new MySqlConnection(_dbConfig.Value.HiveDb);
         _dbConnector.Open();
 
         return ErrorCode.None;
@@ -49,7 +49,7 @@ public class HiveDb : IHiveDb
 
 
 
-    public Task<ErrorCode> CreateAsync(string id, string password)
+    public Task<ErrorCode> CreateAccount(string id, string password)
     {
         throw new NotImplementedException();
     }
@@ -61,12 +61,10 @@ public class HiveDb : IHiveDb
 }
 
 
-// Appseggins 파일에 정의된 내용을 이름 그대로 가져온다
+// Appsettings 파일에 정의된 내용을 이름 그대로 가져온다
 public class DbConfig
 {
 
-    public string? AccountDb { get; set; }
-
-    public string? GameDb { get; set; }
+    public string? HiveDb { get; set; }
 
 }

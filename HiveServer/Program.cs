@@ -1,5 +1,9 @@
+using APIAccountServer.Services;
 using SqlKata;
 using SqlKata.Execution;
+using ZLogger;
+
+
 
 
 
@@ -10,14 +14,30 @@ IConfiguration configuration = builder.Configuration; // Config data
 // Service -> builder 
 // Middleware -> app
 
-// TODO Service Init
+// Service Init, DI
+builder.Services.AddTransient<IHiveDb,  HiveDb>();
 builder.Services.AddControllers();
 
 
+// Log Setting
+Host.CreateDefaultBuilder()
+    .ConfigureLogging(logging =>
+    {
+        logging.ClearProviders();
 
-// TODO Log Setting
+        // TEST 콘솔에 로그 출력
+        logging.AddZLoggerConsole();
 
+        // TODO 날짜에 따라 파일에 로그 출력
+        // logging.AddZLoggerFile("fileName.log");
+        // 날짜에 따라 다른 파일을 생성하여 로깅을 구조화
+        // logging.AddZLoggerRollingFile((dt, x) => $"logs/{dt.ToLocalTime():yyyy-MM-dd}_{x:000}.log", x => x.ToLocalTime().Date, 1024);
 
+        logging.AddZLoggerConsole(options =>
+        {
+            options.UseJsonFormatter();
+        });
+    });
 
 
 
@@ -34,12 +54,10 @@ var app = builder.Build();
 
 app.UseRouting();
 
-// Controller Mapping
 #pragma warning disable ASP0014
 app.UseEndpoints(endpoints => { _ = endpoints.MapControllers(); });
 #pragma warning restore ASP0014
 
 
 
-
-app.Run(configuration["APIAccountServerAddr"]);
+app.Run(configuration["HiveServerAddr"]);
