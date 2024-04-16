@@ -4,7 +4,6 @@
 sequenceDiagram
     
     participant Client
-    participant GameAPIServer
     participant HiveServer
     participant HiveDb
 
