@@ -26,13 +26,11 @@ public class CreateAccountController : ControllerBase
 
         if (!HiveServerSequrity.IsValidEmail(req.Email))
         {
-            res.Result = HiveServer.ErrorCode.InvalidEmailFormat;
+            res.result = HiveServer.ErrorCode.InvalidEmailFormat;
             return res;
         }
 
-        res.Result = await _hiveDb.CreateAccountAsync(req.Email, req.Password);
-        if(res.Result == ErrorCode.None) res.message = "계정 생성 성공";
-
+        res.result = await _hiveDb.CreateAccountAsync(req.Email, req.Password);
 
         return res;
     }

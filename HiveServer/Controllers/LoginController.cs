@@ -1,5 +1,6 @@
 ﻿using HiveServer;
 using HiveServer.Model.DTO;
+using HiveServer.Repository;
 using HiveServer.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,13 @@ public class LoginController : ControllerBase
     readonly string _tokenSaltValue;
     readonly ILogger<LoginController> _logger;
     readonly IHiveDb _hiveDb;
+    readonly IMemoryDb _memoryDb;
 
-    public LoginController(ILogger<LoginController> logger, IHiveDb hiveDb, IConfiguration config)
+    public LoginController(ILogger<LoginController> logger, IHiveDb hiveDb, IMemoryDb memoryDb, IConfiguration config)
     {
         _logger = logger;
         _hiveDb = hiveDb;
+        _memoryDb = memoryDb;
 
         _tokenSaltValue = config.GetSection("TokenSaltValue").Value ?? "error";
     }
@@ -30,7 +33,7 @@ public class LoginController : ControllerBase
 
         
         // 전달된 패스워드를 이용해 해싱값을 만들고 일치하는지 검사
-        (res.Result, res.accountId) = await _hiveDb.VerifyUserAsync(req.Email, req.Password);
+        (res.Result, res.AccountId) = await _hiveDb.VerifyUserAsync(req.Email, req.Password);
         if(res.Result == HiveServer.ErrorCode.None) // 로그인 성공 시 토큰 발급
         {
             if(_tokenSaltValue == "error") 
@@ -39,19 +42,12 @@ public class LoginController : ControllerBase
                 return res;
             }
 
-            res.LoginToken = HiveServerSequrity.GenerateLoginToken(res.accountId, _tokenSaltValue);
-            res.message = "로그인 성공";
+            res.LoginToken = HiveServerSequrity.GenerateLoginToken(res.AccountId, _tokenSaltValue);
 
-            // TODO 레디스에 토큰 저장
-
-
-
-
-
-
+            // hive redis에 토큰 저장
+            res.Result = await _memoryDb.InsertHiveLoginTokenAsync(res.AccountId, res.LoginToken);
 
         }
-
 
         return res;
     }

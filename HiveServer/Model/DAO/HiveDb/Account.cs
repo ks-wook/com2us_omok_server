@@ -1,9 +1,9 @@
-﻿namespace HiveServer.Model.DAO
+﻿namespace HiveServer.Model.DAO.HiveDb
 {
     // account 테이블 아이템 접근 객체
     public class Account
     {
-        public Int64 account_id { get; set; }
+        public long account_id { get; set; }
         public string email { get; set; } = string.Empty;
         public string password { get; set; } = string.Empty;
         public string saltValue { get; set; } = string.Empty;
