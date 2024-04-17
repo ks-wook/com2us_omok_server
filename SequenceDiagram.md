@@ -31,10 +31,11 @@ sequenceDiagram
     
     participant Client
     participant GameAPIServer
-    participant Redis
+    participant GameRedis
     participant HiveServer
-    participant HiveDb
+    participant HiveRedis
     participant GameDb
+    participant HiveDb
 
 
     Client             ->> HiveServer:        로그인 요청 ( /HiveLogin )
@@ -45,6 +46,7 @@ sequenceDiagram
     end
 
     HiveServer        -->> Client:            로그인전용 토큰 발급(유효기간 자정까지)
+    HiveServer         ->> HiveRedis:         발급한 토큰을 redis에 저장
     Client             ->> GameAPIServer:     계정 ID와 토큰을 이용해 로그인 요청
     GameAPIServer      ->> HiveServer:        토큰 유효성 검증 요청 ( /AuthCheck )
     HiveServer        -->> GameAPIServer:     토큰 유효성 검증 결과 응답
@@ -52,6 +54,7 @@ sequenceDiagram
         GameAPIServer -->> Client:            토큰 유효성 검증 실패
     end
 
+    GameAPIServer      ->> GameRedis:         GameRedis에 로그인 성공한 토큰을 저장, 이후의 요청은 Redis를 통해 처리
     GameAPIServer      ->> GameDb:            유저 아이디를 통해 유저의 게임 데이터 검색
     GameDb            -->> GameAPIServer:     하이브 계정에 묶인 유저의 게임 데이터 조회 결과 전달
     alt 유저의 게임 데이터가 존재하는 경우
@@ -60,7 +63,6 @@ sequenceDiagram
         GameAPIServer -->> GameDb:            게임을 처음 시작한 유저의 기본 데이터 생성
         GameAPIServer -->> Client:            기본 유저 데이터 전달 및 로그인 성공 응답
     end
-    GameAPIServer      ->> Redis:    Redis에 로그인 성공한 토큰을 저장, 이후의 요청은 Redis를 통해 처리
 
 ```
 
