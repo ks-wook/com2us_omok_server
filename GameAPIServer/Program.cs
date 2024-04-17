@@ -1,4 +1,5 @@
 using GameAPIServer.Repository;
+using GameAPIServer.Services;
 using Microsoft.Extensions.Logging;
 using ZLogger;
 
@@ -10,7 +11,8 @@ builder.Services.Configure<DbConfig>(configuration.GetSection(nameof(DbConfig)))
 builder.Services.Configure<MemoryDbConfig>(configuration.GetSection(nameof(MemoryDbConfig)));
 
 builder.Services.AddTransient<IGameDb, GameDb>();
-builder.Services.AddTransient<IMemoryDb, MemoryDb>();
+builder.Services.AddSingleton<IMemoryDb, MemoryDb>();
+builder.Services.AddTransient<IGameService, GameService>();
 builder.Services.AddControllers();
 
 
@@ -48,4 +50,4 @@ app.UseEndpoints(endpoints => { _ = endpoints.MapControllers(); });
 
 
 
-app.Run(configuration["HiveServerAddr"]);
+app.Run(configuration["GameAPIServerAddr"]);

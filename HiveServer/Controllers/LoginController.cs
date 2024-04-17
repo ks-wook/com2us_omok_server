@@ -21,7 +21,7 @@ public class LoginController : ControllerBase
         _logger = logger;
         _hiveDb = hiveDb;
         _memoryDb = memoryDb;
-
+        
         _tokenSaltValue = config.GetSection("TokenSaltValue").Value ?? "error";
     }
 
