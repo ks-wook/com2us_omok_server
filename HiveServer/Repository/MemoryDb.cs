@@ -69,6 +69,16 @@ public class MemoryDb : IMemoryDb
     // 유저 accountId로 유효 토큰 검색
     public Task<(ErrorCode, string)> GetHiveTokenByAccountId(long accountId)
     {
+        // TODO accountId를 이용해서 토큰을 검색한 후 검색된 반환한다.
+
+
+
+
+
+
+
+
+
         throw new NotImplementedException();
     }
 

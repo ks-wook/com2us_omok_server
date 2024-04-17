@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GameAPIServer.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class LoginController : ControllerBase
     {
@@ -30,7 +30,7 @@ namespace GameAPIServer.Controllers
 
 
             // TODO 토큰을 hive서버로 보내서 유효성 검사
-
+            
 
 
 

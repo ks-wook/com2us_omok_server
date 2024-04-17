@@ -12,11 +12,12 @@ public enum ErrorCode : short
     InvalidEmailFormat = 2002,
     DuplicatedEmail = 2003,
     InvalidAccountEmail = 2004,
+    NullAccountDbConnectionStr = 2005,
+    InsertAccountFail = 2006,
 
-
-    // AccountDb 3001 ~ 
-    NullAccountDbConnectionStr = 3001,
-    InsertAccountFail = 3002,
+    // Authentication 3001 ~
+    TokenValidationCheckFail = 3001,
+    TokenMismatch = 3002,
 
 
     // Token 4001 ~
@@ -27,5 +28,7 @@ public enum ErrorCode : short
     EmailOrPasswordMismatch = 5002,
     LoginTokenRedisFail = 5003,
     RedisConnectionFail = 5004,
+
+
 }
 
