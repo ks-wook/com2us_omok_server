@@ -30,9 +30,9 @@ CREATE TABLE account
 
 __create query__
 ```
-CREATE TABLE user
+CREATE TABLE user_game_data
 (
-    `user_id`                   BIGINT            NOT NULL    AUTO_INCREMENT COMMENT '유저아이디',
+    `user_game_data_id`         BIGINT         NOT NULL    AUTO_INCREMENT COMMENT '유저 게임 데이터 아이디',
     `account_id`                BIGINT         NOT NULL    COMMENT '유저가 속한 계정 아이디', 
     `nickname`                  VARCHAR(16)    NOT NULL    COMMENT '닉네임',
     `user_money`                INT            NOT NULL    COMMENT '유저 게임 돈',
@@ -42,7 +42,7 @@ CREATE TABLE user
     `user_exp`                  INT            NOT NULL    DEFAULT 0 COMMENT '유저 경험치',  
     `total_win_cnt`             INT            NOT NULL    DEFAULT 0 COMMENT '현재 시즌 승수', 
     `total_lose_cnt`            INT            NOT NULL    DEFAULT 0 COMMENT '현재 시즌 패수',
-     PRIMARY KEY (uid),
+     PRIMARY KEY (user_game_data_id),
      UNIQUE KEY (nickname),
      FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`)
 );
