@@ -14,7 +14,7 @@ public class MemoryDb : IMemoryDb
     readonly ILogger<MemoryDb> _logger;
     readonly IOptions<MemoryDbConfig> _momoryDbConfig;
 
-    RedisConnection _redisConnctor;
+    RedisConnection _redisConnector;
 
     public MemoryDb(ILogger<MemoryDb> logger, IOptions<MemoryDbConfig> momoryDbConfig)
     {
@@ -22,7 +22,7 @@ public class MemoryDb : IMemoryDb
         _momoryDbConfig = momoryDbConfig;
         RedisConfig rc = new RedisConfig("defalut", _momoryDbConfig.Value.HiveRedis);
 
-        _redisConnctor = new RedisConnection(rc);
+        _redisConnector = new RedisConnection(rc);
     }
 
 
@@ -42,7 +42,7 @@ public class MemoryDb : IMemoryDb
         {
             // 토큰, 만료시간 설정
             RedisString<LoginToken> redis = new RedisString<LoginToken>(
-                _redisConnctor, 
+                _redisConnector, 
                 key, 
                 TimeSpan.FromMinutes(Define.LoginTokenExpireMin));
 
@@ -67,17 +67,29 @@ public class MemoryDb : IMemoryDb
 
 
     // 유저 accountId로 유효 토큰 검색
-    public Task<(ErrorCode, string)> GetHiveTokenByAccountId(long accountId)
+    public async Task<(ErrorCode, string)> GetHiveTokenByAccountId(long accountId)
     {
-        // TODO accountId를 이용해서 토큰을 검색한 후 검색된 반환한다.
+        // accountId를 이용해서 토큰을 검색한 후 검색된 반환한다.
+        var key = MemoryDbKeyGenerator.GenLoginTokenKey(accountId.ToString());
 
+        try
+        {
+            RedisString<LoginToken> redis = new(_redisConnector, key, null);
+            RedisResult<LoginToken> loginToken = await redis.GetAsync();
+            if (!user.HasValue)
+            {
+                _logger.ZLogError(
+                    $"[GetHiveTokenByAccountId] UID = {key}, Invalid Token");
+                return (false, null);
+            }
 
-
-
-
-
-
-
+            return (true, user.Value);
+        }
+        catch
+        {
+            _logger.ZLogError($"[GetUserAsync] UID:{uid},ErrorMessage:ID does Not Exist");
+            return (false, null);
+        }
 
         throw new NotImplementedException();
     }
@@ -89,5 +101,5 @@ public class MemoryDb : IMemoryDb
 
 public class MemoryDbConfig
 {
-    public string HiveRedis { get; set; }
+    public string HiveRedis { get; set; } = string.Empty;
 }

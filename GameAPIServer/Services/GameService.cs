@@ -18,7 +18,7 @@ public class GameService : IGameService
 
     public Task<(ErrorCode, int)> InitNewUserGameData(long accountId, string nickname)
     {
-
+        // TODO 최초 게임 시작한 유저에게 기본 데이터 db에 삽입후 결과 반환
 
 
 
