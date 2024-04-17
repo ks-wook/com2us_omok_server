@@ -7,6 +7,6 @@ public interface IHiveDb : IDisposable
 {
     public Task<ErrorCode> CreateAccountAsync(string id, string password);
 
-    public Task<LoginRes> VerifyUserAsync(string email, string password);
+    public Task<(ErrorCode, Int64)> VerifyUserAsync(string email, string password);
 }
 

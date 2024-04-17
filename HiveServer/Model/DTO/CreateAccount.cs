@@ -2,21 +2,21 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
-namespace HiveServer.Model.DAO
+namespace HiveServer.Model.DTO
 {
     public class CreateAccountReq
     {
         [Required]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
     }
 
     public class CreateAccountRes
     {
         ErrorCode _result = ErrorCode.None;
-        public ErrorCode result
+        public ErrorCode Result
         {
             get { return _result; }
             set
@@ -27,6 +27,4 @@ namespace HiveServer.Model.DAO
         }
         public string? message { get; set; }
     }
-
-
 }

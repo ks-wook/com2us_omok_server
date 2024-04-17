@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -40,19 +41,41 @@ public class HiveServerSequrity
             // 평문과 salt를 연결하여 byte 배열로 변환
             byte[] saltedbyteArr = Encoding.UTF8.GetBytes(textString + Convert.ToBase64String(saltValue));
 
-            string hashedString = Convert.ToBase64String(sha256.ComputeHash(saltedbyteArr));
+            string hashedString = Convert.ToBase64String(
+                sha256.ComputeHash(saltedbyteArr));
+
             string saltString = Convert.ToBase64String(saltValue);
 
             return (saltString, hashedString);
         }
     }
 
-
     public static byte[] GenerateSaltValue()
     {
-        byte[] salt;
-        new RNGCryptoServiceProvider().GetBytes(salt = new byte[16]);
-        return salt;
+        byte[] salt = new byte[16]; // 솔트 배열 생성
+
+        // RandomNumberGenerator를 사용하여 난수 생성
+        using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(salt); // 솔트 배열에 난수 저장
+        }
+
+        return salt; // 생성된 솔트 반환
+    }
+
+    // 로그인용 토큰 생성
+    public static string GenerateLoginToken(Int64 accountId, string saltValue)
+    {
+        byte[] saltBytes = Encoding.UTF8.GetBytes(saltValue);
+
+        using (var sha256 = SHA256.Create())
+        {
+            byte[] hashBytes = sha256.ComputeHash(
+                Encoding.ASCII.GetBytes(saltValue + accountId));
+
+            return Convert.ToBase64String(hashBytes);
+        }
+
     }
 
     // 이메일 형식 체크

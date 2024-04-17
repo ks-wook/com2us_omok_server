@@ -1,4 +1,5 @@
-﻿using HiveServer.Model.DTO;
+﻿using HiveServer;
+using HiveServer.Model.DTO;
 using HiveServer.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ using ZLogger;
 [Route("[controller]")]
 public class LoginController : ControllerBase
 {
-    readonly string? _tokenSaltValue;
+    readonly string _tokenSaltValue;
     readonly ILogger<LoginController> _logger;
     readonly IHiveDb _hiveDb;
 
@@ -18,32 +19,28 @@ public class LoginController : ControllerBase
         _logger = logger;
         _hiveDb = hiveDb;
 
-        _tokenSaltValue = config.GetSection("TokenSaltValue").Value;
-        if(_tokenSaltValue == null ) 
-        {
-            _logger.ZLogError(
-                $"[Login] Null TokenSaltValue");
-        }
-
+        _tokenSaltValue = config.GetSection("TokenSaltValue").Value ?? "error";
     }
 
 
     [HttpPost]
-    public async Task<LoginRes> Login([FromHeader] LoginReq req)
+    public async Task<LoginRes> Login([FromBody] LoginReq req)
     {
         LoginRes res = new LoginRes();
 
         
         // 전달된 패스워드를 이용해 해싱값을 만들고 일치하는지 검사
-        res.result = await _hiveDb.VerifyUserAsync(req.Email, req.Password);
-        if(res.result == HiveServer.ErrorCode.None ) // 로그인 성공 시 토큰 발급
-        { 
-            // TODO 토큰 발급
+        (res.Result, res.accountId) = await _hiveDb.VerifyUserAsync(req.Email, req.Password);
+        if(res.Result == HiveServer.ErrorCode.None) // 로그인 성공 시 토큰 발급
+        {
+            if(_tokenSaltValue == "error") 
+            {
+                res.Result = ErrorCode.NullServerToken;
+                return res;
+            }
 
-
-
-
-
+            res.LoginToken = HiveServerSequrity.GenerateLoginToken(res.accountId, _tokenSaltValue);
+            res.message = "로그인 성공";
 
             // TODO 레디스에 토큰 저장
 

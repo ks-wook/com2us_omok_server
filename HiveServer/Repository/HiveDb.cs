@@ -40,7 +40,6 @@ public class HiveDb : IHiveDb
             _logger.ZLogError(
                 $"[DbConnect] Null Db Connection String");
 
-            Console.WriteLine("연결 문자열이 존재하지 않음.");
             return ErrorCode.NullAccountDbConnectionStr;
         }
 
@@ -111,7 +110,7 @@ public class HiveDb : IHiveDb
 
 
     // 하이브 계정 로그인
-    public async Task<ErrorCode> VerifyUserAsync(string email, string password)
+    public async Task<(ErrorCode, Int64)> VerifyUserAsync(string email, string password)
     {
         try
         {
@@ -120,7 +119,7 @@ public class HiveDb : IHiveDb
                 .Where("email", "=", email).FirstOrDefaultAsync<Account>();
             if(data == null) // 하이브 계정이 존재하지 않는 경우
             {
-                return ErrorCode.InvalidAccountEmail;
+                return (ErrorCode.InvalidAccountEmail, -1);
             }
 
 
@@ -136,16 +135,16 @@ public class HiveDb : IHiveDb
             // 검색된 계정의 해시값과 방금 생성한 해시값 비교
             if(data.password != hashedPassword) // 비밀번호 불일치
             {
-                return ErrorCode.EmailOrPasswordMismatch;
+                return (ErrorCode.EmailOrPasswordMismatch, -1);
             }
 
 
             // 계정정보 탐색 성공
-            return ErrorCode.None;
+            return (ErrorCode.None, data.account_id);
         }
         catch (Exception e)
         {
-            return ErrorCode.LoginFail;
+            return (ErrorCode.LoginFail, -1);
         }
     }
 
