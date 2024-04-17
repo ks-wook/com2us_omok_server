@@ -32,7 +32,7 @@ __create query__
 ```
 CREATE TABLE user
 (
-    `user_id`                   INT            NOT NULL    AUTO_INCREMENT COMMENT '유저아이디',
+    `user_id`                   BIGINT            NOT NULL    AUTO_INCREMENT COMMENT '유저아이디',
     `account_id`                BIGINT         NOT NULL    COMMENT '유저가 속한 계정 아이디', 
     `nickname`                  VARCHAR(16)    NOT NULL    COMMENT '닉네임',
     `user_money`                INT            NOT NULL    COMMENT '유저 게임 돈',
