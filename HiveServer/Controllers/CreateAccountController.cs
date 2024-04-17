@@ -1,6 +1,7 @@
 ﻿using HiveServer;
 using HiveServer.Services;
 using HiveServer.Model.DAO;
+using HiveServer.Model.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,12 +26,13 @@ public class CreateAccountController : ControllerBase
 
         if (!HiveServerSequrity.IsValidEmail(req.Email))
         {
-            res.result = HiveServer.ErrorCode.InvalidEmailFormat;
+            res.Result = HiveServer.ErrorCode.InvalidEmailFormat;
             return res;
         }
 
-        // DB 최소 저장 데이터 이메일, 패스워드
-        res.result = await _hiveDb.CreateAccountAsync(req.Email, req.Password);
+        res.Result = await _hiveDb.CreateAccountAsync(req.Email, req.Password);
+        if(res.Result == ErrorCode.None) res.message = "계정 생성 성공";
+
 
         return res;
     }

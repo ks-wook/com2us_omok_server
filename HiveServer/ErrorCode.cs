@@ -20,8 +20,7 @@ public enum ErrorCode : short
 
 
     // Token 4001 ~
-    NullToken = 4001,
-
+    NullServerToken = 4001,
 
     // Login 5001 ~
     LoginFail = 5001,

@@ -16,11 +16,20 @@ public static class ErrorMessage
 
 
 
-        // TODO 에러 메시지 정리
+        // AccountDb 3001 ~ 
+        { ErrorCode.NullAccountDbConnectionStr, "DB 연결 문자열이 존재하지 않습니다." },
+        { ErrorCode.InsertAccountFail, "계정 삽입에 실패하였습니다." },
 
 
 
+        // Token 4001 ~
+        { ErrorCode.NullServerToken, "서버 토큰이 존재하지 않습니다." },
 
+
+
+        // Login 5001 ~
+        { ErrorCode.LoginFail, "로그인에 실패하였습니다." },
+        { ErrorCode.EmailOrPasswordMismatch, "이메일 혹은 비밀번호가 일치하지 않습니다." },
 
 
     };
