@@ -22,7 +22,7 @@ public class CreateAccountController : ControllerBase
     public async Task<CreateAccountRes> CreateAccount([FromBody]CreateAccountReq req)
     {
         CreateAccountRes res = new CreateAccountRes();
-        await Console.Out.WriteLineAsync(req.Email + req.Password);
+
         if (!HiveServerSequrity.IsValidEmail(req.Email))
         {
             res.result = HiveServer.ErrorCode.InvalidEmailFormat;

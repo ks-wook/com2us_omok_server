@@ -6,6 +6,7 @@
         public Int64 account_id { get; set; }
         public string email { get; set; }
         public string password { get; set; }
+        public string saltValue { get; set; }
         public string created_at { get; set; }
         public string recent_login_at { get; set; }
     }

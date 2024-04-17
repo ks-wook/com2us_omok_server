@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveServer", "HiveServer\HiveServer.csproj", "{F9E6F0FC-137F-4D3D-A2C4-938A5806DFBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HiveServer", "HiveServer\HiveServer.csproj", "{F9E6F0FC-137F-4D3D-A2C4-938A5806DFBD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAPIServer", "GameAPIServer\GameAPIServer.csproj", "{6ABFE898-14AA-4B71-A639-CD17C9AAAF63}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{F9E6F0FC-137F-4D3D-A2C4-938A5806DFBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9E6F0FC-137F-4D3D-A2C4-938A5806DFBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9E6F0FC-137F-4D3D-A2C4-938A5806DFBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ABFE898-14AA-4B71-A639-CD17C9AAAF63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ABFE898-14AA-4B71-A639-CD17C9AAAF63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ABFE898-14AA-4B71-A639-CD17C9AAAF63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ABFE898-14AA-4B71-A639-CD17C9AAAF63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -15,7 +15,17 @@ namespace HiveServer.Model.DAO
 
     public class CreateAccountRes
     {
-        public ErrorCode result { get; set; } = ErrorCode.None;
+        ErrorCode _result = ErrorCode.None;
+        public ErrorCode result
+        {
+            get { return _result; }
+            set
+            {
+                _result = value;
+                this.message = ErrorMessage.GetErrorMsg(_result);
+            }
+        }
+        public string? message { get; set; }
     }
 
 
