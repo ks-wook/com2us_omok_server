@@ -13,9 +13,8 @@ namespace HiveServer.Model.DTO
 
     public class LoginRes
     {
-        public ErrorCode result { get; set; } = ErrorCode.None;
-        public Int64 accountId { get; set; }
+        public ErrorCode Result { get; set; } = ErrorCode.None;
+        public Int64 AccountId { get; set; }
         public string? LoginToken { get; set; }
-        public string? message { get; set; }
     }
 }

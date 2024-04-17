@@ -3,14 +3,17 @@ using SqlKata;
 using SqlKata.Execution;
 using ZLogger;
 using Microsoft.Extensions.Logging;
+using HiveServer.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 IConfiguration configuration = builder.Configuration;
 
 // Service Init, DI
 builder.Services.Configure<DbConfig>(configuration.GetSection(nameof(DbConfig)));
+builder.Services.Configure<MemoryDbConfig>(configuration.GetSection(nameof(MemoryDbConfig)));
 
 builder.Services.AddTransient<IHiveDb,  HiveDb>();
+builder.Services.AddTransient<IMemoryDb,  MemoryDb>();
 builder.Services.AddControllers();
 
 

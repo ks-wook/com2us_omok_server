@@ -25,5 +25,7 @@ public enum ErrorCode : short
     // Login 5001 ~
     LoginFail = 5001,
     EmailOrPasswordMismatch = 5002,
+    LoginTokenRedisFail = 5003,
+    RedisConnectionFail = 5004,
 }
 

@@ -5,9 +5,9 @@ using System.Data;
 using MySqlConnector;
 using HiveServer;
 using Microsoft.AspNetCore.SignalR.Protocol;
-using HiveServer.Model.DAO;
 using ZLogger;
 using HiveServer.Model.DTO;
+using HiveServer.Model.DAO.HiveDb;
 
 namespace HiveServer.Services;
 
