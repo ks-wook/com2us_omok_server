@@ -1,4 +1,5 @@
-﻿using HiveServer.Services;
+﻿using HiveServer.Model.DTO;
+using HiveServer.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZLogger;
@@ -28,10 +29,34 @@ public class LoginController : ControllerBase
 
 
     [HttpPost]
-    public string TestAPI([FromHeader] string message)
+    public async Task<LoginRes> Login([FromHeader] LoginReq req)
     {
-        Console.WriteLine(message);
-        return "hello client";
+        LoginRes res = new LoginRes();
+
+        
+        // 전달된 패스워드를 이용해 해싱값을 만들고 일치하는지 검사
+        res.result = await _hiveDb.VerifyUserAsync(req.Email, req.Password);
+        if(res.result == HiveServer.ErrorCode.None ) // 로그인 성공 시 토큰 발급
+        { 
+            // TODO 토큰 발급
+
+
+
+
+
+
+            // TODO 레디스에 토큰 저장
+
+
+
+
+
+
+
+        }
+
+
+        return res;
     }
 }
 

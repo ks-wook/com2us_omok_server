@@ -11,7 +11,7 @@ public enum ErrorCode : short
     CreateAccountFail = 2001,
     InvalidEmailFormat = 2002,
     DuplicatedEmail = 2003,
-
+    InvalidAccountEmail = 2004,
 
 
     // AccountDb 3001 ~ 
@@ -21,5 +21,10 @@ public enum ErrorCode : short
 
     // Token 4001 ~
     NullToken = 4001,
+
+
+    // Login 5001 ~
+    LoginFail = 5001,
+    EmailOrPasswordMismatch = 5002,
 }
 

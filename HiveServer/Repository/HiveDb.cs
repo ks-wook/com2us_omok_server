@@ -7,6 +7,7 @@ using HiveServer;
 using Microsoft.AspNetCore.SignalR.Protocol;
 using HiveServer.Model.DAO;
 using ZLogger;
+using HiveServer.Model.DTO;
 
 namespace HiveServer.Services;
 
@@ -57,7 +58,7 @@ public class HiveDb : IHiveDb
     }
 
 
-
+    // 하이브 계정 생성
     public async Task<ErrorCode> CreateAccountAsync(string email, string password)
     {
         try
@@ -74,7 +75,8 @@ public class HiveDb : IHiveDb
 
             // 패스워드 salting
             string saltValue, hashedPassword;
-            (saltValue, hashedPassword) = HiveServerSequrity.HashPasswordWithSalt(password);
+            (saltValue, hashedPassword) = HiveServerSequrity.HashingWithSaltValue(password);
+
 
             // 계정 정보 삽입
             var insertSuccess = await _queryFactory.Query("account").InsertAsync(new
@@ -83,6 +85,7 @@ public class HiveDb : IHiveDb
                 Password = hashedPassword,
                 SaltValue = saltValue,
             });
+
 
             _logger.ZLogDebug(
                 $"[CreateAccount] email: {email}, salt_value : {saltValue}, hashed_pw:{hashedPassword}");
@@ -104,6 +107,46 @@ public class HiveDb : IHiveDb
         
         // 하이브 계정 생성 성공
         return ErrorCode.None;
+    }
+
+
+    // 하이브 계정 로그인
+    public async Task<ErrorCode> VerifyUserAsync(string email, string password)
+    {
+        try
+        {
+            // 하이브 계정 검색
+            Account? data = await _queryFactory.Query("account")
+                .Where("email", "=", email).FirstOrDefaultAsync<Account>();
+            if(data == null) // 하이브 계정이 존재하지 않는 경우
+            {
+                return ErrorCode.InvalidAccountEmail;
+            }
+
+
+            // Base64 문자열을 바이트 배열로 디코딩 -> 전달된 패스워드로 해시값 재생성
+            string base64String = data.saltValue;
+            byte[] saltByteArray = Convert.FromBase64String(base64String);
+
+            string hashedPassword;
+            (_, hashedPassword) = HiveServerSequrity.HashingWithSaltValue(saltByteArray, password);
+
+
+
+            // 검색된 계정의 해시값과 방금 생성한 해시값 비교
+            if(data.password != hashedPassword) // 비밀번호 불일치
+            {
+                return ErrorCode.EmailOrPasswordMismatch;
+            }
+
+
+            // 계정정보 탐색 성공
+            return ErrorCode.None;
+        }
+        catch (Exception e)
+        {
+            return ErrorCode.LoginFail;
+        }
     }
 
     // distructor
