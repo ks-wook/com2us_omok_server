@@ -26,7 +26,7 @@ CREATE TABLE account
 ---
 
 
-## *user*
+## *user_game_data*
 
 __create query__
 ```
