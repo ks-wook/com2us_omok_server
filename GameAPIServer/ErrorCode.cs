@@ -5,8 +5,8 @@ public enum ErrorCode : short
     None = 0,
 
 
-    // User Authentication 2001 ~ 
-    InvalidResFromHive = 2001,
+    // User Authentication 12001 ~ 
+    InvalidResFromHive = 12001,
 
 
 
@@ -15,12 +15,12 @@ public enum ErrorCode : short
 
 
 
-    // Token 4001 ~
-    NullGameLoginToken = 4002,
+    // Token 14001 ~
+    NullGameLoginToken = 14002,
 
 
-    // Login 5001 ~
-    GameLoginFail = 5001,
-    GameLoginTokenRedisFail = 5003,
-    GameRedisConnectionFail = 5004,
+    // Login 15001 ~
+    GameLoginFail = 15001,
+    GameLoginTokenRedisFail = 15002,
+    GameRedisConnectionFail = 15003,
 }
