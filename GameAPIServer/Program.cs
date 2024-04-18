@@ -13,6 +13,7 @@ builder.Services.Configure<MemoryDbConfig>(configuration.GetSection(nameof(Memor
 builder.Services.AddTransient<IGameDb, GameDb>();
 builder.Services.AddSingleton<IMemoryDb, MemoryDb>();
 builder.Services.AddTransient<IGameService, GameService>();
+builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddControllers();
 
 

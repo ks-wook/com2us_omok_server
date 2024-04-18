@@ -42,10 +42,10 @@ public class LoginController : ControllerBase
                 return res;
             }
 
-            res.LoginToken = HiveServerSequrity.GenerateLoginToken(res.AccountId, _tokenSaltValue);
+            res.Token = HiveServerSequrity.GenerateLoginToken(res.AccountId, _tokenSaltValue);
 
             // hive redis에 토큰 저장
-            res.Result = await _memoryDb.InsertHiveLoginTokenAsync(res.AccountId, res.LoginToken);
+            res.Result = await _memoryDb.InsertHiveLoginTokenAsync(res.AccountId, res.Token);
 
         }
 

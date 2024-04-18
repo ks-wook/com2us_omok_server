@@ -29,8 +29,8 @@ public class AuthenticationService : IAuthenticationService
             HttpClient client = new HttpClient();
             TokenValidationCheckReq req = new TokenValidationCheckReq()
             {
-                accountId = accuountId,
-                token = loginToken
+                AccountId = accuountId,
+                Token = loginToken
             };
 
             HttpResponseMessage httpRes = await client.PostAsJsonAsync(_tokenValidationCheckAPI, req);
