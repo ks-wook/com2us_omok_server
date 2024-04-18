@@ -35,7 +35,6 @@ namespace GameAPIServer.Controllers
             // 토큰을 hive서버로 보내서 유효성 검사
             res.Result = await _authenticationService.LoginTokenVerify(req.AccountId, req.Token);
 
-            // 유효성 검사 통과 시 로그인 성공 메시지를 전송하고
             if(res.Result != ErrorCode.None) 
             {
                 _logger.ZLogError(
