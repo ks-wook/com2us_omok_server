@@ -25,7 +25,8 @@ namespace GameAPIServer.Controllers
 
         }
 
-
+        // TODO 유저 정보가 있다면 같이 동봉해서 보내고, 없다면 새로 만들어서 전달
+        // TODO 함수의 이름도 Login에서 LoginAndLoadGameData로 변경
         [HttpPost]
         public async Task<LoginRes> Login([FromBody] LoginReq req)
         {
