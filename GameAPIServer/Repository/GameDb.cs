@@ -10,7 +10,7 @@ public class GameDb : IGameDb
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        
     }
 
     public Task<ErrorCode> LoadUserGameData()
@@ -22,5 +22,5 @@ public class GameDb : IGameDb
 
 public class DbConfig
 {
-    public string GameDb { get; set; }
+    public string GameDb { get; set; } = string.Empty;
 }

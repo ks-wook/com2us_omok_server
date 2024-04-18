@@ -51,7 +51,7 @@ namespace GameAPIServer.Controllers
                    $"[Login] UID = {req.AccountId}, Login Token Insert Fail");
                 return res;
             }
-
+            
             return res;
         }
 
