@@ -1,10 +1,12 @@
 ﻿using HiveServer;
+using HiveServer.Model.DAO.HiveDb;
 using HiveServer.Model.DTO;
 using HiveServer.Repository;
 using HiveServer.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZLogger;
+using static Humanizer.In;
 
 
 [ApiController]
@@ -36,8 +38,10 @@ public class LoginController : ControllerBase
         (res.Result, res.AccountId) = await _hiveDb.VerifyUserAsync(req.Email, req.Password);
         if(res.Result == HiveServer.ErrorCode.None) // 로그인 성공 시 토큰 발급
         {
-            if(_tokenSaltValue == "error") 
+            if(_tokenSaltValue == "error")
             {
+                _logger.ZLogError
+                ($"[Login] ErrorCode: {ErrorCode.NullServerToken}");
                 res.Result = ErrorCode.NullServerToken;
                 return res;
             }

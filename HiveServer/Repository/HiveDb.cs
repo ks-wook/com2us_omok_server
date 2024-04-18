@@ -159,5 +159,5 @@ public class HiveDb : IHiveDb
 // Appsettings 파일에 정의된 내용을 이름 그대로 가져온다
 public class DbConfig
 {
-    public string HiveDb { get; set; }
+    public string HiveDb { get; set; } = string.Empty;
 }

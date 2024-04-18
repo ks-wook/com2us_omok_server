@@ -9,10 +9,8 @@ public enum ErrorCode : short
     InvalidResFromHive = 12001,
 
 
-
-
-
-
+    // GameDb 13001 ~
+    NullAccountDbConnectionStr = 13001,
 
 
     // Token 14001 ~
