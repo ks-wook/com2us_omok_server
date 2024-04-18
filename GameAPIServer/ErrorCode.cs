@@ -10,4 +10,17 @@ public enum ErrorCode : short
 
 
 
+
+
+
+
+
+    // Token 4001 ~
+    NullGameLoginToken = 4002,
+
+
+    // Login 5001 ~
+    GameLoginFail = 5001,
+    GameLoginTokenRedisFail = 5003,
+    GameRedisConnectionFail = 5004,
 }

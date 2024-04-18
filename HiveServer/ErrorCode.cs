@@ -22,13 +22,13 @@ public enum ErrorCode : short
 
     // Token 4001 ~
     NullServerToken = 4001,
+    NullHiveLoginToken = 4002,
 
     // Login 5001 ~
-    LoginFail = 5001,
+    HiveLoginFail = 5001,
     EmailOrPasswordMismatch = 5002,
-    LoginTokenRedisFail = 5003,
-    RedisConnectionFail = 5004,
-
+    HiveLoginTokenRedisFail = 5003,
+    HiveRedisConnectionFail = 5004,
 
 }
 

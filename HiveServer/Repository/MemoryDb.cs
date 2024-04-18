@@ -14,7 +14,7 @@ public class MemoryDb : IMemoryDb
     readonly ILogger<MemoryDb> _logger;
     readonly IOptions<MemoryDbConfig> _momoryDbConfig;
 
-    RedisConnection _redisConnctor;
+    RedisConnection _redisConnector;
 
     public MemoryDb(ILogger<MemoryDb> logger, IOptions<MemoryDbConfig> momoryDbConfig)
     {
@@ -22,13 +22,13 @@ public class MemoryDb : IMemoryDb
         _momoryDbConfig = momoryDbConfig;
         RedisConfig rc = new RedisConfig("defalut", _momoryDbConfig.Value.HiveRedis);
 
-        _redisConnctor = new RedisConnection(rc);
+        _redisConnector = new RedisConnection(rc);
     }
 
 
 
     // 로그인 유저 토큰 삽입
-    public async Task<ErrorCode> InsertHiveLoginTokenAsync(long accountId, string token)
+    public async Task<ErrorCode> InsertHiveLoginTokenAsync(Int64 accountId, string token)
     {
         var key = MemoryDbKeyGenerator.GenLoginTokenKey(accountId.ToString());
 
@@ -42,23 +42,23 @@ public class MemoryDb : IMemoryDb
         {
             // 토큰, 만료시간 설정
             RedisString<LoginToken> redis = new RedisString<LoginToken>(
-                _redisConnctor, 
+                _redisConnector, 
                 key, 
-                TimeSpan.FromMinutes(Define.LoginTokenExpireMin));
+                TimeSpan.FromMinutes(HiveDefine.LoginTokenExpireMin));
 
             if (await redis.SetAsync(loginToken) == false)
             {
                 _logger.ZLogError
-                    ($"[InsertHiveLoginTokenAsync] Uid:{accountId}, Token:{token} ErrorCode: {ErrorCode.LoginTokenRedisFail}");
-                return ErrorCode.LoginTokenRedisFail;
+                    ($"[InsertHiveLoginTokenAsync] Uid:{accountId}, Token:{token} ErrorCode: {ErrorCode.HiveLoginTokenRedisFail}");
+                return ErrorCode.HiveLoginTokenRedisFail;
             }
 
         }
         catch
         {
             _logger.ZLogError
-                    ($"[InsertHiveLoginTokenAsync] Uid:{accountId}, Token:{token} ErrorCode: {ErrorCode.RedisConnectionFail}");
-            return ErrorCode.RedisConnectionFail;
+                    ($"[InsertHiveLoginTokenAsync] Uid:{accountId}, Token:{token} ErrorCode: {ErrorCode.HiveRedisConnectionFail}");
+            return ErrorCode.HiveRedisConnectionFail;
         }
 
         return ErrorCode.None;
@@ -67,21 +67,32 @@ public class MemoryDb : IMemoryDb
 
 
     // 유저 accountId로 유효 토큰 검색
-    public Task<(ErrorCode, string)> GetHiveTokenByAccountId(long accountId)
+    public async Task<(ErrorCode, LoginToken?)> GetHiveTokenByAccountId(long accountId)
     {
-        // TODO accountId를 이용해서 토큰을 검색한 후 검색된 반환한다.
+        // accountId를 이용해서 토큰을 검색한 후 검색된 반환한다.
+        var key = MemoryDbKeyGenerator.GenLoginTokenKey(accountId.ToString());
 
+        try
+        {
+            RedisString<LoginToken> redis = new(_redisConnector, key, null);
+            RedisResult<LoginToken> loginToken = await redis.GetAsync();
+            if (!loginToken.HasValue)
+            {
+                _logger.ZLogError(
+                    $"[GetHiveTokenByAccountId] UID = {key}, Invalid Token");
+                return (ErrorCode.NullHiveLoginToken, null);
+            }
 
+            return (ErrorCode.None, loginToken.Value);
+        }
+        catch
+        {
+            _logger.ZLogError
+                ($"[GetHiveTokenByAccountId] UID:{accountId}, Fail Get Hive Login Token");
+            return (ErrorCode.NullHiveLoginToken, null);
+        }
 
-
-
-
-
-
-
-        throw new NotImplementedException();
     }
-
 }
 
 
@@ -89,5 +100,5 @@ public class MemoryDb : IMemoryDb
 
 public class MemoryDbConfig
 {
-    public string HiveRedis { get; set; }
+    public string HiveRedis { get; set; } = string.Empty;
 }

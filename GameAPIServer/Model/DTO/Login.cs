@@ -5,10 +5,10 @@ namespace GameAPIServer.Model.DTO
     public class LoginReq
     {
         [Required]
-        public Int64 AccountId1 { get; set; }
+        public Int64 AccountId { get; set; }
 
         [Required]
-        public string token { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
     }
 
     public class LoginRes

@@ -144,7 +144,7 @@ public class HiveDb : IHiveDb
         }
         catch (Exception e)
         {
-            return (ErrorCode.LoginFail, -1);
+            return (ErrorCode.HiveLoginFail, -1);
         }
     }
 

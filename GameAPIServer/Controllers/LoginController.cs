@@ -3,6 +3,7 @@ using GameAPIServer.Repository;
 using GameAPIServer.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ZLogger;
 
 namespace GameAPIServer.Controllers
 {
@@ -12,12 +13,14 @@ namespace GameAPIServer.Controllers
     {
         readonly ILogger<LoginController> _logger;
         readonly IGameService _gameService;
+        readonly IAuthenticationService _authenticationService;
         readonly IMemoryDb _memoryDb;
 
-        public LoginController(ILogger<LoginController> logger, IGameService gameService, IMemoryDb memoryDb) 
+        public LoginController(ILogger<LoginController> logger, IGameService gameService, IAuthenticationService authenticationService, IMemoryDb memoryDb) 
         {
             _logger = logger;
             _gameService = gameService;
+            _authenticationService = authenticationService;
             _memoryDb = memoryDb;
 
         }
@@ -29,20 +32,25 @@ namespace GameAPIServer.Controllers
             LoginRes res = new LoginRes();
 
 
-            // TODO 토큰을 hive서버로 보내서 유효성 검사
-            
+            // 토큰을 hive서버로 보내서 유효성 검사
+            res.Result = await _authenticationService.LoginTokenVerify(req.AccountId, req.Token);
+
+            if(res.Result != ErrorCode.None) 
+            {
+                _logger.ZLogError(
+                   $"[Login] UID = {req.AccountId}, TokenValidationCheckFail");
+                return res;
+            }
 
 
-
-            // TODO 유효성 검사 통과 시 로그인 성공 메시지를 전송하고
-
-
-
-
-            // TODO Game redis에 인증된 토큰을 삽입한다.
-            
-
-
+            // Game redis에 인증된 토큰을 삽입한다.
+            res.Result = await _memoryDb.InsertGameLoginTokenAsync(req.AccountId, req.Token);
+            if (res.Result != ErrorCode.None)
+            {
+                _logger.ZLogError(
+                   $"[Login] UID = {req.AccountId}, Login Token Insert Fail");
+                return res;
+            }
 
             return res;
         }
