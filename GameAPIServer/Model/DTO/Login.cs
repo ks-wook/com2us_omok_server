@@ -14,6 +14,5 @@ namespace GameAPIServer.Model.DTO
     public class LoginRes
     {
         public ErrorCode Result { get; set; } = ErrorCode.None;
-        public string Token { get; set; } = string.Empty;
     }
 }

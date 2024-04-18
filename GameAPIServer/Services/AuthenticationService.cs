@@ -49,6 +49,10 @@ public class AuthenticationService : IAuthenticationService
 
             if(res.Result != ErrorCode.None)
             {
+
+
+
+
                 return ErrorCode.InvalidResFromHive;
             }
 
