@@ -63,10 +63,8 @@ public class GameService : IGameService
         {
             _logger.ZLogInformation
                 ($"[GetGameDataByAccountId] Not exist UserGameData");
-
-            // 새로운 게임 데이터 생성
-            (result, userGameData) = await InitNewUserGameData(accountId);
-
+            result = ErrorCode.NullUserGameData;
+            return (result, null);
         }
 
         return (result, userGameData);
