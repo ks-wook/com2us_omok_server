@@ -4,7 +4,7 @@
     {
         public Int64 uid { get; set; }
         public Int64 friend_uid { get; set; }
-        public bool friend_yn { get; set; }
+        public bool friend_yn { get; set; } = false;
         public string created_at { get; set; } = string.Empty;
     }
 }

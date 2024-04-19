@@ -59,6 +59,11 @@ public class GameDb : IGameDb
         _dbConnector.Close();
     }
 
+    public void Dispose()
+    {
+        DbDisconnect();
+    }
+
 
 
     public async Task<(ErrorCode, UserGameData?)> CreateUserGameData(Int64 accountId)
@@ -100,7 +105,7 @@ public class GameDb : IGameDb
         UserGameData? data = await _queryFactory.Query("user_game_data")
             .Where("account_id", accountId).FirstOrDefaultAsync<UserGameData>();
 
-        if (data == null) // 하이브 계정이 존재하지 않는 경우
+        if (data == null) // 게임데이터가 존재하지 않는 경우
         {
             return (ErrorCode.NullUserGameData, null);
         }
@@ -108,9 +113,35 @@ public class GameDb : IGameDb
         return (ErrorCode.None, data);
     }
 
-    public void Dispose()
+
+    public async Task<(ErrorCode, UserGameData?)> GetGameDataByUid(Int64 uid)
     {
-        DbDisconnect();
+        UserGameData? data = await _queryFactory.Query("user_game_data")
+            .Where("uid", uid).FirstOrDefaultAsync<UserGameData>();
+
+        if (data == null) // 게임데이터가 존재하지 않는 경우
+        {
+            return (ErrorCode.NullUserGameData, null);
+        }
+
+        return (ErrorCode.None, data);
+    }
+
+    
+
+    public Task<(ErrorCode, Friend?)> CreateFriend(Int64 uid, Int64 friendUid)
+    {
+
+
+
+
+
+        throw new NotImplementedException();
+    }
+
+    public Task<(ErrorCode, Friend?)> DeleteFriend(Int64 uid, Int64 friendUid)
+    {
+        throw new NotImplementedException();
     }
 }
 

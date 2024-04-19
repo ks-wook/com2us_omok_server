@@ -1,5 +1,7 @@
 ﻿
+using GameAPIServer.Model.DAO.GameDb;
 using GameAPIServer.Repository;
+using ZLogger;
 
 namespace GameAPIServer.Services
 {
@@ -14,17 +16,32 @@ namespace GameAPIServer.Services
             _logger = logger;
         }
 
-        public Task<ErrorCode> AddFriendReq(Int64 uid, Int64 friendUid)
+        public async Task<ErrorCode> AddFriendReq(Int64 uid, Int64 friendUid)
         {
-            // TODO uid, friendUid에 대하여 전부 존재하는 유저인지 검색
+            // uid, friendUid에 대하여 전부 존재하는 유저인지 검색
+            (ErrorCode result, UserGameData? userGameData) = await _gameDb.GetGameDataByUid(uid);
+            if(result != ErrorCode.None || userGameData == null)
+            {
+                _logger.ZLogError
+                    ($"[AddFriendReq] ErrorCode : {ErrorCode.NullUserGameData}, Uid: {uid}");
+            }
 
+            // 친구요청 상대에 대해서도 동일하게 검사
+            (result, userGameData) = await _gameDb.GetGameDataByUid(friendUid);
+            if (result != ErrorCode.None || userGameData == null)
+            {
+                _logger.ZLogError
+                    ($"[AddFriendReq] ErrorCode : {ErrorCode.NullUserGameData}, Uid: {uid}");
+            }
 
+            // 둘 모두 존재하는 경우에만 친구 추가 시도
+            Friend data = new Friend() 
+            { 
+                uid = uid,
+                friend_uid = friendUid,
+            };
 
-
-            // TODO 둘 모두 존재하는 경우에만 친구 추가 시도
-
-
-
+            int insertSuccess;
 
 
 
