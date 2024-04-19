@@ -126,9 +126,9 @@ __create query__
 ```
 CREATE TABLE friend
 (
-    `uid`         INT         NOT NULL    COMMENT '유저아이디', 
+    `uid`         INT         NOT NULL    COMMENT '유저 아이디', 
     `friend_uid`  INT         NOT NULL    COMMENT '친구 유저아이디', 
-    `friend_yn`   TINYINT     NOT NULL    DEFAULT 0  COMMENT '친구 여부', 
+    `friend_yn`   TINYINT     NOT NULL    DEFAULT 0  COMMENT '친구요청 수락여부(친구상태 여부)', 
     `create_dt`   DATETIME    NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시', 
      PRIMARY KEY (uid, friend_uid)
      FOREIGN KEY (`uid`) REFERENCES `user_game_data` (`uid`)
@@ -137,7 +137,7 @@ CREATE TABLE friend
 친구 관계를 저장하는 테이블, uid와 friend_uid에 대해 한번만 삽입하여 친구관계를 하나의 데이터로만 나타낸다. 쌍으로 삽입하지 않는다.
 친구 데이터 검색 시 uid혹은 friend_uid와 일치하는 지 모두 검색해야함에 주의한다.
 
-친구여부에 따라 수락된 친구요청인지 아직 미수락된 친구 요청인지 파악한다.
+친구 여부에 따라 수락된 친구요청인지 아직 미수락된 친구 요청인지 파악한다.
 친구 요청이 거부된 경우 해당 데이터를 삭제한다.
 
 ---
