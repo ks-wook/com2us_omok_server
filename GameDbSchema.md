@@ -42,7 +42,7 @@ CREATE TABLE user_game_data
     `user_exp`                  INT            NOT NULL    DEFAULT 0 COMMENT '유저 경험치',  
     `total_win_cnt`             INT            NOT NULL    DEFAULT 0 COMMENT '현재 시즌 승수', 
     `total_lose_cnt`            INT            NOT NULL    DEFAULT 0 COMMENT '현재 시즌 패수',
-     PRIMARY KEY (user_game_data_id),
+     PRIMARY KEY (uid),
      UNIQUE KEY (nickname),
      FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`)
 );
