@@ -131,7 +131,8 @@ CREATE TABLE friend
     `friend_yn`   TINYINT     NOT NULL    DEFAULT 0  COMMENT '친구요청 수락여부(친구상태 여부)', 
     `create_dt`   DATETIME    NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시', 
      PRIMARY KEY (uid, friend_uid)
-     FOREIGN KEY (`uid`) REFERENCES `user_game_data` (`uid`)
+     FOREIGN KEY (`uid`) REFERENCES `user_game_data` (`uid`),
+     FOREIGN KEY (`friend_uid`) REFERENCES `user_game_data` (`uid`)
 );
 ```
 친구 관계를 저장하는 테이블, uid와 friend_uid에 대해 한번만 삽입하여 친구관계를 하나의 데이터로만 나타낸다. 쌍으로 삽입하지 않는다.
