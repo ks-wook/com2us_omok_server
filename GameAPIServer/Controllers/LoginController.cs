@@ -1,4 +1,5 @@
-﻿using GameAPIServer.Model.DTO;
+﻿using GameAPIServer.Model.DAO.GameDb;
+using GameAPIServer.Model.DTO;
 using GameAPIServer.Repository;
 using GameAPIServer.Services;
 using Microsoft.AspNetCore.Http;
@@ -25,8 +26,7 @@ namespace GameAPIServer.Controllers
 
         }
 
-        // TODO 유저 정보가 있다면 같이 동봉해서 보내고, 없다면 새로 만들어서 전달
-        // TODO 함수의 이름도 Login에서 LoginAndLoadGameData로 변경
+        // 유저 정보가 있다면 같이 동봉해서 보내고, 없다면 신규 유저이므로 새로 만들어서 전달
         [HttpPost]
         public async Task<LoginRes> Login([FromBody] LoginReq req)
         {
@@ -53,7 +53,20 @@ namespace GameAPIServer.Controllers
                 return res;
             }
             
+            //  게임 데이터를 찾고 res에 담아 반환
+            UserGameData? userGameData = await LoadGameData(req.AccountId);
+            res.UserGameData = userGameData;
+
+
             return res;
+        }
+
+
+        public async Task<UserGameData?> LoadGameData(Int64 accountId)
+        {
+            // accountId 값을 사용하여 게임 데이터를 검색
+            (ErrorCode result, UserGameData? userGameData) = await _gameService.GetGameDataByAccountId(accountId);
+            return userGameData;
         }
 
     }

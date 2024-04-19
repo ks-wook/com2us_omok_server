@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GameAPIServer.Model.DAO.GameDb;
+using System.ComponentModel.DataAnnotations;
 
 namespace GameAPIServer.Model.DTO
 {
@@ -14,5 +15,6 @@ namespace GameAPIServer.Model.DTO
     public class LoginRes
     {
         public ErrorCode Result { get; set; } = ErrorCode.None;
+        public UserGameData? UserGameData { get; set; }
     }
 }

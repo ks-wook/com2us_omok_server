@@ -16,7 +16,7 @@ public class HiveDb : IHiveDb
     readonly IOptions<DbConfig> _dbConfig;
     readonly ILogger<HiveDb> _logger;
 
-    IDbConnection _dbConnector;
+    IDbConnection? _dbConnector;
     SqlKata.Compilers.MySqlCompiler _dbCompiler;
     QueryFactory _queryFactory;
 
@@ -53,6 +53,12 @@ public class HiveDb : IHiveDb
     // disconnect with db
     private void DbDisconnect()
     {
+        if (_dbConnector == null)
+        {
+            _logger.ZLogError
+                ($"[ErrorCode]: {ErrorCode.FailDisconnectHiveDb}");
+            return;
+        }
         _dbConnector.Close();
     }
 
@@ -86,8 +92,8 @@ public class HiveDb : IHiveDb
             });
 
 
-            _logger.ZLogDebug(
-                $"[CreateAccount] email: {email}, salt_value : {saltValue}, hashed_pw:{hashedPassword}");
+            _logger.ZLogDebug
+                ($"[CreateAccount] email: {email}, salt_value : {saltValue}, hashed_pw:{hashedPassword}");
 
             if (insertSuccess != 1)
             {
@@ -116,7 +122,7 @@ public class HiveDb : IHiveDb
         {
             // 하이브 계정 검색
             Account? data = await _queryFactory.Query("account")
-                .Where("email", "=", email).FirstOrDefaultAsync<Account>();
+                .Where("email", email).FirstOrDefaultAsync<Account>();
             if(data == null) // 하이브 계정이 존재하지 않는 경우
             {
                 return (ErrorCode.InvalidAccountEmail, -1);
@@ -159,5 +165,5 @@ public class HiveDb : IHiveDb
 // Appsettings 파일에 정의된 내용을 이름 그대로 가져온다
 public class DbConfig
 {
-    public string HiveDb { get; set; }
+    public string HiveDb { get; set; } = string.Empty;
 }
