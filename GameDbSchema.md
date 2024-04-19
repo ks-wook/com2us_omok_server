@@ -32,7 +32,7 @@ __create query__
 ```
 CREATE TABLE user_game_data
 (
-    `user_game_data_id`         BIGINT         NOT NULL    AUTO_INCREMENT COMMENT '유저 게임 데이터 아이디',
+    `uid`         BIGINT         NOT NULL    AUTO_INCREMENT COMMENT '유저 게임 데이터 아이디',
     `account_id`                BIGINT         NOT NULL    COMMENT '유저가 속한 계정 아이디', 
     `nickname`                  VARCHAR(16)    NOT NULL    COMMENT '닉네임',
     `user_money`                INT            NOT NULL    COMMENT '유저 게임 돈',
@@ -116,6 +116,29 @@ CREATE TABLE mailbox_item
 우편의 보상에 대한 정보를 기록하는 테이블. mailbox의 mail_id를 참조하여 어떤 메일에 대한 보상인지를 나타낸다. 마찬가지로 수령 유무를 표시하며
 수령 완료 시 바로 삭제하는 것이 아닌 매일 자정에 수령이 완료된 메일 데이터에 대해 일괄 삭제를 실시한다.
 
+
+---
+
+
+## *fridend*
+
+__create query__
+```
+CREATE TABLE friend
+(
+    `uid`         INT         NOT NULL    COMMENT '유저아이디', 
+    `friend_uid`  INT         NOT NULL    COMMENT '친구 유저아이디', 
+    `friend_yn`   TINYINT     NOT NULL    DEFAULT 0  COMMENT '친구 여부', 
+    `create_dt`   DATETIME    NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시', 
+     PRIMARY KEY (uid, friend_uid)
+     FOREIGN KEY (`uid`) REFERENCES `user_game_data` (`uid`)
+);
+```
+친구 관계를 저장하는 테이블, uid와 friend_uid에 대해 한번만 삽입하여 친구관계를 하나의 데이터로만 나타낸다. 쌍으로 삽입하지 않는다.
+친구 데이터 검색 시 uid혹은 friend_uid와 일치하는 지 모두 검색해야함에 주의한다.
+
+친구여부에 따라 수락된 친구요청인지 아직 미수락된 친구 요청인지 파악한다.
+친구 요청이 거부된 경우 해당 데이터를 삭제한다.
 
 ---
 
