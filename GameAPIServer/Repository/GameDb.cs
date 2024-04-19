@@ -13,7 +13,7 @@ public class GameDb : IGameDb
     readonly IOptions<DbConfig> _dbConfig;
     readonly ILogger<GameDb> _logger;
 
-    IDbConnection _dbConnector;
+    IDbConnection? _dbConnector;
     SqlKata.Compilers.MySqlCompiler _dbCompiler;
     QueryFactory _queryFactory;
 
@@ -50,43 +50,63 @@ public class GameDb : IGameDb
     // disconnect with db
     private void DbDisconnect()
     {
+        if(_dbConnector == null) 
+        {
+            _logger.ZLogError
+                ($"[ErrorCode]: {ErrorCode.FailDisconnectGameDb}");
+            return;
+        }
         _dbConnector.Close();
     }
 
 
 
-    public Task<(ErrorCode, UserGameData)> CreateUserGameData(UserGameData userGameData)
+    public async Task<(ErrorCode, UserGameData?)> CreateUserGameData(Int64 accountId)
     {
-        // TODO 새로운 게임 데이터 삽입
+        // 새로운 게임 데이터 삽입
+        UserGameData? userGameData = new UserGameData()
+        {
+            account_id = accountId,
+            nickname = "User" + accountId,
+        };
+
+        var insertSuccess = await _queryFactory.Query("user_game_data")
+            .InsertAsync(userGameData);
+
+        _logger.ZLogDebug
+            ($"[CreateUserGameData] accountId: {accountId}, nickname: {userGameData.nickname}");
 
 
+        if(insertSuccess != 1)
+        {
+            _logger.ZLogError
+                ($"[CreateUserGameData] ErrorCode: {ErrorCode.FailCreateNewGameData}, " +
+                 $"accountId: {accountId}, nickname: {userGameData.nickname}");
+            return (ErrorCode.FailCreateNewGameData, null);
+        }
 
 
+        // 데이터 삽입 성공, 삽입된 게임데이터 획득
+        (ErrorCode result, userGameData) = await GetUserGameDataByAccountId(accountId);
 
-
-
-
-        throw new NotImplementedException();
+        return (result, userGameData);
     }
 
-    
 
-    public Task<(ErrorCode, UserGameData)> GetUserGameDataByAccountId(long accountId)
+
+    // AccountId를 이용해서 UserGameData Search
+    public async Task<(ErrorCode, UserGameData?)> GetUserGameDataByAccountId(Int64 accountId)
     {
-        // TODO accountId를 이용해서 유저 게임 데이터 검색
+        UserGameData? data = await _queryFactory.Query("user_game_data")
+            .Where("account_id", accountId).FirstOrDefaultAsync<UserGameData>();
 
+        if (data == null) // 하이브 계정이 존재하지 않는 경우
+        {
+            return (ErrorCode.NullUserGameData, null);
+        }
 
-
-
-
-
-
-        
-        
-        throw new NotImplementedException();
+        return (ErrorCode.None, data);
     }
-
-
 
     public void Dispose()
     {

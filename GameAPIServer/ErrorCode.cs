@@ -11,7 +11,9 @@ public enum ErrorCode : short
 
     // GameDb 13001 ~
     NullAccountDbConnectionStr = 13001,
-
+    NullUserGameData = 13002,
+    FailCreateNewGameData = 13003,
+    FailDisconnectGameDb = 13004,
 
     // Token 14001 ~
     NullGameLoginToken = 14002,

@@ -30,5 +30,7 @@ public enum ErrorCode : short
     HiveLoginTokenRedisFail = 5003,
     HiveRedisConnectionFail = 5004,
 
+    // HiveDb 6001 ~ 
+    FailDisconnectHiveDb = 6001,
 }
 

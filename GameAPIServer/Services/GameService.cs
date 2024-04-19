@@ -21,38 +21,27 @@ public class GameService : IGameService
 
     
 
-    public Task<(ErrorCode, UserGameData?)> InitNewUserGameData(Int64 accountId)
+    public async Task<(ErrorCode, UserGameData?)> InitNewUserGameData(Int64 accountId)
     {
         // 게임을 새로 시작한 유저의 데이터를 만들고 반환
-        UserGameData userGameData = new UserGameData()
-        {
-            account_id = accountId,
-            nickname = "User" + accountId,
-        };
-
         try
         {
-            // TODO db 삽입 시도
+            (ErrorCode result, UserGameData? data) = await _gameDb.CreateUserGameData(accountId);
 
+            if(result != ErrorCode.None || data == null) 
+            {
+                return (result, null);
+            }
 
-
-
-
-
-
-
+            return (result, data);
         }
         catch(Exception e)
         {
-            
-
-
-
-
+            _logger.ZLogError
+               ($"[CreateUserGameData] ErrorCode: {ErrorCode.FailCreateNewGameData}, accountId: {accountId}");
+            return (ErrorCode.FailCreateNewGameData, null);
         }
 
-
-        throw new NotImplementedException();
     }
 
     public async Task<(ErrorCode, UserGameData?)> GetGameDataByAccountId(Int64 accountId)

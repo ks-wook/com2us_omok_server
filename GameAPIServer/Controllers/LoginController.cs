@@ -26,8 +26,7 @@ namespace GameAPIServer.Controllers
 
         }
 
-        // TODO 유저 정보가 있다면 같이 동봉해서 보내고, 없다면 새로 만들어서 전달
-        // TODO 함수의 이름은 그대로 두고, LoadData라는 함수를 또 선언하여 처리한다.
+        // 유저 정보가 있다면 같이 동봉해서 보내고, 없다면 신규 유저이므로 새로 만들어서 전달
         [HttpPost]
         public async Task<LoginRes> Login([FromBody] LoginReq req)
         {
@@ -54,20 +53,20 @@ namespace GameAPIServer.Controllers
                 return res;
             }
             
+            //  게임 데이터를 찾고 res에 담아 반환
+            UserGameData? userGameData = await LoadGameData(req.AccountId);
+            res.UserGameData = userGameData;
+
+
             return res;
         }
 
 
-
-        public async Task<UserGameData> LoadGameData(Int64 accountId)
+        public async Task<UserGameData?> LoadGameData(Int64 accountId)
         {
-            // TODO accountId 값을 사용하여 게임 데이터를 검색한다.
-
-
-
-            // TODO 모든 처리는 gameService에서 한후 로드된 게임 데이터만 가져와서 반환
-
-            throw new NotImplementedException();
+            // accountId 값을 사용하여 게임 데이터를 검색
+            (ErrorCode result, UserGameData? userGameData) = await _gameService.GetGameDataByAccountId(accountId);
+            return userGameData;
         }
 
     }
