@@ -129,7 +129,7 @@ CREATE TABLE friend
     `uid`         BIGINT      NOT NULL    COMMENT '유저 아이디', 
     `friend_uid`  BIGINT      NOT NULL    COMMENT '친구 유저아이디', 
     `friend_yn`   TINYINT     NOT NULL    DEFAULT 0  COMMENT '친구요청 수락여부(친구상태 여부)', 
-    `create_dt`   DATETIME    NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시', 
+    `created_at`   DATETIME    NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시', 
      PRIMARY KEY (uid, friend_uid),
      FOREIGN KEY (`uid`) REFERENCES `user_game_data` (`uid`),
      FOREIGN KEY (`friend_uid`) REFERENCES `user_game_data` (`uid`)
