@@ -78,7 +78,7 @@ public class GameDb : IGameDb
         try
         {
             var insertSuccess = await _queryFactory.Query("user_game_data")
-            .InsertAsync(userGameData);
+                .InsertAsync(userGameData);
 
             _logger.ZLogDebug
                 ($"[CreateUserGameData] accountId: {accountId}, nickname: {userGameData.nickname}");
@@ -168,7 +168,7 @@ public class GameDb : IGameDb
         try
         {
             var insertSuccess = await _queryFactory.Query("friend")
-            .InsertAsync(friend);
+                .InsertAsync(friend);
 
             _logger.ZLogDebug
                 ($"[CreateFriend] uid: {uid}, friendUid: {friendUid}");
@@ -309,7 +309,7 @@ public class GameDb : IGameDb
         try
         {
             IEnumerable<Friend?> dataList = await _queryFactory.Query("friend")
-            .Where("uid", uid).OrWhere("friend_uid", uid).GetAsync<Friend>();
+                .Where("uid", uid).OrWhere("friend_uid", uid).GetAsync<Friend>();
 
             // 친구가 없어서 null인지 데이터를 가져오지 못해 null인지 판단 불가능
             _logger.ZLogInformation
@@ -320,12 +320,271 @@ public class GameDb : IGameDb
         catch
         {
             _logger.ZLogError
-                    ($"[GetFriendListByUid] ErrorCode: {ErrorCode.FailGetFrinedData}, uid: {uid}, friendUid: {friendUid}");
+                    ($"[GetFriendListByUid] ErrorCode: {ErrorCode.FailGetFrinedData}, uid: {uid}");
             return (ErrorCode.FailGetFrinedData, null);
         }
 
     }
 
+    public async Task<(ErrorCode, Mail?)> GetMailByMailId(Int64 mailId)
+    {
+        // 메일 id로 메일 검색
+        try
+        {
+            dynamic? data = await _queryFactory.Query("mail")
+                .Where("mail_id", mailId).FirstOrDefaultAsync<Mail>();
+
+            if(data == null) 
+            {
+                _logger.ZLogError
+                    ($"[GetMailByMailId] ErrorCode: {ErrorCode.FailGetMail}, mailId: {mailId}");
+                return (ErrorCode.FailGetMail, null);
+            }
+
+            return (ErrorCode.None, data);
+        }
+        catch
+        {
+            _logger.ZLogError
+                    ($"[GetMailByMailId] ErrorCode: {ErrorCode.FailGetMail}, mailId: {mailId}");
+            return (ErrorCode.FailGetMail, null);
+        }
+    }
+
+    public async Task<(ErrorCode, IEnumerable<Mail?>?)> GetMailListByUid(Int64 uid)
+    {
+        // uid로 메일 리스트 검색
+        try
+        {
+            IEnumerable<Mail?> dataList = await _queryFactory.Query("mail")
+                .Where("uid", uid).GetAsync<Mail>();
+            
+            if(dataList == null)
+            {
+                _logger.ZLogError
+                    ($"[GetMailByMailId] ErrorCode: {ErrorCode.FailGetMail}, uid: {uid}");
+                return (ErrorCode.FailGetMail, null);
+            }
+
+            return (ErrorCode.None, dataList);
+        }
+        catch
+        {
+            _logger.ZLogError
+                    ($"[GetMailByMailId] ErrorCode: {ErrorCode.FailGetMail}, uid: {uid}");
+            return (ErrorCode.FailGetMail, null);
+        }
+    }
+
+    public async Task<ErrorCode> DeleteMailByMailid(Int64 mailId)
+    {
+        // mailid로 검색하여 삭제
+        try
+        {
+            int delSuccess = await _queryFactory.Query("mail")
+                .Where("mail_id", mailId).DeleteAsync();
+            
+            if(delSuccess != 1)
+            {
+                _logger.ZLogError
+                    ($"[GetMailByMailId] ErrorCode: {ErrorCode.FailGetMail}, mailId: {mailId}");
+                return ErrorCode.FailDeleteMail;
+            }
+
+            return ErrorCode.None;
+        }
+        catch
+        {
+            _logger.ZLogError
+                    ($"[GetMailByMailId] ErrorCode: {ErrorCode.FailGetMail}, mailId: {mailId}");
+            return ErrorCode.FailDeleteMail;
+        }
+    }
+
+    public async Task<ErrorCode> UpdateMailRewardedBymailId(Int64 mailId)
+    {
+        // mail id로 검색하여 수신여부 업데이트
+        try
+        {
+            var updateSuccess = await _queryFactory.Query("mail")
+                .Where("mail", mailId)
+                .UpdateAsync(new
+                {
+                    receive_yn = true
+                });
+
+            if(updateSuccess != 1) 
+            {
+                _logger.ZLogError
+                    ($"[UpdateMailRewardedBymailId] ErrorCode: {ErrorCode.FailReceiveMailReward}, mailId: {mailId}");
+                return ErrorCode.FailReceiveMailReward;
+            }
+
+            return ErrorCode.None;
+        }
+        catch
+        {
+            _logger.ZLogError
+                    ($"[UpdateMailRewardedBymailId] ErrorCode: {ErrorCode.FailReceiveMailReward}, mailId: {mailId}");
+            return ErrorCode.FailReceiveMailReward;
+        }
+    }
+
+    public async Task<(ErrorCode, IEnumerable<MailItem?>?)> GetMailItemListByMailId(Int64 mailId)
+    {
+        // mail id로 검색하여 보상 아이템 정보들 획득하기
+        try
+        {
+            IEnumerable<MailItem?> dataList = await _queryFactory.Query("mail_item")
+                .Where("mail_id", mailId).GetAsync<MailItem>();
+
+            if (dataList == null)
+            {
+                _logger.ZLogError
+                    ($"[GetMailItemListByMailId] ErrorCode: {ErrorCode.FailGetMailItemData}, mailId: {mailId}");
+                return (ErrorCode.FailGetMailItemData, null);
+            }
+
+            return (ErrorCode.None, dataList);
+        }
+        catch
+        {
+            _logger.ZLogError
+                    ($"[GetMailItemListByMailId] ErrorCode: {ErrorCode.FailGetMailItemData}, mailId: {mailId}");
+            return (ErrorCode.FailGetMailItemData, null);
+        }
+
+    }
+
+    public async Task<ErrorCode> CreateMailItem(Int64 mailId, Int64 ItemTemplateId, int itemCount)
+    {
+        // mail reward item 생성
+        try
+        {
+            MailItem mailItem = new MailItem()
+            {
+                mail_id = mailId,
+                item_template_id = ItemTemplateId,
+                item_count = itemCount,
+            };
+
+            int insertSuccess = await _queryFactory.Query("mail_item")
+                .InsertAsync(mailItem);
+
+            if(insertSuccess != 1)
+            {
+                _logger.ZLogError
+                    ($"[CreateMailItem] ErrorCode: {ErrorCode.FailCreateMailItem}, mailId: {mailId}");
+                return ErrorCode.FailCreateMailItem;
+            }
+
+            return ErrorCode.None;
+        }
+        catch
+        {
+            _logger.ZLogError
+                    ($"[CreateMailItem] ErrorCode: {ErrorCode.FailCreateMailItem}, mailId: {mailId}");
+            return ErrorCode.FailCreateMailItem;
+        }
+    }
+
+    public async Task<ErrorCode> CreateItem(Int64 uid, Int64 itemTemplateId, int itemCount)
+    {
+        // 아이템 테이블에 아이템 생성
+        try
+        {
+            Item item = new Item()
+            {
+                item_template_id = itemTemplateId,
+                owner_id = uid,
+                item_count = itemCount,
+            };
+
+            int insertSuccess = await _queryFactory.Query("item")
+                .InsertAsync(item);
+
+            if (insertSuccess != 1)
+            {
+                _logger.ZLogError
+                    ($"[CreateItem] ErrorCode: {ErrorCode.FailCreateMailItem}, uid: {uid}, itemTemplateId: {itemTemplateId}, itemCount: {itemCount}");
+                return ErrorCode.FailCreateMailItem;
+            }
+
+            return ErrorCode.None;
+        }
+        catch
+        {
+            _logger.ZLogError
+                    ($"[CreateItem] ErrorCode: {ErrorCode.FailCreateMailItem}, uid: {uid}, itemTemplateId: {itemTemplateId}, itemCount: {itemCount}");
+            return ErrorCode.FailCreateMailItem;
+        }
+    }
+
+    public async Task<ErrorCode> CreateItemList(Int64 uid, IEnumerable<Item> itemList)
+    {
+        // item 여러개를 한번에 삽입
+        try
+        {
+            foreach (Item? item in itemList)
+            {
+                int insertSuccess = await _queryFactory.Query("item").InsertAsync(item);
+                if(insertSuccess != 1)
+                {
+                    _logger.ZLogError
+                        ($"[CreateItem] ErrorCode: {ErrorCode.FailCreateItemList}, uid: {uid}");
+                    return ErrorCode.FailCreateItemList;
+                }
+            }
+
+            return ErrorCode.None;
+        }
+        catch
+        {
+            _logger.ZLogError
+                ($"[CreateItem] ErrorCode: {ErrorCode.FailCreateItemList}, uid: {uid}");
+            return ErrorCode.FailCreateItemList;
+        }
+    }
+
+    public async Task<ErrorCode> CreateItemListByMailItemList(Int64 uid, IEnumerable<MailItem?>? itemList)
+    {
+        
+
+        if(itemList == null)
+        {
+            _logger.ZLogError
+                ($"[CreateItemListByMailItemList] ErrorCode: {ErrorCode.NullMailItemList}, uid: {uid}");
+            return ErrorCode.FailCreateItemList;
+        }
+
+
+
+
+
+        // mail item을 item으로 전환하여 테이블에 삽입
+        List<Item> items = new List<Item>();
+
+        foreach(MailItem? mailitem in itemList)
+        {
+            if(mailitem == null)
+            {
+                _logger.ZLogError
+                    ($"[CreateItemListByMailItemList] ErrorCode: {ErrorCode.NullMailItemList}, uid: {uid}");
+                return ErrorCode.FailCreateItemList;
+            }
+
+            Item item = new Item() 
+            { 
+                item_template_id = mailitem.item_template_id,
+                owner_id = uid,
+                item_count = mailitem.item_count,
+            };
+
+            items.Add(item);
+        }
+
+        return await CreateItemList(uid, items);
+    }
 }
 
 

@@ -24,5 +24,22 @@ public interface IGameDb : IDisposable
 
 
 
+    // Mail
+    public Task<(ErrorCode, Mail?)> GetMailByMailId(Int64 mailId);
+    public Task<(ErrorCode, IEnumerable<Mail?>?)> GetMailListByUid(Int64 uid);
+    public Task<ErrorCode> DeleteMailByMailid(Int64 mailId);
+    public Task<ErrorCode> UpdateMailRewardedBymailId(Int64 mailId);
+
+
+
+    // Mail Item
+    public Task<(ErrorCode, IEnumerable<MailItem?>?)> GetMailItemListByMailId(Int64 mailId);
+    public Task<ErrorCode> CreateMailItem(Int64 mailId, Int64 ItemTemplateId, int itemCount);
+
+
+    // Item
+    public Task<ErrorCode> CreateItem(Int64 uid, Int64 itemTemplateId, int itemCount);
+    public Task<ErrorCode> CreateItemList(Int64 uid, IEnumerable<Item> itemList);
+    public Task<ErrorCode> CreateItemListByMailItemList(Int64 uid, IEnumerable<MailItem?>? itemList);
 
 }
