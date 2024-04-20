@@ -15,7 +15,14 @@ public interface IGameDb : IDisposable
 
 
     // Friend
-    public Task<(ErrorCode, Friend?)> CreateFriend(Int64 uid, Int64 friendUid);
-    public Task<(ErrorCode, Friend?)> DeleteFriend(Int64 uid, Int64 friendUid);
+    public Task<ErrorCode> CreateFriend(Int64 uid, Int64 friendUid);
+    public Task<ErrorCode> DeleteFriend(Int64 uid, Int64 friendUid);
+    public Task<ErrorCode> AcceptFriendReq(Int64 uid, Int64 friendUid);
+    public Task<ErrorCode> RejectFriendReq(Int64 uid, Int64 friendUid);
+    public Task<(ErrorCode, Friend?)> GetFriemdDataByUidAndFriendUid(Int64 uid, Int64 friendUid);
+    public Task<(ErrorCode, IEnumerable<Friend?>?)> GetFriendListByUid(Int64 uid);
+
+
+
 
 }

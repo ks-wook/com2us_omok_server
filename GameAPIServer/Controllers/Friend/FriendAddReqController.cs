@@ -23,17 +23,12 @@ namespace GameAPIServer.Controllers.Friend
         [HttpPost]
         public async Task<FriendAddReqRes> FriendAddReq ([FromBody] FriendAddReqReq req)
         {
-            // TODO 친구 요청에 대해 처리
+            // 친구 요청에 대해 처리
             FriendAddReqRes res = new FriendAddReqRes();
 
+            res.Result = await _friendService.AddFriendReq(req.Uid, req.FriendUid);
 
-
-
-
-
-
-
-            throw new NotImplementedException();
+            return res;
         }
 
     }

@@ -14,6 +14,12 @@ public enum ErrorCode : short
     NullUserGameData = 13002,
     FailCreateNewGameData = 13003,
     FailDisconnectGameDb = 13004,
+    FailCreateNewFriendData = 13005,
+    FailDeleteFriend = 13006,
+    FailUpdateFriend = 13007,
+    NullFriendData =  13008,
+    FailGetFrinedData = 13009,
+    FailRejectFriendReq = 13010,
 
     // Token 14001 ~
     NullGameLoginToken = 14002,

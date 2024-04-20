@@ -1,4 +1,6 @@
-﻿namespace GameAPIServer.Services
+﻿using GameAPIServer.Model.DAO.GameDb;
+
+namespace GameAPIServer.Services
 {
     public interface IFriendService
     {
@@ -11,6 +13,7 @@
 
         // 친구관계 삭제
         public Task<ErrorCode> DeleteFriend(Int64 uid, Int64 friendUid);
+
 
     }
 }

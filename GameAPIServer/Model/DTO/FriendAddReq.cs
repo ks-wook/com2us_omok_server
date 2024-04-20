@@ -10,6 +10,6 @@
     // 친구추가 요청에 대한 결과
     public class FriendAddReqRes
     {
-        ErrorCode Result { get; set; } = ErrorCode.None;
+        public ErrorCode Result { get; set; } = ErrorCode.None;
     }
 }

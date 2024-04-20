@@ -75,74 +75,257 @@ public class GameDb : IGameDb
             nickname = "User" + accountId,
         };
 
-        var insertSuccess = await _queryFactory.Query("user_game_data")
+        try
+        {
+            var insertSuccess = await _queryFactory.Query("user_game_data")
             .InsertAsync(userGameData);
 
-        _logger.ZLogDebug
-            ($"[CreateUserGameData] accountId: {accountId}, nickname: {userGameData.nickname}");
+            _logger.ZLogDebug
+                ($"[CreateUserGameData] accountId: {accountId}, nickname: {userGameData.nickname}");
 
 
-        if(insertSuccess != 1)
+            if (insertSuccess != 1)
+            {
+                _logger.ZLogError
+                    ($"[CreateUserGameData] ErrorCode: {ErrorCode.FailCreateNewGameData}, " +
+                     $"accountId: {accountId}, nickname: {userGameData.nickname}");
+                return (ErrorCode.FailCreateNewGameData, null);
+            }
+
+
+            // 데이터 삽입 성공, 삽입된 게임데이터 획득
+            (ErrorCode result, userGameData) = await GetUserGameDataByAccountId(accountId);
+
+            return (result, userGameData);
+        }
+        catch
         {
             _logger.ZLogError
-                ($"[CreateUserGameData] ErrorCode: {ErrorCode.FailCreateNewGameData}, " +
-                 $"accountId: {accountId}, nickname: {userGameData.nickname}");
+                    ($"[CreateUserGameData] ErrorCode: {ErrorCode.FailCreateNewGameData}, accountId: {accountId}");
             return (ErrorCode.FailCreateNewGameData, null);
         }
 
-
-        // 데이터 삽입 성공, 삽입된 게임데이터 획득
-        (ErrorCode result, userGameData) = await GetUserGameDataByAccountId(accountId);
-
-        return (result, userGameData);
+        
     }
-
 
 
     // AccountId를 이용해서 UserGameData Search
     public async Task<(ErrorCode, UserGameData?)> GetUserGameDataByAccountId(Int64 accountId)
     {
-        UserGameData? data = await _queryFactory.Query("user_game_data")
+        try
+        {
+            UserGameData? data = await _queryFactory.Query("user_game_data")
             .Where("account_id", accountId).FirstOrDefaultAsync<UserGameData>();
 
-        if (data == null) // 게임데이터가 존재하지 않는 경우
+            if (data == null) // 게임데이터가 존재하지 않는 경우
+            {
+                return (ErrorCode.NullUserGameData, null);
+            }
+
+            return (ErrorCode.None, data);
+        }
+        catch 
         {
+            _logger.ZLogError
+                ($"[CreateUserGameData] ErrorCode: {ErrorCode.FailCreateNewGameData}, accountId: {accountId}");
             return (ErrorCode.NullUserGameData, null);
         }
-
-        return (ErrorCode.None, data);
     }
 
 
     public async Task<(ErrorCode, UserGameData?)> GetGameDataByUid(Int64 uid)
     {
-        UserGameData? data = await _queryFactory.Query("user_game_data")
+        try
+        {
+            UserGameData? data = await _queryFactory.Query("user_game_data")
             .Where("uid", uid).FirstOrDefaultAsync<UserGameData>();
 
-        if (data == null) // 게임데이터가 존재하지 않는 경우
+            if (data == null) // 게임데이터가 존재하지 않는 경우
+            {
+                return (ErrorCode.NullUserGameData, null);
+            }
+
+            return (ErrorCode.None, data);
+        }
+        catch 
         {
+            _logger.ZLogError
+                ($"[CreateUserGameData] ErrorCode: {ErrorCode.NullUserGameData}, uid: {uid}");
             return (ErrorCode.NullUserGameData, null);
         }
-
-        return (ErrorCode.None, data);
     }
 
     
 
-    public Task<(ErrorCode, Friend?)> CreateFriend(Int64 uid, Int64 friendUid)
+    public async Task<ErrorCode> CreateFriend(Int64 uid, Int64 friendUid)
     {
+        Friend? friend = new Friend()
+        {
+              uid = uid,
+              friend_uid = friendUid
+        };
+
+        try
+        {
+            var insertSuccess = await _queryFactory.Query("friend")
+            .InsertAsync(friend);
+
+            _logger.ZLogDebug
+                ($"[CreateFriend] uid: {uid}, friendUid: {friendUid}");
 
 
+            if (insertSuccess != 1)
+            {
+                _logger.ZLogError
+                    ($"[CreateFriend] uid: {uid}, friendUid: {friendUid}");
+                return ErrorCode.FailCreateNewFriendData;
+            }
 
+            return ErrorCode.None;
+        }
+        catch
+        {
+            _logger.ZLogError
+                    ($"[CreateFriend] uid: {uid}, friendUid: {friendUid}");
+            return ErrorCode.FailCreateNewFriendData;
+        }
 
-
-        throw new NotImplementedException();
+        
     }
 
-    public Task<(ErrorCode, Friend?)> DeleteFriend(Int64 uid, Int64 friendUid)
+    public async Task<ErrorCode> DeleteFriend(Int64 uid, Int64 friendUid)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var delSuccess = await _queryFactory.Query("friend")
+            .Where(q => q
+                .Where("uid", uid)
+                .Where("friend_uid", friendUid)
+            )
+            .OrWhere(q => q
+                .Where("uid", friendUid)
+                .Where("friend_uid", uid)
+            )
+            .DeleteAsync();
+
+            if (delSuccess != 1)
+            {
+                _logger.ZLogError
+                    ($"[DeleteFriend] ErrorCode: {ErrorCode.FailDeleteFriend}, uid: {uid}, friendUid{friendUid}");
+                return ErrorCode.FailDeleteFriend;
+            }
+
+            return ErrorCode.None;
+        }
+        catch
+        {
+            _logger.ZLogError
+                    ($"[DeleteFriend] ErrorCode: {ErrorCode.FailDeleteFriend}, uid: {uid}, friendUid{friendUid}");
+            return ErrorCode.FailDeleteFriend;
+        }
+
+        
     }
+
+    public async Task<ErrorCode> AcceptFriendReq(Int64 uid, Int64 friendUid)
+    {
+        try
+        {
+            var updateSuccess = await _queryFactory.Query("friend")
+            .Where(q => q
+                .Where("uid", uid)
+                .Where("friend_uid", friendUid)
+            )
+            .OrWhere(q => q
+                .Where("uid", friendUid)
+                .Where("friend_uid", uid)
+            )
+            .UpdateAsync(new
+            {
+                friend_yn = 1
+            });
+
+
+            if (updateSuccess != 1)
+            {
+                _logger.ZLogError
+                    ($"[AcceptFriendReq] ErrorCode: {ErrorCode.FailUpdateFriend}, uid: {uid}, friendUid{friendUid}");
+                return ErrorCode.FailUpdateFriend;
+            }
+
+            return ErrorCode.None;
+        }
+        catch
+        {
+            _logger.ZLogError
+                    ($"[AcceptFriendReq] ErrorCode: {ErrorCode.FailUpdateFriend}, uid: {uid}, friendUid{friendUid}");
+            return ErrorCode.FailUpdateFriend;
+        }
+
+    }
+
+    public async Task<ErrorCode> RejectFriendReq(Int64 uid, Int64 friendUid)
+    {
+        ErrorCode result = await DeleteFriend(uid, friendUid);
+
+        return ErrorCode.None;
+    }
+
+    public async Task<(ErrorCode, Friend?)> GetFriemdDataByUidAndFriendUid(Int64 uid, Int64 friendUid)
+    {
+        try
+        {
+            dynamic? data = await _queryFactory.Query("friend")
+            .Where(q => q
+                .Where("uid", uid)
+                .Where("friend_uid", uid)
+            )
+            .OrWhere(q => q
+                .Where("uid", friendUid)
+                .Where("friend_uid", uid)
+            )
+            .FirstOrDefaultAsync<Friend>();
+
+
+            if (data == null)
+            {
+                _logger.ZLogError
+                    ($"[GetFriemdDataByUidAndFriendUid] ErrorCode: {ErrorCode.NullFriendData}, uid: {uid}, friendUid: {friendUid}");
+                return (ErrorCode.NullFriendData, null);
+            }
+
+            return (ErrorCode.None, data);
+        }
+        catch 
+        {
+            _logger.ZLogError
+                    ($"[GetFriemdDataByUidAndFriendUid] ErrorCode: {ErrorCode.NullFriendData}, uid: {uid}, friendUid: {friendUid}");
+            return (ErrorCode.NullFriendData, null);
+        }
+    }
+
+    public async Task<(ErrorCode, IEnumerable<Friend?>?)> GetFriendListByUid(Int64 uid)
+    {
+        try
+        {
+            IEnumerable<Friend?> dataList = await _queryFactory.Query("friend")
+            .Where("uid", uid).OrWhere("friend_uid", uid).GetAsync<Friend>();
+
+            // 친구가 없어서 null인지 데이터를 가져오지 못해 null인지 판단 불가능
+            _logger.ZLogInformation
+                    ($"[GetFriendListByUid] Null Friend List, uid: {uid}");
+
+            return (ErrorCode.None, dataList);
+        }
+        catch
+        {
+            _logger.ZLogError
+                    ($"[GetFriendListByUid] ErrorCode: {ErrorCode.FailGetFrinedData}, uid: {uid}, friendUid: {friendUid}");
+            return (ErrorCode.FailGetFrinedData, null);
+        }
+
+    }
+
 }
 
 
