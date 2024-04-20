@@ -60,10 +60,10 @@ __create query__
 ```
 CREATE TABLE item
 (
-    `item_id`                    INT            NOT NULL    AUTO_INCREMENT COMMENT '아이템 아이디',
-    `item_template_id`           INT            NOT NULL    COMMENT '아이템 템플릿 아이디',
-    `owner_id`                   INT            NOT NULL    COMMENT '아이템 주인의 user_id', 
-    `item_count`                 INT            NOT NULL    COMMENT '아이템의 개수',
+    `item_id`                    BIGINT            NOT NULL    AUTO_INCREMENT COMMENT '아이템 아이디',
+    `item_template_id`           BIGINT            NOT NULL    COMMENT '아이템 템플릿 아이디',
+    `owner_id`                   BIGINT            NOT NULL    COMMENT '아이템 주인의 user_id', 
+    `item_count`                 INT               NOT NULL    COMMENT '아이템의 개수',
      PRIMARY KEY (item_id),
      FOREIGN KEY (`owner_id`) REFERENCES `user` (`user_id`)
 );
@@ -78,10 +78,10 @@ CREATE TABLE item
 
 __create query__
 ```
-CREATE TABLE mailbox
+CREATE TABLE mail
 (
-    `mail_id`           INT             NOT NULL    AUTO_INCREMENT COMMENT '메일 아이디', 
-    `user_id`           INT             NOT NULL    COMMENT '수신자의 유저 아이디', 
+    `mail_id`           BIGINT          NOT NULL    AUTO_INCREMENT COMMENT '메일 아이디', 
+    `user_id`           BIGINT          NOT NULL    COMMENT '수신자의 유저 아이디', 
     `mail_template_id`  VARCHAR(20)     NOT NULL    COMMENT '우편 템플릿 아이디',
     `created_at`        DATETIME        NOT NULL    COMMENT '우편 생성 일시', 
     `expired_at`        DATETIME        NOT NULL    COMMENT '우편 만료 일시', 
@@ -91,8 +91,8 @@ CREATE TABLE mailbox
      FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
 );
 ```
-유저의 우편함을 관리하는 테이블. 메일의 템플릿 아이디를 통해 마스터 DB에 있는 메일의 제목과 내용을 구분하여 유저에게 표시해준다. 수령 완료 시 바로 삭제하지 않고
-매일 자정에 수령이 완료된 메일 데이터에 대해 일괄 삭제를 실시한다.
+유저의 우편함을 관리하는 테이블. 메일의 템플릿 아이디를 통해 외부에서 관리되는 메일의 제목과 내용을 주입하여 유저에게 표시해준다. 수령 완료 시 바로 삭제하지 않고
+매일 자정에 수령이 완료된 메일 데이터에 대해 일괄 삭제를 실시한다. 혹은 만료 일시가 지난 보상에 대해 삭제를 실시한다.
 
 
 ---
@@ -102,11 +102,11 @@ CREATE TABLE mailbox
 
 __create query__
 ```
-CREATE TABLE mailbox_item
+CREATE TABLE mail_item
 (
-    `mail_item_id`      INT             NOT NULL    AUTO_INCREMENT COMMENT '메일 아이템 아이디', 
-    `mail_id`           INT             NOT NULL    COMMENT '어떤 메일의 보상인지 나타내는 mail_id', 
-    `item_template_id`  INT             NOT NULL    COMMENT '아이템 템플릿 아이디', 
+    `mail_item_id`      BIGINT          NOT NULL    AUTO_INCREMENT COMMENT '메일 아이템 아이디', 
+    `mail_id`           BIGINT          NOT NULL    COMMENT '어떤 메일의 보상인지 나타내는 mail_id', 
+    `item_template_id`  BIGINT          NOT NULL    COMMENT '아이템 템플릿 아이디', 
     `item_count`        INT             NOT NULL    COMMENT '아이템 개수', 
     `receive_yn`        TINYINT         NOT NULL    DEFAULT 0 COMMENT '수령 유무',
      PRIMARY KEY (mail_seq),
