@@ -74,7 +74,7 @@ CREATE TABLE item
 ---
 
 
-## *mailbox*
+## *mail*
 
 __create query__
 ```
@@ -98,7 +98,7 @@ CREATE TABLE mail
 ---
 
 
-## *mailbox_item*
+## *mail_item*
 
 __create query__
 ```
