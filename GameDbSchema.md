@@ -62,10 +62,10 @@ CREATE TABLE item
 (
     `item_id`                    BIGINT            NOT NULL    AUTO_INCREMENT COMMENT '아이템 아이디',
     `item_template_id`           BIGINT            NOT NULL    COMMENT '아이템 템플릿 아이디',
-    `owner_id`                   BIGINT            NOT NULL    COMMENT '아이템 주인의 user_id', 
+    `owner_id`                   BIGINT            NOT NULL    COMMENT '아이템 주인의 uid', 
     `item_count`                 INT               NOT NULL    COMMENT '아이템의 개수',
      PRIMARY KEY (item_id),
-     FOREIGN KEY (`owner_id`) REFERENCES `user` (`user_id`)
+     FOREIGN KEY (`owner_id`) REFERENCES `user_game_data` (`uid`)
 );
 ```
 유저가 획득한 아이템의 정보에 대해 관리하는 테이블. 유저가 소유한 모든 아이템은 고유한 아이디와 함께 아이템의 종류를 확인하기 위한 템플릿 아이디를 가진다.
@@ -81,14 +81,14 @@ __create query__
 CREATE TABLE mail
 (
     `mail_id`           BIGINT          NOT NULL    AUTO_INCREMENT COMMENT '메일 아이디', 
-    `user_id`           BIGINT          NOT NULL    COMMENT '수신자의 유저 아이디', 
+    `uid`               BIGINT          NOT NULL    COMMENT '수신자의 유저 아이디', 
     `mail_template_id`  VARCHAR(20)     NOT NULL    COMMENT '우편 템플릿 아이디',
     `created_at`        DATETIME        NOT NULL    COMMENT '우편 생성 일시', 
     `expired_at`        DATETIME        NOT NULL    COMMENT '우편 만료 일시', 
     `received_at`       DATETIME        NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '수령 일시', 
     `receive_yn`        TINYINT         NOT NULL    DEFAULT 0 COMMENT '수령 유무',
      PRIMARY KEY (mail_seq),
-     FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+     FOREIGN KEY (`uid`) REFERENCES `user_game_data` (`uid`)
 );
 ```
 유저의 우편함을 관리하는 테이블. 메일의 템플릿 아이디를 통해 외부에서 관리되는 메일의 제목과 내용을 주입하여 유저에게 표시해준다. 수령 완료 시 바로 삭제하지 않고
