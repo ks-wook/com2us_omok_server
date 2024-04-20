@@ -63,13 +63,36 @@ public class GameService : IGameService
         {
             _logger.ZLogInformation
                 ($"[GetGameDataByAccountId] Not exist UserGameData");
-
-            // 새로운 게임 데이터 생성
-            (result, userGameData) = await InitNewUserGameData(accountId);
-
+            result = ErrorCode.NullUserGameData;
+            return (result, null);
         }
 
         return (result, userGameData);
         
+    }
+
+    public async Task<(ErrorCode, UserGameData?)> GetGameDataByUid(Int64 uid)
+    {
+        // uid를 이용하여 유저 게임 데이터 검색
+        (ErrorCode result, UserGameData? userGameData) =
+            await _gameDb.GetGameDataByUid(uid);
+
+
+        if (result != ErrorCode.None) // 데이터 검색에서 오류
+        {
+            _logger.ZLogError
+                ($"[GetGameDataByAccountId] ErrorCode: {result}");
+            return (result, null);
+
+        }
+        else if (userGameData == null) // 게임 데이터가 존재하지 않는 경우
+        {
+            _logger.ZLogInformation
+                ($"[GetGameDataByAccountId] Not exist UserGameData");
+            result = ErrorCode.NullUserGameData;
+            return (result, null);
+        }
+
+        return (result, userGameData);
     }
 }
