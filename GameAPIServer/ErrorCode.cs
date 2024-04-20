@@ -20,6 +20,15 @@ public enum ErrorCode : short
     NullFriendData =  13008,
     FailGetFrinedData = 13009,
     FailRejectFriendReq = 13010,
+    FailGetMail = 13011,
+    FailReceiveMailReward = 13012,
+    FailDeleteMail = 13013,
+    FailGetMailItemData = 13014,
+    FailCreateMailItem = 13015,
+    FailCreateItem = 13016,
+    FailCreateItemList = 13017,
+    NullMailItemList = 13018,
+
 
     // Token 14001 ~
     NullGameLoginToken = 14002,
