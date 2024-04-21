@@ -95,4 +95,19 @@ public class GameService : IGameService
 
         return (result, userGameData);
     }
+
+    public async Task<(ErrorCode, IEnumerable<Item>?)> GetItemListByUid(Int64 uid)
+    {
+        (ErrorCode result, IEnumerable<Item>? itemList) = 
+            await _gameDb.GetItemListByUid(uid);
+
+        if (result != ErrorCode.None) // 아이템 검색에서 오류
+        {
+            _logger.ZLogError
+                ($"[GetGameDataByAccountId] ErrorCode: {result}");
+            return (result, null);
+        }
+
+        return (result,  itemList);
+    }
 }

@@ -9,4 +9,8 @@ public interface IGameService
     public Task<(ErrorCode, UserGameData?)> GetGameDataByAccountId(Int64 accountId);
     public Task<(ErrorCode, UserGameData?)> GetGameDataByUid(Int64 uid);
 
+    // Item ~
+    public Task<(ErrorCode, IEnumerable<Item>?)> GetItemListByUid(Int64 uid);
+
+
 }

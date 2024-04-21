@@ -28,7 +28,7 @@ public enum ErrorCode : short
     FailCreateItem = 13016,
     FailCreateItemList = 13017,
     NullMailItemList = 13018,
-
+    FailGetItemList = 13019,
 
     // Token 14001 ~
     NullGameLoginToken = 14002,

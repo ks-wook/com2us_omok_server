@@ -548,17 +548,12 @@ public class GameDb : IGameDb
 
     public async Task<ErrorCode> CreateItemListByMailItemList(Int64 uid, IEnumerable<MailItem?>? itemList)
     {
-        
-
         if(itemList == null)
         {
             _logger.ZLogError
                 ($"[CreateItemListByMailItemList] ErrorCode: {ErrorCode.NullMailItemList}, uid: {uid}");
             return ErrorCode.FailCreateItemList;
         }
-
-
-
 
 
         // mail item을 item으로 전환하여 테이블에 삽입
@@ -584,6 +579,29 @@ public class GameDb : IGameDb
         }
 
         return await CreateItemList(uid, items);
+    }
+
+    public async Task<(ErrorCode, IEnumerable<Item>?)> GetItemListByUid(Int64 uid)
+    {
+        try
+        {
+            IEnumerable<Item> items = await _queryFactory.Query("Item")
+                .Where("owner_id", uid).GetAsync<Item>();
+
+            if(items == null) // 플레이어의 아이템이 존재하지 않는 것은 오류가 아니다.
+            {
+                _logger.ZLogInformation
+                    ($"[GetItemListByUid] NullItemList, uid: {uid}");
+            }
+
+            return (ErrorCode.None, items);
+        }
+        catch
+        {
+            _logger.ZLogInformation
+                ($"[GetItemListByUid] NullItemList, uid: {uid}");
+            return (ErrorCode.FailGetItemList, null);
+        }
     }
 }
 

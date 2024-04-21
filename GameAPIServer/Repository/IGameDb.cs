@@ -41,5 +41,6 @@ public interface IGameDb : IDisposable
     public Task<ErrorCode> CreateItem(Int64 uid, Int64 itemTemplateId, int itemCount);
     public Task<ErrorCode> CreateItemList(Int64 uid, IEnumerable<Item> itemList);
     public Task<ErrorCode> CreateItemListByMailItemList(Int64 uid, IEnumerable<MailItem?>? itemList);
+    public Task<(ErrorCode, IEnumerable<Item>?)> GetItemListByUid(Int64 uid);
 
 }
