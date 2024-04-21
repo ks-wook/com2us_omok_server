@@ -13,6 +13,7 @@ CREATE TABLE account
     `account_id`        BIGINT          NOT NULL    COMMENT '계정 아이디',
     `email`             VARCHAR(30)     NOT NULL    COMMENT '이메일',
     `password`          VARCHAR(30)     NOT NULL    COMMENT '해싱된 비밀번호',
+    `nickname`          VARCHAR(16)     NOT NULL    COMMENT '하이브 계정 닉네임',
     `created_at`        DATETIME        NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '계정 생성 일시',
     `recent_login_at`   DATETIME        NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '가장 최근 로그인 일시',
      PRIMARY KEY (account_id),
