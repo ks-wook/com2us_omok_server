@@ -7,10 +7,10 @@ namespace GameAPIServer.Services
 {
     public class FriendService : IFriendService
     {
-        readonly ILogger _logger;
+        readonly ILogger<FriendService> _logger;
         readonly IGameDb _gameDb;
         
-        public FriendService(IGameDb gameDb, ILogger logger)
+        public FriendService(IGameDb gameDb, ILogger<FriendService> logger)
         {
             _gameDb = gameDb;
             _logger = logger;

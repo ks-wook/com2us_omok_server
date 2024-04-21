@@ -22,6 +22,8 @@ public class GameDb : IGameDb
         _dbConfig = dbConfig;
         _logger = logger;
 
+        DbConnect();
+
         _dbCompiler = new SqlKata.Compilers.MySqlCompiler();
         _queryFactory = new SqlKata.Execution.QueryFactory(_dbConnector, _dbCompiler);
     }
@@ -68,44 +70,39 @@ public class GameDb : IGameDb
 
     public async Task<(ErrorCode, UserGameData?)> CreateUserGameData(Int64 accountId)
     {
-        // 새로운 게임 데이터 삽입
-        UserGameData? userGameData = new UserGameData()
-        {
-            account_id = accountId,
-            nickname = "User" + accountId,
-        };
-
         try
         {
             var insertSuccess = await _queryFactory.Query("user_game_data")
-                .InsertAsync(userGameData);
+                .InsertAsync(new
+                {
+                    account_id = accountId,
+                    nickname = "User" + accountId,
+                });
 
             _logger.ZLogDebug
-                ($"[CreateUserGameData] accountId: {accountId}, nickname: {userGameData.nickname}");
+                ($"[CreateUserGameData] accountId: {accountId}");
 
 
             if (insertSuccess != 1)
             {
                 _logger.ZLogError
-                    ($"[CreateUserGameData] ErrorCode: {ErrorCode.FailCreateNewGameData}, " +
-                     $"accountId: {accountId}, nickname: {userGameData.nickname}");
+                    ($"[CreateUserGameData] ErrorCode: {ErrorCode.FailCreateNewGameData}, accountId: {accountId}");
                 return (ErrorCode.FailCreateNewGameData, null);
             }
 
 
             // 데이터 삽입 성공, 삽입된 게임데이터 획득
-            (ErrorCode result, userGameData) = await GetUserGameDataByAccountId(accountId);
+            (ErrorCode result, UserGameData? userGameData) = await GetUserGameDataByAccountId(accountId);
 
             return (result, userGameData);
         }
-        catch
+        catch (Exception ex)
         {
+            await Console.Out.WriteLineAsync(ex.ToString());
             _logger.ZLogError
                     ($"[CreateUserGameData] ErrorCode: {ErrorCode.FailCreateNewGameData}, accountId: {accountId}");
             return (ErrorCode.FailCreateNewGameData, null);
         }
-
-        
     }
 
 
@@ -127,8 +124,8 @@ public class GameDb : IGameDb
         catch 
         {
             _logger.ZLogError
-                ($"[CreateUserGameData] ErrorCode: {ErrorCode.FailCreateNewGameData}, accountId: {accountId}");
-            return (ErrorCode.NullUserGameData, null);
+                ($"[GetUserGameDataByAccountId] ErrorCode: {ErrorCode.FailGetUserGameData}, accountId: {accountId}");
+            return (ErrorCode.FailGetUserGameData, null);
         }
     }
 

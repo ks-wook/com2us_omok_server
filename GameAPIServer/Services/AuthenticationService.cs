@@ -49,20 +49,17 @@ public class AuthenticationService : IAuthenticationService
 
             if(res.Result != ErrorCode.None)
             {
-
-
-
-
+                _logger.ZLogInformation
+                    ($"[LoginTokenVerify] ErrorCode:{ErrorCode.InvalidResFromHive}, AccountId = {accuountId}, Token = {loginToken}");
                 return ErrorCode.InvalidResFromHive;
             }
 
 
             return ErrorCode.None;
-
         }
-        catch(Exception e) 
+        catch
         {
-            _logger.ZLogDebug($"[LoginTokenVerify] " +
+            _logger.ZLogError($"[LoginTokenVerify] " +
                 $"ErrorCode:{ErrorCode.InvalidResFromHive}, AccountId = {accuountId}, Token = {loginToken}");
             return ErrorCode.InvalidResFromHive;
         }
