@@ -7,6 +7,7 @@ public enum ErrorCode : short
 
     // User Authentication 12001 ~ 
     InvalidResFromHive = 12001,
+    FailLogin = 12002,
 
 
     // GameDb 13001 ~
@@ -30,6 +31,7 @@ public enum ErrorCode : short
     NullMailItemList = 13018,
     FailGetItemList = 13019,
     FailGetUserGameData = 13020,
+    FailUpdateRecentLogin = 13021,
 
     // Token 14001 ~
     NullGameLoginToken = 14002,

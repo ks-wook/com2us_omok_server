@@ -34,47 +34,22 @@ namespace GameAPIServer.Controllers
             LoginRes res = new LoginRes();
 
 
-            // 토큰을 hive서버로 보내서 유효성 검사
-            res.Result = await _authenticationService.LoginTokenVerify(req.AccountId, req.Token);
 
-            if(res.Result != ErrorCode.None) 
+            res.Result = await _authenticationService.Login(req.AccountId, req.Token);
+
+            if(res.Result != ErrorCode.None)
             {
-                _logger.ZLogError(
-                   $"[Login] UID = {req.AccountId}, TokenValidationCheckFail");
+                _logger.ZLogError
+                    ($"[Login] ErrorCode: {ErrorCode.FailLogin}, accountId: {req.AccountId}");
                 return res;
             }
 
 
-            // Game redis에 인증된 토큰을 삽입한다.
-            res.Result = await _memoryDb.InsertGameLoginTokenAsync(req.AccountId, req.Token);
-            if (res.Result != ErrorCode.None)
-            {
-                _logger.ZLogError(
-                   $"[Login] UID = {req.AccountId}, Login Token Insert Fail");
-                return res;
-            }
-            
-            //  게임 데이터를 찾고 res에 담아 반환
-            UserGameData? userGameData = await LoadGameData(req.AccountId);
-            res.UserGameData = userGameData;
 
+            // 로그인 성공 시 게임 데이터 로드
+            res.UserGameData = await _gameService.LoadGameData(req.AccountId);
 
             return res;
-        }
-
-
-        public async Task<UserGameData?> LoadGameData(Int64 accountId)
-        {
-            // accountId 값을 사용하여 게임 데이터를 검색
-            (ErrorCode result, UserGameData? userGameData) = await _gameService.GetGameDataByAccountId(accountId);
-            
-            if(userGameData == null)
-            {
-                // UserGameData가 존재하지 않는 경우 새로운 유저 게임 데이터를 생성하여 반환
-                (result, userGameData) = await _gameService.InitNewUserGameData(accountId);
-            }
-
-            return userGameData;
         }
 
     }
