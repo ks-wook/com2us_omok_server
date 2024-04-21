@@ -35,7 +35,7 @@ public class GameService : IGameService
 
             return (result, data);
         }
-        catch(Exception e)
+        catch
         {
             _logger.ZLogError
                ($"[CreateUserGameData] ErrorCode: {ErrorCode.FailCreateNewGameData}, accountId: {accountId}");
@@ -96,6 +96,24 @@ public class GameService : IGameService
         return (result, userGameData);
     }
 
+
+    public async Task<ErrorCode> UpdateGameDataRecentLoginByUid(Int64 uid)
+    {
+        // 최근 로그인 시간 업데이트
+        ErrorCode result = await _gameDb.UpdateGameDataRecentLoginByUid(uid);
+
+        if(result != ErrorCode.None)
+        {
+            _logger.ZLogError
+                ($"[UpdateGameDataRecentLoginByUid] ErrorCode: {ErrorCode.FailUpdateRecentLogin}, uid: {uid}");
+            return ErrorCode.FailUpdateRecentLogin;
+        }
+
+        return result;
+    }
+
+
+
     public async Task<(ErrorCode, IEnumerable<Item>?)> GetItemListByUid(Int64 uid)
     {
         (ErrorCode result, IEnumerable<Item>? itemList) = 
@@ -109,5 +127,23 @@ public class GameService : IGameService
         }
 
         return (result,  itemList);
+    }
+
+    public async Task<UserGameData?> LoadGameData(Int64 accountId)
+    {
+        // accountId 값을 사용하여 게임 데이터를 검색
+        (ErrorCode result, UserGameData? userGameData) = await GetGameDataByAccountId(accountId);
+
+        if (userGameData == null)
+        {
+            // UserGameData가 존재하지 않는 경우 새로운 유저 게임 데이터를 생성하여 반환
+            (result, userGameData) = await InitNewUserGameData(accountId);
+            return userGameData;
+        }
+
+        // 로그인 시간 업데이트
+        result = await UpdateGameDataRecentLoginByUid(userGameData.uid);
+
+        return userGameData;
     }
 }

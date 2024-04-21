@@ -10,6 +10,7 @@ public interface IGameDb : IDisposable
     public Task<(ErrorCode, UserGameData?)> CreateUserGameData(Int64 accountId);
     public Task<(ErrorCode, UserGameData?)> GetUserGameDataByAccountId(Int64 accountId);
     public Task<(ErrorCode, UserGameData?)> GetGameDataByUid(Int64 uid);
+    public Task<ErrorCode> UpdateGameDataRecentLoginByUid(Int64 uid);
 
 
 

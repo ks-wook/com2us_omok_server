@@ -1,4 +1,5 @@
-﻿using GameAPIServer.Model.DTO;
+﻿using GameAPIServer.Model.DAO.GameDb;
+using GameAPIServer.Model.DTO;
 using GameAPIServer.Repository;
 using ZLogger;
 
@@ -9,14 +10,43 @@ public class AuthenticationService : IAuthenticationService
     readonly ILogger<AuthenticationService> _logger;
     readonly IGameDb _gameDb;
     readonly IMemoryDb _memoryDb;
+    readonly IGameService _gameService;
     string _tokenValidationCheckAPI;
 
-    public AuthenticationService(ILogger<AuthenticationService> logger, IConfiguration configuration, IGameDb gameDb, IMemoryDb memoryDb)
+    public AuthenticationService(ILogger<AuthenticationService> logger, IConfiguration configuration, IGameDb gameDb, IMemoryDb memoryDb, IGameService gameService)
     {
         _gameDb = gameDb;
         _logger = logger;
         _tokenValidationCheckAPI = configuration.GetSection("HiveServerAddr").Value + "/tokenValidationCheck";
         _memoryDb = memoryDb;
+        _gameService = gameService;
+    }
+
+    
+    // 게임 API 서버 로그인 처리
+    public async Task<ErrorCode> Login(Int64 accountId, string loginToken)
+    {
+        // 토큰을 hive서버로 보내서 유효성 검사
+        ErrorCode result = await LoginTokenVerify(accountId, loginToken);
+
+        if (result != ErrorCode.None)
+        {
+            _logger.ZLogError(
+               $"[Login] UID = {accountId}, TokenValidationCheckFail");
+            return result;
+        }
+
+
+        // Game redis에 인증된 토큰을 삽입한다.
+        result = await _memoryDb.InsertGameLoginTokenAsync(accountId, loginToken);
+        if (result != ErrorCode.None)
+        {
+            _logger.ZLogError(
+               $"[Login] UID = {accountId}, Login Token Insert Fail");
+            return result;
+        }
+
+        return result;
     }
 
 

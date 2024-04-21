@@ -152,7 +152,32 @@ public class GameDb : IGameDb
         }
     }
 
-    
+
+    public async Task<ErrorCode> UpdateGameDataRecentLoginByUid(Int64 uid)
+    {
+        try
+        {
+            int updateSuccess = await _queryFactory.Query("user_game_data")
+                .Where("uid", uid).UpdateAsync(new { recent_login_at = DateTime.Now });
+            
+            if(updateSuccess != 1)
+            {
+                _logger.ZLogError
+                    ($"[UpdateGameDataRecentLoginByUid] ErrorCode: {ErrorCode.FailUpdateRecentLogin}, uid: {uid}");
+                return ErrorCode.FailUpdateRecentLogin;
+            }
+
+            return ErrorCode.None;
+        }
+        catch
+        {
+            _logger.ZLogError
+                ($"[UpdateGameDataRecentLoginByUid] ErrorCode: {ErrorCode.FailUpdateRecentLogin}, uid: {uid}");
+            return ErrorCode.FailUpdateRecentLogin;
+        }
+    }
+
+
 
     public async Task<ErrorCode> CreateFriend(Int64 uid, Int64 friendUid)
     {
@@ -600,6 +625,8 @@ public class GameDb : IGameDb
             return (ErrorCode.FailGetItemList, null);
         }
     }
+
+    
 }
 
 
