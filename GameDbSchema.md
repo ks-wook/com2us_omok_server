@@ -13,7 +13,7 @@ CREATE TABLE user_game_data
     `uid`                       BIGINT         NOT NULL    AUTO_INCREMENT COMMENT '유저 게임 데이터 아이디',
     `account_id`                BIGINT         NOT NULL    COMMENT '유저가 속한 계정 아이디', 
     `nickname`                  VARCHAR(16)    NOT NULL    COMMENT '닉네임',
-    `user_money`                INT            NOT NULL    COMMENT '유저 게임 돈',
+    `user_money`                INT            NOT NULL    DEFAULT 0 COMMENT '유저 게임 돈',
     `created_at`                DATETIME       NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '유저 생성 일시', 
     `recent_login_at`           DATETIME       NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '가장 최근 로그인 일시',
     `user_level`                INT            NOT NULL    DEFAULT 0 COMMENT '유저 레벨', 
