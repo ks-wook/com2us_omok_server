@@ -68,9 +68,12 @@ namespace GameAPIServer.Controllers
             // accountId 값을 사용하여 게임 데이터를 검색
             (ErrorCode result, UserGameData? userGameData) = await _gameService.GetGameDataByAccountId(accountId);
             
-            // UserGameData가 존재하지 않는 경우 새로운 유저 게임 데이터를 생성하여 반환
-            (result, userGameData) = await _gameService.InitNewUserGameData(accountId);
-            
+            if(userGameData == null)
+            {
+                // UserGameData가 존재하지 않는 경우 새로운 유저 게임 데이터를 생성하여 반환
+                (result, userGameData) = await _gameService.InitNewUserGameData(accountId);
+            }
+
             return userGameData;
         }
 

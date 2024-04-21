@@ -3,7 +3,7 @@
 public static class HiveDefine
 {
     // TEST 1분
-    public static short LoginTokenExpireMin = 1;
+    public static short LoginTokenExpireMin = 5;
 
 
 }

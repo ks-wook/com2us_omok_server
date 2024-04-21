@@ -2,7 +2,7 @@
 {
     public class UserGameData
     {
-        public Int64 user_game_data_id { get; set; }
+        public Int64 uid { get; set; }
         public Int64 account_id {  get; set; }
         public string nickname { get; set; } = string.Empty;
         public int user_money { get; set; } = 0;
