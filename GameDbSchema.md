@@ -4,28 +4,6 @@
 ---
 
 
-## *account*
-
-__create query__
-```
-CREATE TABLE account
-(
-    `account_id`        BIGINT          NOT NULL    COMMENT '계정 아이디',
-    `email`             VARCHAR(30)     NOT NULL    COMMENT '이메일',
-    `password`          VARCHAR(30)     NOT NULL    COMMENT '해싱된 비밀번호',
-    `created_at`        DATETIME        NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '계정 생성 일시',
-    `recent_login_at`   DATETIME        NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '가장 최근 로그인 일시',
-     PRIMARY KEY (account_id),
-     UNIQUE KEY (email)
-);
-```
-
-하이브 계정과 관련된 정보를 저장하는 테이블.
-
-
----
-
-
 ## *user_game_data*
 
 __create query__
@@ -42,9 +20,8 @@ CREATE TABLE user_game_data
     `user_exp`                  INT            NOT NULL    DEFAULT 0 COMMENT '유저 경험치',  
     `total_win_cnt`             INT            NOT NULL    DEFAULT 0 COMMENT '현재 시즌 승수', 
     `total_lose_cnt`            INT            NOT NULL    DEFAULT 0 COMMENT '현재 시즌 패수',
-     PRIMARY KEY (uid),
-     UNIQUE KEY (nickname),
-     FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`)
+     PRIMARY KEY (uid, account_id),
+     UNIQUE KEY (nickname)
 );
 ```
 하이브 계정에 묶인 유저의 정보에 대해 저장하는 테이블.
