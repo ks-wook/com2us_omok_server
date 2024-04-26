@@ -18,8 +18,12 @@ namespace GameServer
         PacketProcessor _mainPacketProcessor = new PacketProcessor();
         MainServerOption _mainServerOption;
 
+
+        // 매니저 생성
         RoomManager _roomManager = new RoomManager();
         UserManager _userManager = new UserManager();
+
+
 
         public MainServer()
             : base(new DefaultReceiveFilterFactory<ReceiveFilter, MemoryPackBinaryRequestInfo>())
@@ -89,12 +93,8 @@ namespace GameServer
             // 매니저 초기화
             _roomManager.Init(_mainServerOption);
 
-
             _mainPacketProcessor = new PacketProcessor();
             _mainPacketProcessor.CreateAndStart(_roomManager, _userManager); // 프로세서 초기화
-
-
-            
         }
 
 
