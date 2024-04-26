@@ -1,4 +1,5 @@
-﻿using GameServer.PacketHandler;
+﻿using GameServer.Packet;
+using GameServer.PacketHandler;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace GameServer
     {
         Dictionary<int, Action<MemoryPackBinaryRequestInfo>>_packetHandlerMap = new Dictionary<int, Action<MemoryPackBinaryRequestInfo>>(); // 패킷의 ID와 패킷 핸들러를 같이 등록한다.
         NetworkPacketHandler _networkPacketHandler = new NetworkPacketHandler();
+        RoomPacketHandler _roomPacketHandler = new RoomPacketHandler();
         
         System.Threading.Thread? _processThread = null; // 패킷 처리용 쓰레드 선언
 
@@ -21,9 +23,22 @@ namespace GameServer
         BufferBlock<MemoryPackBinaryRequestInfo> _recvBuffer = new BufferBlock<MemoryPackBinaryRequestInfo>();
 
 
-        // 룸 개념은 나중에 추가
-        public void CreateAndStart()
+        RoomManager? _roomManager;
+        UserManager? _userManager;
+
+
+
+        public void CreateAndStart(RoomManager roomManager, UserManager userManager)
         {
+            if(roomManager == null)
+            {
+                Console.WriteLine("[PacketProcessor.CreateAndStart] roomManager Null");
+                return;
+            }
+
+            _roomManager = roomManager;
+            _userManager = userManager;
+
             // 패킷 처리용 쓰레드를 생성하고, 패킷 처리를 도맡아한다.    
 
             RegisterPakcetHandler();
@@ -37,8 +52,11 @@ namespace GameServer
 
         void RegisterPakcetHandler()
         {
-            // 여러 종류의 패킷 핸들러에 선언된 핸들러들을 패킷 프로세서의 핸들러에 최종 등록한다.
+            // 여러 종류의 패킷 핸들러에 선언된 핸들러들을 패킷 프로세서의 핸들러에 최종 등록
             _networkPacketHandler.RegisterPacketHandler(_packetHandlerMap);
+
+            _roomPacketHandler.Init(_roomManager, _userManager);
+            _roomPacketHandler.RegisterPacketHandler(_packetHandlerMap);
         }
 
 

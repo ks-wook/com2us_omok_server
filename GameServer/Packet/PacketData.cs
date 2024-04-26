@@ -33,7 +33,7 @@ public partial class PKTTest : PkHeader // 테스트용 패킷
 public partial class C_LoginReq : PkHeader // 게임 서버 로그인 요청
 {
     public string UID { get; set; } = string.Empty;
-    public string Token { get; set; } = string.Empty;
+    public string AuthToken { get; set; } = string.Empty;
 }
 
 
@@ -66,3 +66,7 @@ public partial class C_RoomChat : PkHeader // 방 채팅 요청
 {
     public string ChatMsg { get; set; } = string.Empty;
 }
+
+
+
+// TODO 오목 로직 패킷
