@@ -10,22 +10,34 @@ namespace GameServer
     public class Room
     {
         public int RoomNumber { get; set; }
+        public int RoomMaxUserCount { get; set; }
         List<RoomUser> _roomUsers = new List<RoomUser>();
 
-
-
-        public bool AddRoomUser(string uid,  string roomSessionId)
+        public void Init(int roomNumber, int roomMaxUserCount)
         {
+            RoomNumber = roomNumber;
+            RoomMaxUserCount = roomMaxUserCount;
+        }
+
+
+        public ErrorCode AddRoomUser(string uid,  string roomSessionId)
+        {
+            if(_roomUsers.Count >= RoomMaxUserCount) // 방 정원 초과
+            {
+                return ErrorCode.ExceedMaxRoomUser;
+            }
+
             if(GetRoomUserByUid(uid) != null)
             {
-                return false;
+                return ErrorCode.AlreadyExsistUser;
             }
 
             var roomUser = new RoomUser();
             roomUser.Set(uid, roomSessionId);
             _roomUsers.Add(roomUser);
-            return true;
+            return ErrorCode.None;
         }
+
 
         public RoomUser? GetRoomUserByUid(string uid) 
         {
@@ -37,19 +49,12 @@ namespace GameServer
             return _roomUsers.Remove(ru);
         }
 
-
-
-    }
-
-    public class RoomUser
-    {
-        public string UID { get; private set; }
-        public string RoomSessionID { get; private set; } // 방에서 구분되는 유저의 아이디
-
-        public void Set(string userID, string roomSessionId)
+        public List<RoomUser> GetRoomUserList()
         {
-            UID = userID;
-            RoomSessionID = roomSessionId;
+            return _roomUsers;
         }
+
     }
+
+    
 }

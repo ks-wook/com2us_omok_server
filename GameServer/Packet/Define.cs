@@ -15,5 +15,12 @@
         C_RoomChat = 2003,
 
 
+        // Omok Logic 3001 ~
+
+
+
+
+
+
     }
 }

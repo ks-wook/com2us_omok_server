@@ -7,15 +7,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GameServer.Session;
+using GameServer.Packet;
 
 namespace GameServer
 {
     // AppServer를 상속받는 Listener 생성
     public class MainServer : AppServer<ClientSession, MemoryPackBinaryRequestInfo>
     {
-        SuperSocket.SocketBase.Config.IServerConfig m_Config;
+        SuperSocket.SocketBase.Config.IServerConfig _serverConfig;
         PacketProcessor _mainPacketProcessor = new PacketProcessor();
+        MainServerOption _mainServerOption;
 
+        RoomManager _roomManager = new RoomManager();
+        UserManager _userManager = new UserManager();
 
         public MainServer()
             : base(new DefaultReceiveFilterFactory<ReceiveFilter, MemoryPackBinaryRequestInfo>())
@@ -25,19 +29,23 @@ namespace GameServer
             NewRequestReceived += new RequestHandler<ClientSession, MemoryPackBinaryRequestInfo>(OnPacketReceived);
         }
 
-        public void Init()
+        public void Init(MainServerOption option)
         {
-            m_Config = new SuperSocket.SocketBase.Config.ServerConfig()
+            _mainServerOption = option;
+
+            _serverConfig = new SuperSocket.SocketBase.Config.ServerConfig()
             {
-                Name = "SuperSocketPractice",
+                Name = option.Name,
                 Ip = "Any", // 모든 주소 연결 허용
-                Port = 8282, // 포트 할당
+                Port = option.Port,
                 Mode = SocketMode.Tcp,
-                MaxConnectionNumber = 10, // 최대 동접 수
-                MaxRequestLength = 100,
-                ReceiveBufferSize = 2048, // recv 버퍼 사이즈 2048 할당
-                SendBufferSize = 2048, // send 버퍼 사이즈 2048 할당
+                MaxConnectionNumber = option.MaxConnectionNumber, // 최대 동접 수
+                MaxRequestLength = option.MaxRequestLength,
+                ReceiveBufferSize = option.ReceiveBufferSize, // recv 버퍼 사이즈 2048 할당
+                SendBufferSize = option.SendBufferSize, // send 버퍼 사이즈 2048 할당
             };
+
+
         }
 
         public void StopServer()
@@ -51,7 +59,7 @@ namespace GameServer
         {
             try
             {
-                bool result = Setup(new SuperSocket.SocketBase.Config.RootConfig(), m_Config, logFactory: new ConsoleLogFactory());
+                bool result = Setup(new SuperSocket.SocketBase.Config.RootConfig(), _serverConfig, logFactory: new ConsoleLogFactory());
 
                 if (result == false)
                 {
@@ -78,8 +86,15 @@ namespace GameServer
         // 패킷 프로세서 생성 및 실행
         void CreateComponent()
         {
+            // 매니저 초기화
+            _roomManager.Init(_mainServerOption);
+
+
             _mainPacketProcessor = new PacketProcessor();
-            _mainPacketProcessor.CreateAndStart(); // 프로세서 초기화
+            _mainPacketProcessor.CreateAndStart(_roomManager, _userManager); // 프로세서 초기화
+
+
+            
         }
 
 
@@ -120,7 +135,6 @@ namespace GameServer
             Console.WriteLine($"세션 번호 {clientSession.SessionID} 받은 데이터 크기: {requestInfo.Body.Length}, ThreadId: {Thread.CurrentThread.ManagedThreadId}");
 
             requestInfo.SessionID = clientSession.SessionID;
-            // 패킷 프로세서에게 전달
             _mainPacketProcessor.Insert(requestInfo);
         }
 

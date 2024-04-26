@@ -1,5 +1,4 @@
 ﻿using GameServer.Binary;
-using GameServer.Packet;
 using SuperSocket.Common;
 using SuperSocket.SocketBase.Protocol;
 using SuperSocket.SocketEngine.Protocol;
@@ -9,8 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameServer;
+namespace GameServer.Packet;
 
+
+// 패킷 전체 정보
 public class MemoryPackBinaryRequestInfo : BinaryRequestInfo
 {
     public string SessionID;
@@ -27,21 +28,24 @@ public class MemoryPackBinaryRequestInfo : BinaryRequestInfo
 
 }
 
+
+
+// 패킷 헤더 정보
 public struct MemoryPackPacketHeadInfo
 {
     const int PacketHeaderMemoryPackStartPos = 1;
     public const int HeadSize = 6;
 
-    public UInt16 TotalSize;
-    public UInt16 Id;
+    public ushort TotalSize;
+    public ushort Id;
     public byte Type;
 
-    public static UInt16 GetTotalSize(byte[] data, int startPos)
+    public static ushort GetTotalSize(byte[] data, int startPos)
     {
         return PtrBinaryReader.UInt16(data, startPos + PacketHeaderMemoryPackStartPos);
     }
 
-    public static void WritePacketId(byte[] data, UInt16 packetId)
+    public static void WritePacketId(byte[] data, ushort packetId)
     {
         PtrBinaryWriter.UInt16(data, PacketHeaderMemoryPackStartPos + 2, packetId);
     }
@@ -64,10 +68,10 @@ public struct MemoryPackPacketHeadInfo
     {
         var pos = PacketHeaderMemoryPackStartPos;
 
-        PtrBinaryWriter.UInt16(packetData, pos, (UInt16)packetData.Length);
+        PtrBinaryWriter.UInt16(packetData, pos, (ushort)packetData.Length);
         pos += 2;
 
-        PtrBinaryWriter.UInt16(packetData, pos, (UInt16)packetId);
+        PtrBinaryWriter.UInt16(packetData, pos, (ushort)packetId);
         pos += 2;
 
         packetData[pos] = type;
@@ -81,6 +85,10 @@ public struct MemoryPackPacketHeadInfo
         Console.WriteLine("Type : " + Type);
     }
 }
+
+
+
+
 
 
 public class ReceiveFilter : FixedHeaderReceiveFilter<MemoryPackBinaryRequestInfo>
@@ -122,7 +130,7 @@ public class ReceiveFilter : FixedHeaderReceiveFilter<MemoryPackBinaryRequestInf
             else
             {
                 //offset 이 헤더 크기보다 작으므로 헤더와 보디를 직접 합쳐야 한다.
-                var packetData = new Byte[length + MemoryPackBinaryRequestInfo.HEADERE_SIZE];
+                var packetData = new byte[length + MemoryPackBinaryRequestInfo.HEADERE_SIZE];
                 header.CopyTo(packetData, 0);
                 Array.Copy(readBuffer, offset, packetData, MemoryPackBinaryRequestInfo.HEADERE_SIZE, length);
 

@@ -14,4 +14,10 @@
     <PackageReference Include="ZLogger" Version="2.4.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="SuperSocketLite">
+      <HintPath>..\SuperSocketLite\SuperSocketLite.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

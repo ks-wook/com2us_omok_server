@@ -1,4 +1,5 @@
-﻿using SuperSocket.SocketBase;
+﻿using GameServer.Packet;
+using SuperSocket.SocketBase;
 using System;
 using System.Collections.Generic;
 using System.Linq;

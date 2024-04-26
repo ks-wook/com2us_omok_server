@@ -29,7 +29,7 @@ namespace GameServer.PacketHandler
             try
             {
                 var bodyData = MemoryPackSerializer.Deserialize<PKTTest>(packet.Data);
-                
+
                 if (bodyData != null)
                 {
                     Console.WriteLine("패킷 수신 성공, MSG: " + bodyData.Msg);
