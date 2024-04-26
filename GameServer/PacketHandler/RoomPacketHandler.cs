@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameServer.PacketHandler
+namespace GameServer
 {
     public class RoomPacketHandler : PacketHandler
     {
@@ -46,7 +46,7 @@ namespace GameServer.PacketHandler
 
                 if(bodyData == null)
                 {
-                    Console.WriteLine("[C_RoomEnterReqHandler] Packet Error");
+                    Console.WriteLine($"[C_RoomEnterReqHandler] ErrorCode: {ErrorCode.NullPacket}");
                     return;
                 }
 
@@ -56,7 +56,7 @@ namespace GameServer.PacketHandler
                 
                 if(user == null)
                 {
-                    ResRoomEnter(ErrorCode.NullUser);
+                    Console.WriteLine($"[C_RoomEnterReqHandler] ErrorCode: {ErrorCode.NullUser}");
                     return;
                 }
 
@@ -65,19 +65,20 @@ namespace GameServer.PacketHandler
                 Room? room = _roomManager.FindRoomByRoomNumber(bodyData.RoomNumber);
                 if (room == null)
                 {
-                    ResRoomEnter(ErrorCode.NullRoom);
+                    Console.WriteLine($"[C_RoomEnterReqHandler] ErrorCode: {ErrorCode.NullRoom}");
                     return;
                 }
 
                 ErrorCode result = room.AddRoomUser(user.Id, sessionId);
                 if (result != ErrorCode.None)
                 {
-                    ResRoomEnter(ErrorCode.NullRoom);
+                    Console.WriteLine($"[C_RoomEnterReqHandler] ErrorCode: {result}");
                     return;
                 }
 
                 // 방 입장 성공
-                ResRoomEnter(ErrorCode.None, room, user);
+                // TODO 방 입장 성공 패킷 전송
+                // ResRoomEnter(ErrorCode.None, room, user);
             }
             catch (Exception ex)
             {
@@ -101,29 +102,5 @@ namespace GameServer.PacketHandler
         }
 
 
-
-        // 방 입장 요청 응답
-        public void ResRoomEnter(ErrorCode result, Room? room = null, User? user = null)
-        {
-            if(result != ErrorCode.None)
-            {
-                // TODO 실패 응답 처리
-
-
-
-
-            }
-
-
-
-            // TODO 성공 응답 처리
-
-
-
-
-
-
-
-        }
     }
 }

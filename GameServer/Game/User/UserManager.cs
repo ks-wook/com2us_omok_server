@@ -17,15 +17,20 @@ namespace GameServer
             MaxConnectionNumber = option.MaxConnectionNumber;
         }
 
-        public bool AddUser(string userId, string SessionId)
+        public ErrorCode AddUser(string userId, string SessionId)
         {
             if (CheckMaxConnection() == false)
             {
-                return false;
+                return ErrorCode.ExceedMaxUserConnection;
+            }
+
+            if (CheckExistUser(userId) == false)
+            {
+                return ErrorCode.AlreadyExsistUser;
             }
 
             users.Add(new User(userId, SessionId));
-            return true;
+            return ErrorCode.None;
         }
 
         bool CheckMaxConnection()
@@ -33,6 +38,16 @@ namespace GameServer
             if (users.Count < MaxConnectionNumber) { return true; }
 
             return false;
+        }
+
+        bool CheckExistUser(string userId)
+        {
+            if(users.Find(u => u.Id == userId) != null) // 이미 접속한 유저
+            { 
+                return false; 
+            }
+
+            return true;
         }
 
         public User? GetUserBySessionId(string SessionId)

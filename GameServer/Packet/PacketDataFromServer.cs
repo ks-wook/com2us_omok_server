@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 
 namespace GameServer.Packet;
 
+[MemoryPackable]
+public partial class S_Test : PkHeader // 테스트 요청 응답
+{
+    public string Msg { get; set; } = string.Empty;
+}
 
 [MemoryPackable]
 public partial class S_LoginReq : PkHeader // 로그인 요청 응답

@@ -9,6 +9,7 @@
     public enum PACKET_ID : short
     {
         C_Test = 101, // 테스트 요청 패킷
+        S_Test = 102, // 테스트 요청 읃답
 
         // 네트워크 1001 ~
         C_LoginReq = 1001,

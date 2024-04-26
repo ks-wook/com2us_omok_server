@@ -8,8 +8,8 @@ namespace GameServer
 {
     public class RoomUser
     {
-        public string UID { get; private set; }
-        public string RoomSessionID { get; private set; } // 방에서 구분되는 유저의 아이디
+        public string UID { get; private set; } = string.Empty;
+        public string RoomSessionID { get; private set; } = string.Empty;
 
         public void Set(string userID, string roomSessionId)
         {

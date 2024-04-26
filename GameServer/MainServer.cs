@@ -93,6 +93,9 @@ namespace GameServer
             // 매니저 초기화
             _roomManager.Init(_mainServerOption);
 
+
+            PacketHandler.NetSendFunc = SendData;
+
             _mainPacketProcessor = new PacketProcessor();
             _mainPacketProcessor.CreateAndStart(_roomManager, _userManager); // 프로세서 초기화
         }
