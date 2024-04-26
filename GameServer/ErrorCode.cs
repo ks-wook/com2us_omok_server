@@ -11,12 +11,15 @@ namespace GameServer
         None = 0,
 
         // Network 20001 ~
-
+        LoginFail = 20001,
+        InvaildToken = 20002,
+        AlreadyExsistUser = 20003,
+        NullPacket = 20004,
 
         // Room 21001 ~ 
         NullRoom = 21001,
         ExceedMaxRoomUser = 21002,
-        AlreadyExsistUser = 21003,
+        AlreadyExsistRoomUser = 21003,
 
 
         // User 22001 ~

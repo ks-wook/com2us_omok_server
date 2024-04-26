@@ -20,6 +20,7 @@
                 option.MaxConnectionNumber = 10;
                 option.RoomMaxCount = 10;
                 option.RoomStartNumber = 1;
+                option.MaxRequestLength = 1000;
                 option.RoomMaxUserCount = 2; // 2인 대전 게임
             }
             

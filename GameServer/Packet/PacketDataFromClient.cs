@@ -11,18 +11,8 @@ namespace GameServer.Packet;
 
 
 
-
 [MemoryPackable]
-public partial class PkHeader
-{
-    public UInt16 TotalSize { get; set; } = 0;
-    public UInt16 Id { get; set; } = 0;
-    public byte Type { get; set; } = 0;
-}
-
-
-[MemoryPackable]
-public partial class PKTTest : PkHeader // 테스트용 패킷
+public partial class C_Test : PkHeader // 테스트용 패킷
 {
     public string Msg { get; set; } = string.Empty;
 }
@@ -42,7 +32,7 @@ public partial class C_LoginReq : PkHeader // 게임 서버 로그인 요청
 [MemoryPackable]
 public partial class C_LogoutReq : PkHeader // 게임 서버 로그아웃 요청
 {
-    public string UID { get; set; } = string.Empty;
+    public string UserId { get; set; } = string.Empty;
     public string Token { get; set; } = string.Empty;
 }
 
