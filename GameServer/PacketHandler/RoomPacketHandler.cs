@@ -76,9 +76,18 @@ namespace GameServer
                     return;
                 }
 
-                // 방 입장 성공
-                // TODO 방 입장 성공 패킷 전송
-                // ResRoomEnter(ErrorCode.None, room, user);
+
+
+                // 방 입장 성공 응답
+                {
+                    S_EnterRoomReq sendData = new S_EnterRoomReq();
+                    sendData.RoomNumber = bodyData.RoomNumber;
+                    var sendPacket = MemoryPackSerializer.Serialize<S_EnterRoomReq>(sendData);
+                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_EnterRoomReq);
+                    NetSendFunc(sessionId, sendPacket);
+                }
+                
+
             }
             catch (Exception ex)
             {

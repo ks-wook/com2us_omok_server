@@ -54,6 +54,7 @@ public class PacketProcessor
         // 여러 종류의 패킷 핸들러에 선언된 핸들러들을 패킷 프로세서의 핸들러에 최종 등록
         _networkPacketHandler.RegisterPacketHandler(_packetHandlerMap);
 
+        _networkPacketHandler.Init(_userManager);
         _roomPacketHandler.Init(_roomManager, _userManager);
         _roomPacketHandler.RegisterPacketHandler(_packetHandlerMap);
     }
