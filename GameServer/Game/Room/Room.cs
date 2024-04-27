@@ -72,6 +72,15 @@ namespace GameServer
         }
         
 
+        // 룸에서 방의 모든 사람에게 패킷 전송
+        // 유저가 강제종료 시 남아있는 유저에게 패킷을 전송할때만 사용
+        public void NotifyRoomUsersFromRoom(Func<string, byte[], bool> NetSendFunc, byte[] sendData)
+        {
+            foreach(var roomUser in _roomUsers)
+            {
+                NetSendFunc(roomUser.RoomSessionID, sendData);
+            }
+        }
     }
 
     

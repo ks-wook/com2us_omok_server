@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GameServer.Session;
 using GameServer.Packet;
+using MemoryPack;
 
 namespace GameServer
 {
@@ -132,6 +133,36 @@ namespace GameServer
         void OnClosed(ClientSession session, CloseReason closeReason)
         {
             Console.WriteLine($"[OnClosed] sesseionID: {session.SessionID}, ${closeReason.ToString()}");
+
+            // 강제 종료시 유저가 방에 있었다면 내보낸다.
+            User? user = _userManager.GetUserBySessionId(session.SessionID);
+            if (user != null)
+            {
+                // 게임 중이거나 방에 있던 상태였다면
+                if(user.State == UserState.InGame || user.State == UserState.InRoom) 
+                {
+                    Room? room = _roomManager.FindRoomByRoomNumber(user.RoomNumber);
+                    if (room != null)
+                    {
+                        room.RemoveUserBySessionId(session.SessionID);
+
+                        // 방에 남아있는 유저에게도 접속 종료 패킷 전송
+                        S_LeaveRoomReq leaveRoomReq = new S_LeaveRoomReq();
+                        leaveRoomReq.UserId = user.Id;
+                        var sendPacket = MemoryPackSerializer.Serialize(leaveRoomReq);
+                        MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_LeaveRoomReq);
+                        room.NotifyRoomUsersFromRoom(SendData, sendPacket);
+
+                        
+
+                    }
+                }
+
+
+                // 유저 매니저에서 삭제
+                _userManager.RemoveUserBySessionId(session.SessionID);
+            }
+
         }
 
         void OnPacketReceived(ClientSession clientSession, MemoryPackBinaryRequestInfo requestInfo)

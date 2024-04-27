@@ -33,6 +33,19 @@ namespace GameServer
             return ErrorCode.None;
         }
 
+        public ErrorCode RemoveUserBySessionId(string sessionId)
+        {
+            User? user = users.Find(u => u.SessionId == sessionId);
+            if(user == null)
+            {
+                return ErrorCode.NullUser;
+            }
+
+            users.Remove(user);
+
+            return ErrorCode.None;
+        }
+
         bool CheckMaxConnection()
         {
             if (users.Count < MaxConnectionNumber) { return true; }
