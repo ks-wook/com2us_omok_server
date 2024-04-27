@@ -33,7 +33,7 @@ public partial class S_LogoutReq : PkHeader // 게임 서버 로그아웃 요청
 public partial class S_EnterRoomReq : PkHeader // 방 입장 요청 응답
 {
     public ErrorCode Result { get; set; }
-
+    public string UserId { get; set; } = string.Empty; // 입장에 성공한 UserId
     public Int32 RoomNumber { get; set; } // 입장에 성공한 방 number
 }
 
