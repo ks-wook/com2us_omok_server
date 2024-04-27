@@ -116,12 +116,12 @@ public class NetworkPacketHandler : PacketHandler
             // 로그인 성공 응답
             {
                 S_LoginReq sendData = new S_LoginReq();
+                sendData.UserId = bodyData.UserId;
                 var sendPacket = MemoryPackSerializer.Serialize<S_LoginReq>(sendData);
                 MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_LoginReq);
                 NetSendFunc(sessionId, sendPacket);
             }
             
-
 
         }
         catch (Exception ex)

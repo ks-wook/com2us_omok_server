@@ -47,7 +47,6 @@ public partial class C_EnterRoomReq : PkHeader // 방 입장 요청
 [MemoryPackable]
 public partial class C_LeaveRoomReq : PkHeader // 방 퇴장 요청
 {
-    public int RoomNumber = 0; // 0번방은 존재 하지 않으므로 0이라면 잘못된 패킷
 }
 
 

@@ -19,6 +19,7 @@ public partial class S_Test : PkHeader // 테스트 요청 응답
 public partial class S_LoginReq : PkHeader // 로그인 요청 응답
 {
     public ErrorCode Result { get; set; }
+    public string UserId { get; set; } = string.Empty;
 }
 
 
@@ -40,6 +41,7 @@ public partial class S_EnterRoomReq : PkHeader // 방 입장 요청 응답
 public partial class S_LeaveRoomReq : PkHeader // 방 퇴장 요청 응답
 {
     public ErrorCode Result { get; set; }
+    public String UserId { get; set; } = string.Empty; // 퇴장한 유저의 user id
 }
 
 

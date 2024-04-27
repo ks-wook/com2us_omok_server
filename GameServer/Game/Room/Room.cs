@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,7 +28,7 @@ namespace GameServer
                 return ErrorCode.ExceedMaxRoomUser;
             }
 
-            if(GetRoomUserByUid(uid) != null)
+            if(GetRoomUserBySessionId(uid) != null)
             {
                 return ErrorCode.AlreadyExsistUser;
             }
@@ -35,18 +36,34 @@ namespace GameServer
             var roomUser = new RoomUser();
             roomUser.Set(uid, roomSessionId);
             _roomUsers.Add(roomUser);
+
+            Console.WriteLine($"[{RoomNumber}번 room] Uid {uid} 입장, 현재 인원: {_roomUsers.Count}");
+
             return ErrorCode.None;
         }
 
 
-        public RoomUser? GetRoomUserByUid(string uid) 
+        public RoomUser? GetRoomUserBySessionId(string sessionId) 
         {
-            return _roomUsers.Find(ru => ru.UID == uid);
+            return _roomUsers.Find(ru => ru.RoomSessionID == sessionId);
         }
 
-        public bool RemoveUserByUid(RoomUser ru)
+        public ErrorCode RemoveUserBySessionId(string sessioniId)
         {
-            return _roomUsers.Remove(ru);
+            RoomUser? roomUser = _roomUsers.Find(ru => ru.RoomSessionID == sessioniId);
+            if(roomUser == null)
+            {
+                return ErrorCode.NullUser;
+            }
+
+            if(_roomUsers.Remove(roomUser) == false)
+            {
+                return ErrorCode.FailRemoveRoomUser;
+            }
+
+            Console.WriteLine($"[{RoomNumber}번 room] Uid {roomUser.UserId} 퇴장, 현재 인원: {_roomUsers.Count}");
+
+            return ErrorCode.None;
         }
 
         public List<RoomUser> GetRoomUserList()

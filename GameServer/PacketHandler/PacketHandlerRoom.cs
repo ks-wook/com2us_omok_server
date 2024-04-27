@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GameServer
 {
-    public class RoomPacketHandler : PacketHandler
+    public class PacketHandlerRoom : PacketHandler
     {
         RoomManager? _roomManager;
         UserManager? _userManager;
@@ -86,7 +86,9 @@ namespace GameServer
                     MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_EnterRoomReq);
                     NetSendFunc(sessionId, sendPacket);
                 }
-                
+
+                // 서버 유저 상태 변경
+                user.EnteredRoom(bodyData.RoomNumber);
 
             }
             catch (Exception ex)
@@ -100,6 +102,60 @@ namespace GameServer
         // 방 퇴장 요청
         public void C_LeaveRoomReqHandler(MemoryPackBinaryRequestInfo packet)
         {
+            var sessionId = packet.SessionID;
+
+            try
+            {
+                User? user = _userManager.GetUserBySessionId(sessionId);
+                if (user == null)
+                {
+                    Console.WriteLine($"[C_LeaveRoomReqHandler] ErrorCode: {ErrorCode.NullUser}");
+                    return;
+                }
+
+                // 유저가 방에 입장한 상태인가?
+                if (user.State != UserState.InRoom)
+                {
+                    Console.WriteLine($"[C_LeaveRoomReqHandler] ErrorCode: {ErrorCode.InvalidRequest}");
+                    return;
+                }
+
+
+
+                // Room을 찾고 룸 유저 삭제
+                Room? room = _roomManager.FindRoomByRoomNumber(user.RoomNumber);
+                if (room == null)
+                {
+                    Console.WriteLine($"[C_LeaveRoomReqHandler] ErrorCode: {ErrorCode.NullRoom}");
+                    return;
+                }
+
+                ErrorCode result = room.RemoveUserBySessionId(sessionId);
+                if(result != ErrorCode.None)
+                {
+                    Console.WriteLine($"[C_LeaveRoomReqHandler] ErrorCode: {result}");
+                    return;
+                }
+
+
+
+                // 방 퇴장 성공 응답
+                {
+                    S_LeaveRoomReq sendData = new S_LeaveRoomReq();
+                    sendData.UserId = user.Id;
+                    var sendPacket = MemoryPackSerializer.Serialize(sendData);
+                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_LeaveRoomReq);
+                    NetSendFunc(sessionId, sendPacket);
+                }
+
+                // 서버 유저 상태 변경
+                user.LeavedRoom();
+
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"[C_LeaveRoomReqHandler] ErrorCode: {ErrorCode.LeaveRoomFail}"); ;
+            }
 
         }
 
