@@ -76,9 +76,6 @@ public class NetworkPacketHandler : PacketHandler
 
 
 
-
-
-
     public void C_LoginReqHander(MemoryPackBinaryRequestInfo packet)
     {
         var sessionId = packet.SessionID;
@@ -87,6 +84,8 @@ public class NetworkPacketHandler : PacketHandler
         try
         {
             // TODO 게임 레디스에서 토큰 검증
+
+
 
 
 
@@ -105,23 +104,24 @@ public class NetworkPacketHandler : PacketHandler
             ErrorCode result = _userManager.AddUser(bodyData.UserId, sessionId);
 
 
-
-
-
-            // TODO S_LoginReq 패킷 조립 후 재전송
-
-
-
-
-
+            if(result != ErrorCode.None)
+            {
+                Console.WriteLine($"[C_LoginReqHander] ErrorCode: {result}");
+                return;
+            }
 
 
 
 
-
-
-
-
+            // 로그인 성공 응답
+            {
+                S_LoginReq sendData = new S_LoginReq();
+                sendData.UserId = bodyData.UserId;
+                var sendPacket = MemoryPackSerializer.Serialize<S_LoginReq>(sendData);
+                MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_LoginReq);
+                NetSendFunc(sessionId, sendPacket);
+            }
+            
 
         }
         catch (Exception ex)

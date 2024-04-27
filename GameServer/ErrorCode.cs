@@ -15,12 +15,14 @@ namespace GameServer
         InvaildToken = 20002,
         AlreadyExsistUser = 20003,
         NullPacket = 20004,
+        InvalidRequest = 20005,
 
         // Room 21001 ~ 
         NullRoom = 21001,
         ExceedMaxRoomUser = 21002,
         AlreadyExsistRoomUser = 21003,
-
+        LeaveRoomFail = 21004,
+        FailRemoveRoomUser = 21005,
 
         // User 22001 ~
         NullUser = 22001,
