@@ -3,6 +3,7 @@ using MemoryPack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,20 +29,57 @@ namespace GameServer
 
         public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap)
         {
+            // 방 입퇴장
             packetHandlerMap.Add((int)PACKET_ID.C_EnterRoomReq, C_RoomEnterReqHandler);
             packetHandlerMap.Add((int)PACKET_ID.C_LeaveRoomReq, C_LeaveRoomReqHandler);
             packetHandlerMap.Add((int)PACKET_ID.C_RoomChat, C_RoomChatHandler);
+
+
+            // 오목
+            packetHandlerMap.Add((int)PACKET_ID.C_ReadyOmok, C_ReadyOmokHandler);
+            packetHandlerMap.Add((int)PACKET_ID.C_PutMok, C_PutMokHandler);
         }
 
+       
+        // 룸의 모든 유저에게 패킷 전송
         public void NotifyRoomUsers(byte[] sendData, Room room)
         {
-            // 룸의 모든 유저에게 패킷 전송
+            
             foreach(RoomUser roomUser in room.GetRoomUserList())
             {
                 NetSendFunc(roomUser.RoomSessionID, sendData);
             }
         }
 
+        // 오목 게임 시작 통보 패킷 전송
+        public void OmokStart(Room room)
+        {
+            // 모든 유저에게 오목 게임 시작 패킷 전송
+            List<RoomUser> roomUsers = room.GetRoomUserList();
+
+            // 선후공 결정
+            int blackUser = RandomNumberGenerator.GetInt32(2);
+            S_StartOmok sendData = new S_StartOmok();
+
+            if(blackUser == 0)
+            {
+                sendData.BlackUserId = roomUsers[0].UserId;
+                sendData.WhiteUserId = roomUsers[1].UserId;
+            }
+            else
+            {
+                sendData.BlackUserId = roomUsers[1].UserId;
+                sendData.WhiteUserId = roomUsers[0].UserId;
+            }
+
+            room.OmokGameStart(sendData.BlackUserId, sendData.WhiteUserId);
+
+
+            // 오목 시작 패킷 전달
+            var sendPacket = MemoryPackSerializer.Serialize(sendData);
+            MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_StartOmok);
+            NotifyRoomUsers(sendPacket, room);
+        }
 
         // 방 입장 요청
         public void C_RoomEnterReqHandler(MemoryPackBinaryRequestInfo packet)
@@ -226,12 +264,145 @@ namespace GameServer
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[C_LeaveRoomReqHandler] ErrorCode: {ErrorCode.LeaveRoomFail}"); ;
+                Console.WriteLine($"[C_RoomChatHandler] ErrorCode: {ErrorCode.RoomChatFail}"); ;
             }
 
 
         }
 
+        
+        // 오목 준비 완료 요청
+        public void C_ReadyOmokHandler(MemoryPackBinaryRequestInfo packet)
+        {
+            var sessionId = packet.SessionID;
 
+            try
+            {
+                User? user = _userManager.GetUserBySessionId(sessionId);
+                if (user == null)
+                {
+                    Console.WriteLine($"[C_ReadyOmokHandler] ErrorCode: {ErrorCode.NullUser}");
+                    return;
+                }
+
+                // 유저가 방에 입장한 상태인가?
+                if (user.State != UserState.InRoom)
+                {
+                    Console.WriteLine($"[C_ReadyOmokHandler] ErrorCode: {ErrorCode.InvalidRequest}");
+                    return;
+                }
+
+
+                // Room을 찾고 roomUser의 준비 상태 변경
+                Room? room = _roomManager.FindRoomByRoomNumber(user.RoomNumber);
+                if (room == null)
+                {
+                    Console.WriteLine($"[C_ReadyOmokHandler] ErrorCode: {ErrorCode.NullRoom}");
+                    return;
+                }
+
+                int result = room.ChangeIsReadyBySessionId(sessionId);
+                if(result == -1 )
+                {
+                    Console.WriteLine($"[C_ReadyOmokHandler] ErrorCode: {ErrorCode.NullUser}");
+                    return;
+                }
+
+                // 준비상태 변경 응답
+                {
+                    S_ReadyOmok sendData = new S_ReadyOmok();
+                    sendData.UserId = user.Id;
+
+                    if (result == 0)
+                    {
+                        sendData.IsReady = false;
+
+                    }
+                    else if(result == 1)
+                    {
+                        sendData.IsReady = true;
+                    }
+
+                    var sendPacket = MemoryPackSerializer.Serialize(sendData);
+                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_ReadyOmok);
+                    NotifyRoomUsers(sendPacket, room);
+
+                }
+
+                // 모든 유저의 준비가 끝났는지 검사
+                if(room.CheckAllUsersReady())
+                {
+                    OmokStart(room);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[C_ReadyOmokHandler] ErrorCode: {ErrorCode.FailReadyOmok}"); ;
+            }
+        }
+
+        // 오목 돌을 두는 요청
+        public void C_PutMokHandler(MemoryPackBinaryRequestInfo packet)
+        {
+            var sessionId = packet.SessionID;
+
+            try
+            {
+                var bodyData = MemoryPackSerializer.Deserialize<C_PutMok>(packet.Data);
+
+                if (bodyData == null)
+                {
+                    Console.WriteLine($"[C_PutMokHandler] ErrorCode: {ErrorCode.NullPacket}");
+                    return;
+                }
+
+                User? user = _userManager.GetUserBySessionId(sessionId);
+                if (user == null)
+                {
+                    Console.WriteLine($"[C_PutMokHandler] ErrorCode: {ErrorCode.NullUser}");
+                    return;
+                }
+
+                // Room을 찾고 서버 오목판에 돌을 반영
+                Room? room = _roomManager.FindRoomByRoomNumber(user.RoomNumber);
+                if (room == null)
+                {
+                    Console.WriteLine($"[C_PutMokHandler] ErrorCode: {ErrorCode.NullRoom}");
+                    return;
+                }
+
+                room.GetOmokGame().PlaceStone(bodyData.PosX, bodyData.PosY, user.Id);
+
+                // 돌을 두었다는 완료 패킷 전송
+                {
+                    S_PutMok sendData = new S_PutMok();
+                    sendData.UserId = user.Id;
+                    sendData.PosX = bodyData.PosX;
+                    sendData.PosY = bodyData.PosY;
+                    var sendPacket = MemoryPackSerializer.Serialize(sendData);
+                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_PutMok);
+                    NotifyRoomUsers(sendPacket, room);
+                }
+
+
+                // 승부가 났다면 게임 종료 패킷도 전송
+                if (room.GetOmokGame().CheckWinner(bodyData.PosX, bodyData.PosY)) 
+                {
+                    S_EndOmok sendData = new S_EndOmok();
+                    sendData.WinUserId = user.Id;
+                    var sendPacket = MemoryPackSerializer.Serialize(sendData);
+                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_EndOmok);
+                    NotifyRoomUsers(sendPacket, room);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[C_PutMokHandler] ErrorCode: {ErrorCode.PutMokFail}"); ;
+            }
+
+        }
     }
 }

@@ -58,4 +58,23 @@ public partial class C_RoomChat : PkHeader // 방 채팅 요청
 
 
 
-// TODO 오목 로직 패킷
+
+
+
+// 오목 로직 패킷
+[MemoryPackable] 
+public partial class C_ReadyOmok : PkHeader // 오목 플레이 준비 완료 요청
+{
+}
+
+
+
+[MemoryPackable]
+public partial class C_PutMok : PkHeader // 돌 두기 요청
+{
+    public int PosX;
+    public int PosY;
+}
+
+
+

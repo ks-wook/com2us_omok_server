@@ -10,6 +10,7 @@ namespace GameServer
     {
         public string UserId { get; private set; } = string.Empty;
         public string RoomSessionID { get; private set; } = string.Empty;
+        public bool IsReady = false;
 
         public void Set(string userID, string roomSessionId)
         {
