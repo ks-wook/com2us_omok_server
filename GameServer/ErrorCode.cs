@@ -27,9 +27,11 @@ namespace GameServer
         // User 22001 ~
         NullUser = 22001,
         ExceedMaxUserConnection = 22002,
+        RoomChatFail = 22003,
 
-
-
+        // OmokGame 23001 ~
+        PutMokFail = 23001,
+        FailReadyOmok = 23002,
 
     }
 }

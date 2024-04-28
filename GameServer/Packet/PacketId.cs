@@ -28,8 +28,15 @@
 
 
         // Omok Logic 3001 ~
+        C_ReadyOmok = 3001,
+        S_ReadyOmok = 3002,
 
+        S_StartOmok = 3003,
+        
+        C_PutMok = 3004,
+        S_PutMok = 3005,
 
+        S_EndOmok = 3006,
 
 
 

@@ -14,6 +14,10 @@ namespace GameServer
         public int RoomMaxUserCount { get; set; }
         List<RoomUser> _roomUsers = new List<RoomUser>();
 
+
+        OmokGame _omokGame = new OmokGame(); // 오목 게임 객체
+
+
         public void Init(int roomNumber, int roomMaxUserCount)
         {
             RoomNumber = roomNumber;
@@ -81,6 +85,60 @@ namespace GameServer
                 NetSendFunc(roomUser.RoomSessionID, sendData);
             }
         }
+
+        public bool CheckAllUsersReady()
+        {
+            if(_roomUsers.Count != RoomMaxUserCount)
+            {
+                return false;
+            }
+
+            foreach (var roomUser in _roomUsers)
+            {
+                if (roomUser.IsReady == false)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // 유저 준비 상태 변경
+        public int ChangeIsReadyBySessionId(string sessionId)
+        {
+            RoomUser? roomUser = GetRoomUserBySessionId(sessionId);
+            if(roomUser != null) 
+            {
+                if (roomUser.IsReady == false)
+                {
+                    roomUser.IsReady = true;
+                    Console.WriteLine($"[{roomUser.UserId}] 준비완료");
+                    return 1;
+                }
+                else
+                {
+                    roomUser.IsReady = false;
+                    Console.WriteLine($"[{roomUser.UserId}] 준비완료 취소");
+                    return 0;
+                }
+
+            }
+
+            return -1;
+        }
+
+        // 오목 게임 획득
+        public OmokGame GetOmokGame() { return _omokGame; }
+
+
+        // 오목 게임 시작
+        public void OmokGameStart(string blackUserId, string whiteUserId)
+        {
+            _omokGame.StartGame(blackUserId, whiteUserId);
+            Console.WriteLine($"RoomNumber: {RoomNumber}, 흑돌: {blackUserId}, 백돌: {whiteUserId} 게임 시작");
+        }
+
     }
 
     
