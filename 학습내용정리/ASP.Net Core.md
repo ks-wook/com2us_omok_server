@@ -1,5 +1,5 @@
 # ASP.Net Core
-*들어가며*
+
 컴투스 서버 캠퍼스 2기 1 ~ 2주차에 진행하였던 ASP.Net Core에 대해 학습한 내용을 정리한 문서입니다.
 
 
@@ -78,7 +78,7 @@ builder.Services.AddSingleton<IMyService, MyService>();
 builder.UseMiddleware<MyMiddleware>();
 
 // 라우팅 설정
-builder.MapControllers();
+builder.AddControllers();
 
 // 호스트 구성
 builder.Host.UseEnvironment("Development");
@@ -89,9 +89,69 @@ var app = builder.Build();
 
 * 서비스 등록: Services 속성을 사용하여 애플리케이션에서 사용할 서비스를 등록할 수 있다. 서비스는 인터페이스와 구현 클래스를 사용하여 등록한다.
 * 미들웨어 등록: UseMiddleware() 메서드를 사용하여 HTTP 요청 파이프라인에 사용자 정의 미들웨어를 추가 할 수 있다.
-* 라우팅 설정: MapContollers() 또는 MapGet() 등의 메서드를 사용하여 엔드포인트를 라우팅할 수 있다.
+* 라우팅 설정: AddControllers() 또는 MapGet() 등의 메서드를 사용하여 엔드포인트를 라우팅할 수 있다.
 * 호스트 구성: Host 속성을 사용하여 호스트 설정을 구성할 수 있다. 여기에는 포트번호 환경 변수 등이 포함된다.
 * 애플리케이션 빌드: Build() 메서드를 사용하여 WebApplication 인스턴스를 빌드한다.
+
+
+
+## Routing
+
+라우팅은 들어오는 HTTP 요청을 적절한 컨트롤러 작업이나 미들웨어에 매핑하는 프로세스이다. 이를 통해 애플리케이션은 다양한 요청을 처리하고 사용자에게 올바른 응답을 제공 할 수 있다.
+
+-> 컨트롤러 선언 후 연결하기 MyContoller.cs
+```
+[Route("[controller]")]
+[ApiController]
+public class LoginController : ControllerBase
+{
+    readonly ILogger<LoginController> _logger;
+    readonly IGameService _gameService;
+
+    public LoginController() 
+    {
+        _logger = logger;
+        _gameService = gameService;
+    }
+
+    // 유저 정보가 있다면 같이 동봉해서 보내고, 없다면 신규 유저이므로 새로 만들어서 전달
+    [HttpPost]
+    public async Task<LoginRes> Login([FromBody] LoginReq req)
+    {
+        // Login Logic ~
+
+
+        // 로그인 성공 시 게임 데이터 로드
+        res.UserGameData = await _gameService.LoadGameData(req.AccountId);
+
+        return res;
+    }
+
+}
+
+
+```
+
+### 컨트롤러
+컨트롤러는 MVC 패턴에서 사용자의 입력을 처리하는 로직을 실행한다. 이번 ASP.Net Core에서 MVC 패턴은 주된 학습 목표가 아니기 때문에 컨트롤러를 통해 사용자의 요청에 따라 다른 로직을 실행한다는 것 정도만 꼭 기억해두자.  
+
+
+
+
+-> LoginController  
+
+* '[Route("[controller]")]' : 이 속성은 컨트롤러가 라우팅되는 경로를 의미한다. 컨트롤러의 이름이 'LoginController'인 경우 앞 글자만 따서 '/Login' 으로 라우팅 경로를 지정한다.
+* '[HttpPost]' : 이 속성은 해당 메서드가 HTTP POST 요청을 처리하도록 지정함을 의미한다. 위의 LoginContoller에는 'Login' 하나의 메서드만 존재하므로 '서버주소/Login'으로 들어오는 모든 HTTP POST 요청을 해당 메서드가 처리하게 된다.
+
+
+  
+
+이런식으로 선언한 컨트롤러는 '[ApiController]' 속성을 통해 ASP.Net Core에서 관리하는 컨트롤러로 취급되어 builder.AddController() 메서드를 호출하는 시점에 라우팅 경로가 매핑된다. 
+
+
+
+
+
 
 
 
