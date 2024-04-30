@@ -11,33 +11,34 @@ namespace GameServer
 {
     public class PacketHandlerRoom : PacketHandler
     {
-        RoomManager? _roomManager;
-        UserManager? _userManager;
+        RoomManager _roomManager;
+        UserManager _userManager;
 
-        public void Init(RoomManager roomManager, UserManager userManger)
+
+        public PacketHandlerRoom(RoomManager? roomManager, UserManager? userManger)
         {
             if(roomManager == null || userManger == null)
             {
                 Console.WriteLine("[RoomPacketHandler.Init] roomList null");
-                return;
+                throw new NullReferenceException();
             }
 
-            _roomManager = roomManager;
-            _userManager = userManger;
+            this._roomManager = roomManager;
+            this._userManager = userManger;
         }
 
 
         public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap)
         {
             // 방 입퇴장
-            packetHandlerMap.Add((int)PACKET_ID.C_EnterRoomReq, C_RoomEnterReqHandler);
-            packetHandlerMap.Add((int)PACKET_ID.C_LeaveRoomReq, C_LeaveRoomReqHandler);
-            packetHandlerMap.Add((int)PACKET_ID.C_RoomChat, C_RoomChatHandler);
+            packetHandlerMap.Add((int)PACKETID.PKTReqRoomEnter, C_RoomEnterReqHandler);
+            packetHandlerMap.Add((int)PACKETID.PKTReqRoomLeave, C_LeaveRoomReqHandler);
+            packetHandlerMap.Add((int)PACKETID.PKTReqRoomChat, C_RoomChatHandler);
 
 
             // 오목
-            packetHandlerMap.Add((int)PACKET_ID.C_ReadyOmok, C_ReadyOmokHandler);
-            packetHandlerMap.Add((int)PACKET_ID.C_PutMok, C_PutMokHandler);
+            packetHandlerMap.Add((int)PACKETID.PKTReqReadyOmok, C_ReadyOmokHandler);
+            packetHandlerMap.Add((int)PACKETID.PKTReqPutMok, C_PutMokHandler);
         }
 
        
@@ -59,7 +60,7 @@ namespace GameServer
 
             // 선후공 결정
             int blackUser = RandomNumberGenerator.GetInt32(2);
-            S_StartOmok sendData = new S_StartOmok();
+            PKTNtfStartOmok sendData = new PKTNtfStartOmok();
 
             if(blackUser == 0)
             {
@@ -77,7 +78,7 @@ namespace GameServer
 
             // 오목 시작 패킷 전달
             var sendPacket = MemoryPackSerializer.Serialize(sendData);
-            MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_StartOmok);
+            MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTNtfStartOmok);
             NotifyRoomUsers(sendPacket, room);
         }
 
@@ -88,7 +89,7 @@ namespace GameServer
 
             try
             {
-                var bodyData = MemoryPackSerializer.Deserialize<C_EnterRoomReq>(packet.Data);
+                var bodyData = MemoryPackSerializer.Deserialize<PKTReqRoomEnter>(packet.Data);
 
                 if(bodyData == null)
                 {
@@ -126,11 +127,11 @@ namespace GameServer
 
                 // 방 입장 성공 응답
                 {
-                    S_EnterRoomReq sendData = new S_EnterRoomReq();
+                    PKTResRoomEnter sendData = new PKTResRoomEnter();
                     sendData.UserId = user.Id;
                     sendData.RoomNumber = bodyData.RoomNumber;
-                    var sendPacket = MemoryPackSerializer.Serialize<S_EnterRoomReq>(sendData);
-                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_EnterRoomReq);
+                    var sendPacket = MemoryPackSerializer.Serialize<PKTResRoomEnter>(sendData);
+                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResRoomEnter);
                     NotifyRoomUsers(sendPacket, room);
                 }
 
@@ -189,10 +190,10 @@ namespace GameServer
 
                 // 방 퇴장 성공 응답
                 {
-                    S_LeaveRoomReq sendData = new S_LeaveRoomReq();
+                    PKTResRoomLeave sendData = new PKTResRoomLeave();
                     sendData.UserId = user.Id;
                     var sendPacket = MemoryPackSerializer.Serialize(sendData);
-                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_LeaveRoomReq);
+                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResRoomLeave);
                     NotifyRoomUsers(sendPacket, room);
 
                     // 방을 나간 유저에게는 따로 보낸다.
@@ -218,7 +219,7 @@ namespace GameServer
 
             try
             {
-                var bodyData = MemoryPackSerializer.Deserialize<C_RoomChat>(packet.Data);
+                var bodyData = MemoryPackSerializer.Deserialize<PKTReqRoomChat>(packet.Data);
 
                 if (bodyData == null)
                 {
@@ -253,11 +254,11 @@ namespace GameServer
 
                 // 채팅 메시지 전달
                 {
-                    S_RoomChat sendData = new S_RoomChat();
+                    PKTResRoomChat sendData = new PKTResRoomChat();
                     sendData.UserId = user.Id;
                     sendData.ChatMsg = bodyData.ChatMsg;
                     var sendPacket = MemoryPackSerializer.Serialize(sendData);
-                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_RoomChat);
+                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResRoomChat);
                     NotifyRoomUsers(sendPacket, room);
                 }
 
@@ -310,7 +311,7 @@ namespace GameServer
 
                 // 준비상태 변경 응답
                 {
-                    S_ReadyOmok sendData = new S_ReadyOmok();
+                    PKTResReadyOmok sendData = new PKTResReadyOmok();
                     sendData.UserId = user.Id;
 
                     if (result == 0)
@@ -324,7 +325,7 @@ namespace GameServer
                     }
 
                     var sendPacket = MemoryPackSerializer.Serialize(sendData);
-                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_ReadyOmok);
+                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResReadyOmok);
                     NotifyRoomUsers(sendPacket, room);
 
                 }
@@ -350,7 +351,7 @@ namespace GameServer
 
             try
             {
-                var bodyData = MemoryPackSerializer.Deserialize<C_PutMok>(packet.Data);
+                var bodyData = MemoryPackSerializer.Deserialize<PKTReqPutMok>(packet.Data);
 
                 if (bodyData == null)
                 {
@@ -377,12 +378,12 @@ namespace GameServer
 
                 // 돌을 두었다는 완료 패킷 전송
                 {
-                    S_PutMok sendData = new S_PutMok();
+                    PKTResPutMok sendData = new PKTResPutMok();
                     sendData.UserId = user.Id;
                     sendData.PosX = bodyData.PosX;
                     sendData.PosY = bodyData.PosY;
                     var sendPacket = MemoryPackSerializer.Serialize(sendData);
-                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_PutMok);
+                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResPutMok);
                     NotifyRoomUsers(sendPacket, room);
                 }
 
@@ -390,10 +391,10 @@ namespace GameServer
                 // 승부가 났다면 게임 종료 패킷도 전송
                 if (room.GetOmokGame().CheckWinner(bodyData.PosX, bodyData.PosY)) 
                 {
-                    S_EndOmok sendData = new S_EndOmok();
+                    PKTNtfEndOmok sendData = new PKTNtfEndOmok();
                     sendData.WinUserId = user.Id;
                     var sendPacket = MemoryPackSerializer.Serialize(sendData);
-                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKET_ID.S_EndOmok);
+                    MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTNtfEndOmok);
                     NotifyRoomUsers(sendPacket, room);
                 }
                 
