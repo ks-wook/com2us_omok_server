@@ -10,7 +10,7 @@ namespace GameServer
     {
         None = 0,
 
-        // Network 20001 ~
+        // Auth 20001 ~
         LoginFail = 20001,
         InvaildToken = 20002,
         AlreadyExsistUser = 20003,
@@ -21,8 +21,9 @@ namespace GameServer
         NullRoom = 21001,
         ExceedMaxRoomUser = 21002,
         AlreadyExsistRoomUser = 21003,
-        LeaveRoomFail = 21004,
+        FailLeaveRoom = 21004,
         FailRemoveRoomUser = 21005,
+        FailEnterRoom = 21006,
 
         // User 22001 ~
         NullUser = 22001,
@@ -32,6 +33,7 @@ namespace GameServer
         // OmokGame 23001 ~
         PutMokFail = 23001,
         FailReadyOmok = 23002,
+
 
     }
 }

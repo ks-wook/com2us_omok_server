@@ -1,4 +1,5 @@
 ﻿using GameServer.Session;
+using MemoryPack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,12 +78,14 @@ namespace GameServer
         
 
         // 룸에서 방의 모든 사람에게 패킷 전송
-        // 유저가 강제종료 시 남아있는 유저에게 패킷을 전송할때만 사용
-        public void NotifyRoomUsersFromRoom(Func<string, byte[], bool> NetSendFunc, byte[] sendData)
+        public void NotifyRoomUsers<T>(Func<string, byte[], bool> NetSendFunc, T sendData, PACKETID packetId)
         {
-            foreach(var roomUser in _roomUsers)
+            var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
+            MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
+
+            foreach (var roomUser in _roomUsers)
             {
-                NetSendFunc(roomUser.RoomSessionID, sendData);
+                NetSendFunc(roomUser.RoomSessionID, sendPacket);
             }
         }
 
@@ -133,10 +136,31 @@ namespace GameServer
 
 
         // 오목 게임 시작
-        public void OmokGameStart(string blackUserId, string whiteUserId)
+        public void OmokGameStart(Func<string, byte[], bool> NetSendFunc)
         {
-            _omokGame.StartGame(blackUserId, whiteUserId);
-            Console.WriteLine($"RoomNumber: {RoomNumber}, 흑돌: {blackUserId}, 백돌: {whiteUserId} 게임 시작");
+            // 선후공 결정
+            int blackUser = RandomNumberGenerator.GetInt32(2);
+            PKTNtfStartOmok sendData = new PKTNtfStartOmok();
+
+            if (blackUser == 0)
+            {
+                sendData.BlackUserId = _roomUsers[0].UserId;
+                sendData.WhiteUserId = _roomUsers[1].UserId;
+            }
+            else
+            {
+                sendData.BlackUserId = _roomUsers[1].UserId;
+                sendData.WhiteUserId = _roomUsers[0].UserId;
+            }
+
+            _omokGame.StartGame(sendData.BlackUserId, sendData.WhiteUserId);
+            Console.WriteLine
+                ($"RoomNumber: {RoomNumber}, 흑돌: {sendData.BlackUserId}, 백돌: {sendData.WhiteUserId} 게임 시작");
+
+
+            // 모든 유저에게 오목 게임 시작 패킷 전송
+            NotifyRoomUsers<PKTNtfStartOmok>(NetSendFunc, sendData, PACKETID.PKTNtfStartOmok);
+
         }
 
     }

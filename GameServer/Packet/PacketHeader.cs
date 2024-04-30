@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameServer.Packet;
+namespace GameServer;
 
 
 
@@ -57,7 +57,7 @@ public struct MemoryPackPacketHeadInfo
         pos += 1;
     }
 
-    public static void Write(byte[] packetData, PACKET_ID packetId, byte type = 0)
+    public static void Write(byte[] packetData, PACKETID packetId, byte type = 0)
     {
         var pos = PacketHeaderMemoryPackStartPos;
 
