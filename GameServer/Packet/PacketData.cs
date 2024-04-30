@@ -113,7 +113,7 @@ public partial class PKTReqReadyOmok : PkHeader // 오목 플레이 준비 완�
 }
 
 [MemoryPackable]
-public partial class PKTResReadyOmok : PkHeader // 오목 플레이 준비 완료 요청 응답
+public partial class PKTResReadyOmok : PacketResult // 오목 플레이 준비 완료 요청 응답
 {
     public string UserId { get; set; } = string.Empty; // 준비 상태가 변경된 유저의 ID
     public bool IsReady { get; set; } // 변경된 준비 완료 여부
@@ -144,7 +144,7 @@ public partial class PKTReqPutMok : PkHeader // 돌 두기 요청
 }
 
 [MemoryPackable]
-public partial class PKTResPutMok : PkHeader // 돌 두기 요청 응답
+public partial class PKTResPutMok : PacketResult // 돌 두기 요청 응답
 {
     public string UserId { get; set; } = string.Empty;
     public int PosX;
@@ -157,7 +157,7 @@ public partial class PKTResPutMok : PkHeader // 돌 두기 요청 응답
 
 
 [MemoryPackable]
-public partial class PKTNtfEndOmok : PkHeader // 게임 종료 통보 패킷
+public partial class PKTNtfEndOmok : PacketResult // 게임 종료 통보 패킷
 {
     public string WinUserId { get; set; } = string.Empty; // 승리한 유저 ID
 }

@@ -21,8 +21,9 @@ namespace GameServer
         NullRoom = 21001,
         ExceedMaxRoomUser = 21002,
         AlreadyExsistRoomUser = 21003,
-        LeaveRoomFail = 21004,
+        FailLeaveRoom = 21004,
         FailRemoveRoomUser = 21005,
+        FailEnterRoom = 21006,
 
         // User 22001 ~
         NullUser = 22001,

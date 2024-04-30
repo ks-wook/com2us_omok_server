@@ -149,12 +149,7 @@ namespace GameServer
                         // 방에 남아있는 유저에게도 접속 종료 패킷 전송
                         PKTResRoomLeave leaveRoomReq = new PKTResRoomLeave();
                         leaveRoomReq.UserId = user.Id;
-                        var sendPacket = MemoryPackSerializer.Serialize(leaveRoomReq);
-                        MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResRoomLeave);
-                        room.NotifyRoomUsersFromRoom(SendData, sendPacket);
-
-                        
-
+                        room.NotifyRoomUsers(SendData, leaveRoomReq, PACKETID.PKTResRoomLeave);
                     }
                 }
 

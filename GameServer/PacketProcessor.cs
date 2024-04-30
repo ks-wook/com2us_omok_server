@@ -11,8 +11,10 @@ namespace GameServer;
 public class PacketProcessor
 {
     Dictionary<int, Action<MemoryPackBinaryRequestInfo>>_packetHandlerMap = new Dictionary<int, Action<MemoryPackBinaryRequestInfo>>(); // 패킷의 ID와 패킷 핸들러를 같이 등록한다.
+    
     PacketHandlerAuth? _packetHandlerAuth;
     PacketHandlerRoom? _packetHandlerRoom;
+    PacketHandlerGame? _packetHandlerGame;
     
     System.Threading.Thread? _processThread = null; // 패킷 처리용 쓰레드 선언
 
@@ -58,12 +60,14 @@ public class PacketProcessor
         }
 
         // 여러 종류의 패킷 핸들러에 선언된 핸들러들을 패킷 프로세서의 핸들러에 최종 등록
-
         _packetHandlerAuth = new PacketHandlerAuth(_userManager);
         _packetHandlerAuth.RegisterPacketHandler(_packetHandlerMap);
 
         _packetHandlerRoom = new PacketHandlerRoom(_roomManager, _userManager);
         _packetHandlerRoom.RegisterPacketHandler(_packetHandlerMap);
+
+        _packetHandlerGame= new PacketHandlerGame(_roomManager, _userManager);
+        _packetHandlerGame.RegisterPacketHandler(_packetHandlerMap);
     }
 
 

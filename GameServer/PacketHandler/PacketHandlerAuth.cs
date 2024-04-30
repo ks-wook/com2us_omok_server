@@ -81,19 +81,25 @@ public class PacketHandlerAuth : PacketHandler
     {
         var sessionId = packet.SessionID;
 
-        PKTReqLogin? bodyData = MemoryPackSerializer.Deserialize<PKTReqLogin>(packet.Data);
-        if (bodyData == null)
+
+        (ErrorCode result, PKTReqLogin? bodyData) = DeserializePacket<PKTReqLogin>(packet.Data);
+
+        if (result != ErrorCode.None || bodyData == null)
         {
-            Console.WriteLine($"[C_LoginReqHander] ErrorCode: {ErrorCode.NullPacket}");
             SendLoginFail(sessionId);
             return;
         }
 
-        ErrorCode result = CheckAuthToken(bodyData, sessionId);
+
+
+        result = CheckAuthToken(bodyData, sessionId);
+
         if(result != ErrorCode.None)
         {
+            SendLoginFail(sessionId);
             return;
         }
+
 
 
         // 토큰 인증 성공, 유저 로그인
@@ -127,7 +133,6 @@ public class PacketHandlerAuth : PacketHandler
         catch (Exception ex)
         {
             Console.WriteLine($"[CheckAuthToken] ErrorCode: {ErrorCode.InvaildToken}, {ex.ToString()}");
-            SendLoginFail(sessionId);
             return ErrorCode.InvaildToken;
         }
     }
