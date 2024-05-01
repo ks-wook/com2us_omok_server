@@ -17,6 +17,7 @@ namespace GameServer
     {
         SuperSocket.SocketBase.Config.IServerConfig _serverConfig;
         PacketProcessor _mainPacketProcessor = new PacketProcessor();
+        MysqlProcessor _mysqlProcessor = new MysqlProcessor();
         MainServerOption _mainServerOption;
 
 
@@ -58,6 +59,7 @@ namespace GameServer
             Stop();
 
             _mainPacketProcessor.Destory();
+            _mysqlProcessor.Destory();
         }
 
         public void CreateAndStart()
@@ -98,8 +100,11 @@ namespace GameServer
 
             PacketHandler.NetSendFunc = SendData;
 
-            _mainPacketProcessor = new PacketProcessor();
-            _mainPacketProcessor.CreateAndStart(_roomManager, _userManager); // 프로세서 초기화
+            // 메인 패킷 프로세서
+            _mainPacketProcessor.CreateAndStart(_roomManager, _userManager, _mysqlProcessor); // 프로세서 초기화
+
+            // mysql 프로세서
+            _mysqlProcessor.CreateAndStart(_roomManager, _userManager, _mainServerOption.MysqlConnectionStr, _mainPacketProcessor); // 프로세서 초기화
         }
 
 
@@ -163,7 +168,7 @@ namespace GameServer
         void OnPacketReceived(ClientSession clientSession, MemoryPackBinaryRequestInfo requestInfo)
         {
             Console.WriteLine($"세션 번호 {clientSession.SessionID} 받은 데이터 크기: {requestInfo.Body.Length}, ThreadId: {Thread.CurrentThread.ManagedThreadId}");
-
+            
             requestInfo.SessionID = clientSession.SessionID;
             _mainPacketProcessor.Insert(requestInfo);
         }

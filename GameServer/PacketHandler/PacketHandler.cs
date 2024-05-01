@@ -1,4 +1,5 @@
-﻿using GameServer.Packet;
+﻿using GameServer.DB.Mysql;
+using GameServer.Packet;
 using MemoryPack;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace GameServer;
 
-public abstract class PacketHandler
+public class PacketHandler
 {
     public static Func<string, byte[], bool> NetSendFunc;
 
@@ -30,6 +31,9 @@ public abstract class PacketHandler
         return (ErrorCode.None, bodyData);
     }
 
+
+
+
     // 일반 패킷 전송
     public void SendPacket<T>(T sendData, PACKETID packetId, string sessionId)
     {
@@ -37,6 +41,20 @@ public abstract class PacketHandler
         MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
         NetSendFunc(sessionId, sendPacket);
     }
+
+    // DB완료 패킷 전송
+    public void SendDBPacket<T>(T sendData, MQDATAID packetId, string sessionId, PacketProcessor packetProcessor)
+    {
+        var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
+        MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
+        MemoryPackBinaryRequestInfo memoryPackReq = new MemoryPackBinaryRequestInfo(sendPacket);
+        memoryPackReq.SessionID = sessionId;
+        packetProcessor.Insert(memoryPackReq);
+    }
+
+
+
+
 
     // 실패 패킷 전송
     public void SendFailPacket<T>(PACKETID packetId, string sessionId, ErrorCode error) where T : PacketResult, new()
@@ -49,7 +67,35 @@ public abstract class PacketHandler
         NetSendFunc(sessionId, sendPacket);
     }
 
+    // DB 실패 패킷 전송
+    public void SendDBFailPacket<T>(MQDATAID packetId, PacketProcessor packetProcessor, ErrorCode error) where T : PacketResult, new()
+    {
+        T sendData = new T();
+        sendData.Result = error;
 
-    public abstract void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap);
+        var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
+        MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
+        packetProcessor.Insert(new MemoryPackBinaryRequestInfo(sendPacket));
+    }
+
+    public void SendFailPacket<T>(PACKETID packetId, List<string> sessionIds, ErrorCode error) where T : PacketResult, new()
+    {
+        T sendData = new T();
+        sendData.Result = error;
+
+        var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
+        MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
+
+
+        foreach (var sessionId in sessionIds)
+        {
+            NetSendFunc(sessionId, sendPacket);
+        }
+    }
+
+
+
+    public virtual void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap) { }
+    public virtual void RegisterPacketHandler(Dictionary<int, Func<byte[], Task>> packetHandlerMap) { }
     
 }

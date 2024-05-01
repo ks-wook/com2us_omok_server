@@ -35,5 +35,14 @@ namespace GameServer
         FailReadyOmok = 23002,
 
 
+
+
+
+
+        // ------- DB --------
+        // GameResult 50001 ~
+        FailInsertGameResult = 50001,
+
+
     }
 }

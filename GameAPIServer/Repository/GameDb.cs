@@ -17,6 +17,8 @@ public class GameDb : IGameDb
     SqlKata.Compilers.MySqlCompiler _dbCompiler;
     QueryFactory _queryFactory;
 
+    public static string gameDBConnectionStr = string.Empty;
+
     public GameDb(ILogger<GameDb> logger, IOptions<DbConfig> dbConfig)
     {
         _dbConfig = dbConfig;
@@ -32,8 +34,8 @@ public class GameDb : IGameDb
     // create connection with db
     private ErrorCode DbConnect()
     {
-        string? connectionStr = _dbConfig.Value.GameDb;
-        if (connectionStr == null) // db 연결문자열 가져오기 실패
+        gameDBConnectionStr = _dbConfig.Value.GameDb;
+        if (gameDBConnectionStr == null) // db 연결문자열 가져오기 실패
         {
             _logger.ZLogError(
                 $"[DbConnect] Null Db Connection String");
@@ -41,7 +43,7 @@ public class GameDb : IGameDb
             return ErrorCode.NullAccountDbConnectionStr;
         }
 
-        _dbConnector = new MySqlConnection(connectionStr);
+        _dbConnector = new MySqlConnection(gameDBConnectionStr);
         _dbConnector.Open();
 
         return ErrorCode.None;
