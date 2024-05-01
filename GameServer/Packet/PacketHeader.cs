@@ -1,4 +1,5 @@
 ﻿using GameServer.Binary;
+using GameServer.DB.Mysql;
 using MemoryPack;
 using System;
 using System.Collections.Generic;
@@ -35,22 +36,22 @@ public struct MemoryPackPacketHeadInfo
 
     public static ushort GetTotalSize(byte[] data, int startPos)
     {
-        return PtrBinaryReader.UInt16(data, startPos + PacketHeaderMemoryPackStartPos);
+        return PtrBinaryRead.UInt16(data, startPos + PacketHeaderMemoryPackStartPos);
     }
 
     public static void WritePacketId(byte[] data, ushort packetId)
     {
-        PtrBinaryWriter.UInt16(data, PacketHeaderMemoryPackStartPos + 2, packetId);
+        PtrBinaryWrite.UInt16(data, PacketHeaderMemoryPackStartPos + 2, packetId);
     }
 
     public void Read(byte[] headerData)
     {
         var pos = PacketHeaderMemoryPackStartPos;
 
-        TotalSize = PtrBinaryReader.UInt16(headerData, pos);
+        TotalSize = PtrBinaryRead.UInt16(headerData, pos);
         pos += 2;
 
-        Id = PtrBinaryReader.UInt16(headerData, pos);
+        Id = PtrBinaryRead.UInt16(headerData, pos);
         pos += 2;
 
         Type = headerData[pos];
@@ -61,14 +62,42 @@ public struct MemoryPackPacketHeadInfo
     {
         var pos = PacketHeaderMemoryPackStartPos;
 
-        PtrBinaryWriter.UInt16(packetData, pos, (ushort)packetData.Length);
+        PtrBinaryWrite.UInt16(packetData, pos, (ushort)packetData.Length);
         pos += 2;
 
-        PtrBinaryWriter.UInt16(packetData, pos, (ushort)packetId);
+        PtrBinaryWrite.UInt16(packetData, pos, (ushort)packetId);
         pos += 2;
 
         packetData[pos] = type;
     }
+
+    public static void Write(byte[] packetData, GameServer.DB.Mysql.MQDATAID packetId, byte type = 0)
+    {
+        var pos = PacketHeaderMemoryPackStartPos;
+
+        PtrBinaryWrite.UInt16(packetData, pos, (ushort)packetData.Length);
+        pos += 2;
+
+        PtrBinaryWrite.UInt16(packetData, pos, (ushort)packetId);
+        pos += 2;
+
+        packetData[pos] = type;
+    }
+
+    public static void Write(byte[] packetData, GameServer.DB.Redis.MQDATAID packetId, byte type = 0)
+    {
+        var pos = PacketHeaderMemoryPackStartPos;
+
+        PtrBinaryWrite.UInt16(packetData, pos, (ushort)packetData.Length);
+        pos += 2;
+
+        PtrBinaryWrite.UInt16(packetData, pos, (ushort)packetId);
+        pos += 2;
+
+        packetData[pos] = type;
+    }
+
+
 
     public void DebugConsolOutHeaderInfo()
     {

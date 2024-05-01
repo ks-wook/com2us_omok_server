@@ -18,30 +18,10 @@ public partial class PacketResult : PkHeader // 결과가 포함된 패킷
 
 
 
-
-[MemoryPackable]
-public partial class C_Test : PkHeader // 테스트용 패킷
-{
-    public string Msg { get; set; } = string.Empty;
-}
-
-
-
-[MemoryPackable]
-public partial class S_Test : PacketResult // 테스트 요청 응답
-{
-    public string Msg { get; set; } = string.Empty;
-}
-
-
-
-
-
-
 [MemoryPackable]
 public partial class PKTReqLogin : PkHeader // 게임 서버 로그인 요청
 {
-    public string UserId { get; set; } = string.Empty;
+    public string UserId { get; set; } = string.Empty; // 유저 아이디 = 계정 아이디
     public string AuthToken { get; set; } = string.Empty;
 }
 

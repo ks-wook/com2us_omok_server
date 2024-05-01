@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameServer.Binary
 {
-    public class PtrBinaryReader
+    public class PtrBinaryRead
     {
         public static bool Boolean(byte[] bytes, int offset)
         {
@@ -198,11 +198,11 @@ namespace GameServer.Binary
 
         public static char Char(byte[] bytes, int offset)
         {
-            return (char)PtrBinaryReader.UInt16(bytes, offset);
+            return (char)PtrBinaryRead.UInt16(bytes, offset);
         }
         public static char Char(ReadOnlySpan<byte> bytes, int offset)
         {
-            return (char)PtrBinaryReader.UInt16(bytes, offset);
+            return (char)PtrBinaryRead.UInt16(bytes, offset);
         }
 
         public static string String(byte[] bytes, int offset, int count)

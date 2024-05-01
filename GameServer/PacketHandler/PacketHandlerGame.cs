@@ -1,4 +1,6 @@
-﻿using GameServer.Packet;
+﻿using GameServer.DB.Mysql;
+using GameServer.Packet;
+using MemoryPack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,26 +11,35 @@ namespace GameServer
 {
     public class PacketHandlerGame : PacketHandler
     {
+        MysqlProcessor _mysqlProcessor;
+
         RoomManager _roomManager;
         UserManager _userManager;
 
-        public PacketHandlerGame(RoomManager? roomManager, UserManager? userManger)
+        public PacketHandlerGame(RoomManager? roomManager, UserManager? userManger, MysqlProcessor mysqlProcessor)
         {
-            if (roomManager == null || userManger == null)
+            if (roomManager == null || userManger == null || mysqlProcessor == null)
             {
-                Console.WriteLine("[RoomPacketHandler.Init] roomList null");
+                Console.WriteLine("[RoomPacketHandler.Init] Fail Create PacketHandlerGame");
                 throw new NullReferenceException();
             }
 
             this._roomManager = roomManager;
             this._userManager = userManger;
+            this._mysqlProcessor = mysqlProcessor;
         }
 
 
         public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap)
         {
+            // Client req
             packetHandlerMap.Add((int)PACKETID.PKTReqReadyOmok, PKTReqReadyOmokHandler);
             packetHandlerMap.Add((int)PACKETID.PKTReqPutMok, PKTReqPutMokHandler);
+
+
+            // DB res
+            packetHandlerMap.Add((int)MQDATAID.MQ_RES_SAVE_GAME_RESULT, MqResSaveGameResultHandler);
+
         }
 
         // 오목 준비 완료 요청
@@ -68,6 +79,28 @@ namespace GameServer
                 SendFailPacket<PKTResPutMok>(PACKETID.PKTResPutMok, sessionId, result);
             }
         }
+
+
+        // 게임 결과 DB 저장 완료 응답
+        public void MqResSaveGameResultHandler(MemoryPackBinaryRequestInfo packet)
+        {
+            var sessionId = packet.SessionID;
+
+            (ErrorCode result, MQResSaveGameResult? bodyData) = DeserializePacket<MQResSaveGameResult>(packet.Data);
+            if (result != ErrorCode.None || bodyData == null)
+            {
+                Console.WriteLine("DB 패킷 수신 실패");
+                return;
+            }
+
+            NotifyEndGame(bodyData);
+        }
+
+
+
+
+
+
 
         public ErrorCode ReadyOmok(PKTReqReadyOmok packet, string sessionId)
         {
@@ -133,20 +166,75 @@ namespace GameServer
             // 승부가 났는지 확인
             if (room.GetOmokGame().CheckWinner(packet.PosX, packet.PosY))
             {
-                // TODO 게임 종료 패킷을 바로 보내는 것이 아니라 DB에 게임 결과를 저장한 후 저장이 완료된 시점에 보낸다.
+                // TODO 룸의 게임 타이머 종료
 
 
 
 
 
 
-                PKTNtfEndOmok endGameData = new PKTNtfEndOmok();
-                endGameData.WinUserId = user.Id;
-                room.NotifyRoomUsers<PKTNtfEndOmok>(NetSendFunc, endGameData, PACKETID.PKTNtfEndOmok);
+
+
+
+                // 종료된 게임을 db에 저장한다.
+                MQReqSaveGameResult sendDBData = new MQReqSaveGameResult();
+                foreach (RoomUser roomUser in room.GetRoomUserList())
+                {
+                    sendDBData.sessionIds.Add(roomUser.RoomSessionID);
+                }
+
+                sendDBData.BlackUserId = room.GetOmokGame().blackUserId;
+                sendDBData.WhiteUserId = room.GetOmokGame().whiteUserId;
+                sendDBData.WinUserId = room.GetOmokGame().winUserId;
+
+                // mysql processor로 전송
+                SendMysqlReqPacket<MQReqSaveGameResult>(sendDBData, MQDATAID.MQ_REQ_SAVE_GAME_RESULT, sessionId, _mysqlProcessor);
+
+                return ErrorCode.None;
             }
+
+
+            // TODO 룸의 게임 타이머 재시작
+
+
+
+
+
+
+
+
+
 
             return ErrorCode.None;
         }
+
+
+        // 게임 종료 통보 전송
+        public void NotifyEndGame(MQResSaveGameResult packet)
+        {
+            PKTNtfEndOmok endGameData = new PKTNtfEndOmok();
+            endGameData.WinUserId = packet.WinUserId;
+
+            User? user = _userManager.GetUserByUID(packet.WinUserId);
+            if (user == null)
+            {
+                SendFailPacket<PKTNtfEndOmok>(PACKETID.PKTNtfEndOmok, packet.sessionIds, ErrorCode.NullUser);
+                return;
+            }
+
+            Room? room = _roomManager.FindRoomByRoomNumber(user.RoomNumber);
+            if (room == null)
+            {
+                SendFailPacket<PKTNtfEndOmok>(PACKETID.PKTNtfEndOmok, packet.sessionIds, ErrorCode.NullRoom);
+                return;
+            }
+
+
+            room.NotifyRoomUsers<PKTNtfEndOmok>(NetSendFunc, endGameData, PACKETID.PKTNtfEndOmok);
+        }
+
+
+
 
         public (ErrorCode, User?, Room?) GetUserAndRoomBySessionId(string sessionId)
         {

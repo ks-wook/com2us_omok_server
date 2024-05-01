@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameServer.Binary
 {
-    public class PtrBinaryWriter
+    public class PtrBinaryWrite
     {
         public static void Boolean(byte[] bytes, int offset, bool value)
         {

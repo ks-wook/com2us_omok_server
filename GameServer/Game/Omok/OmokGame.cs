@@ -19,8 +19,9 @@ public class OmokGame
     StoneType[,] board;
     public int BoardSize = 19;
 
-    string _blackUserId = string.Empty;
-    string _whiteUserId = string.Empty;
+    public string winUserId = string.Empty; // white or black user id
+    public string blackUserId = string.Empty;
+    public string whiteUserId = string.Empty;
 
     public OmokGame()
     {
@@ -30,18 +31,18 @@ public class OmokGame
     public void StartGame(string blackUserId, string whiteUserId)
     {
         ClearBoard();
-        this._blackUserId = blackUserId;
-        this._whiteUserId = whiteUserId;
+        this.blackUserId = blackUserId;
+        this.whiteUserId = whiteUserId;
     }
 
     // 돌을 둔 위치를 오목판에 반영
     public void PlaceStone(int row, int col, string userId)
     {
-        if(userId == _blackUserId)
+        if(userId == blackUserId)
         {
             board[row, col] = StoneType.Black;
         }
-        else if(userId == _whiteUserId)
+        else if(userId == whiteUserId)
         {
             board[row, col] = StoneType.White;
         }
@@ -51,6 +52,11 @@ public class OmokGame
     public bool CheckWinner(int lastRow, int lastCol)
     {
         StoneType stone = board[lastRow, lastCol];
+
+        // TEST -------
+        setWinner(stone);
+        return true;
+        // ------------
 
         // 가로 체크
         int count = 1;
@@ -64,6 +70,7 @@ public class OmokGame
         }
         if (count >= 5)
         {
+            setWinner(stone);
             return true;
         }
 
@@ -79,6 +86,7 @@ public class OmokGame
         }
         if (count >= 5)
         {
+            setWinner(stone);
             return true;
         }
 
@@ -94,6 +102,7 @@ public class OmokGame
         }
         if (count >= 5)
         {
+            setWinner(stone);
             return true;
         }
 
@@ -109,10 +118,23 @@ public class OmokGame
         }
         if (count >= 5)
         {
+            setWinner(stone);
             return true;
         }
 
         return false;
+    }
+
+    public void setWinner(StoneType stone)
+    {
+        if(stone == StoneType.Black)
+        {
+            winUserId = blackUserId;
+        }
+        else if(stone == StoneType.White)
+        {
+            winUserId = whiteUserId;
+        }
     }
 
     // 오목판 초기화

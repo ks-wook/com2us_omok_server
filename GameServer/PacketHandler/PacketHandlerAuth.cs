@@ -1,4 +1,5 @@
-﻿using GameServer.Packet;
+﻿using GameServer.DB.Redis;
+using GameServer.Packet;
 using MemoryPack;
 using System;
 using System.Collections.Generic;
@@ -13,71 +14,35 @@ public class PacketHandlerAuth : PacketHandler
 {
     UserManager _userManager;
 
-    public PacketHandlerAuth(UserManager? userManager)
+    RedisProcessor _redisProcessor;
+
+    public PacketHandlerAuth(UserManager? userManager, RedisProcessor? redisProcessor)
     {
-        if (userManager == null)
+        if (userManager == null || redisProcessor == null)
         {
             Console.WriteLine("[RoomPacketHandler.Init] roomList null");
             throw new NullReferenceException();
         }
 
-        this._userManager = userManager;
+        _userManager = userManager;
+        _redisProcessor = redisProcessor;
     }
 
     public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap)
     {
-        // 테스트 패킷 핸들러 등록
-        packetHandlerMap.Add((int)PACKETID.C_Test, OnRecvTestPacket);
+        // 클라이언트 요청
+        packetHandlerMap.Add((int)PACKETID.PKTReqLogin, PKTReqLoginHandler);
 
 
 
-        packetHandlerMap.Add((int)PACKETID.PKTReqLogin, C_LoginReqHander);
 
-    }
-
-
-    // TEST 테스트 패킷 핸들러
-    public void OnRecvTestPacket(MemoryPackBinaryRequestInfo packet)
-    {
-        var sessionId = packet.SessionID;
-
-        // 테스트 패킷에 대한 로그 작성
-        try
-        {
-            var bodyData = MemoryPackSerializer.Deserialize<C_Test>(packet.Data);
-
-            if (bodyData != null)
-            {
-                Console.WriteLine("패킷 수신 성공, MSG: " + bodyData.Msg);
-
-
-                // 테스트 패킷 재전송
-                var testPacket = new S_Test();
-                testPacket.Msg = "Hello Client";
-
-                var sendBodyData = MemoryPackSerializer.Serialize(testPacket);
-                MemoryPackPacketHeadInfo.Write(sendBodyData, PACKETID.S_Test);
-                NetSendFunc(sessionId, sendBodyData);
-
-
-            }
-            else
-            {
-                Console.WriteLine("패킷 수신 실패");
-            }
-
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[OnRecvTestPacket] Packet Error " + ex.ToString());
-        }
+        // Redis 응답
+        packetHandlerMap.Add((int)MQDATAID.MQ_RES_VERIFY_TOKEN, MQResVerifyTokenHandler);
     }
 
 
 
-
-
-    public void C_LoginReqHander(MemoryPackBinaryRequestInfo packet)
+    public void PKTReqLoginHandler(MemoryPackBinaryRequestInfo packet)
     {
         var sessionId = packet.SessionID;
 
@@ -100,33 +65,40 @@ public class PacketHandlerAuth : PacketHandler
             return;
         }
 
+    }
+
+    public void MQResVerifyTokenHandler(MemoryPackBinaryRequestInfo packet)
+    {
+        var sessionId = packet.SessionID;
 
 
-        // 토큰 인증 성공, 유저 로그인
+        (ErrorCode result, MQResVerifyToken? bodyData) = DeserializePacket<MQResVerifyToken>(packet.Data);
+
+        if (result != ErrorCode.None || bodyData == null)
+        {
+            SendLoginFail(sessionId);
+            return;
+        }
+
+        if(bodyData.Result != ErrorCode.None)
+        {
+            SendLoginFail(sessionId);
+            return;
+        }
+
         Login(bodyData, sessionId);
     }
 
 
-    public ErrorCode CheckAuthToken(PKTReqLogin? bodyData, string sessionId)
+    public ErrorCode CheckAuthToken(PKTReqLogin bodyData, string sessionId)
     {
-        
         try
         {
-            // TODO 레디스에서 토큰 검증
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            // 레디스에서 토큰 검증
+            MQReqVerifyToken sendData = new MQReqVerifyToken();
+            sendData.AccountId = Int64.Parse(bodyData.UserId);
+            sendData.Token = bodyData.AuthToken;
+            SendRedisReqPacket<MQReqVerifyToken>(sendData, MQDATAID.MQ_REQ_VERIFY_TOKEN, sessionId, _redisProcessor);
 
             return ErrorCode.None;
         }
@@ -138,7 +110,7 @@ public class PacketHandlerAuth : PacketHandler
     }
 
 
-    public ErrorCode Login(PKTReqLogin packet, string sessionId)
+    public ErrorCode Login(MQResVerifyToken packet, string sessionId)
     {
         try
         {
@@ -147,7 +119,7 @@ public class PacketHandlerAuth : PacketHandler
 
             if (result != ErrorCode.None)
             {
-                Console.WriteLine($"[C_LoginReqHander] ErrorCode: {result}");
+                Console.WriteLine($"[Login] ErrorCode: {result}");
                 return result;
             }
 

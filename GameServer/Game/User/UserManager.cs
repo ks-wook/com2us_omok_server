@@ -70,7 +70,7 @@ namespace GameServer
 
         public User? GetUserByUID(string uid)
         {
-            return users.Find(u => uid == u.SessionId);
+            return users.Find(u => uid == u.Id);
         }
 
 
