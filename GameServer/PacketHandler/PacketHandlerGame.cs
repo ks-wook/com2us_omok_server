@@ -166,6 +166,16 @@ namespace GameServer
             // 승부가 났는지 확인
             if (room.GetOmokGame().CheckWinner(packet.PosX, packet.PosY))
             {
+                // TODO 룸의 게임 타이머 종료
+
+
+
+
+
+
+
+
+
                 // 종료된 게임을 db에 저장한다.
                 MQReqSaveGameResult sendDBData = new MQReqSaveGameResult();
                 foreach (RoomUser roomUser in room.GetRoomUserList())
@@ -173,23 +183,27 @@ namespace GameServer
                     sendDBData.sessionIds.Add(roomUser.RoomSessionID);
                 }
 
-
-
-
                 sendDBData.BlackUserId = room.GetOmokGame().blackUserId;
                 sendDBData.WhiteUserId = room.GetOmokGame().whiteUserId;
                 sendDBData.WinUserId = room.GetOmokGame().winUserId;
-                //var bytes = MemoryPackSerializer.Serialize<MQReqSaveGameResult>(sendDBData);
-                //MemoryPackPacketHeadInfo.Write(bytes, MQDATAID.MQ_REQ_SAVE_GAME_RESULT);
-                //MemoryPackBinaryRequestInfo sendDBPacket = new MemoryPackBinaryRequestInfo(bytes);
-                //sendDBPacket.SessionID = sessionId;
 
                 // mysql processor로 전송
                 SendMysqlReqPacket<MQReqSaveGameResult>(sendDBData, MQDATAID.MQ_REQ_SAVE_GAME_RESULT, sessionId, _mysqlProcessor);
 
-
-                // _mysqlProcessor.Insert(sendDBPacket);
+                return ErrorCode.None;
             }
+
+
+            // TODO 룸의 게임 타이머 재시작
+
+
+
+
+
+
+
+
+
 
             return ErrorCode.None;
         }

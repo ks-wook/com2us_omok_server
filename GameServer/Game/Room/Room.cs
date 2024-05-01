@@ -161,6 +161,17 @@ namespace GameServer
             // 모든 유저에게 오목 게임 시작 패킷 전송
             NotifyRoomUsers<PKTNtfStartOmok>(NetSendFunc, sendData, PACKETID.PKTNtfStartOmok);
 
+
+
+            // TODO 타이머 실행
+
+
+
+
+
+
+
+
         }
 
     }

@@ -65,10 +65,6 @@ public class PacketHandlerAuth : PacketHandler
             return;
         }
 
-
-
-        // 토큰 인증 성공, 유저 로그인
-        // Login(bodyData, sessionId);
     }
 
     public void MQResVerifyTokenHandler(MemoryPackBinaryRequestInfo packet)
@@ -84,6 +80,11 @@ public class PacketHandlerAuth : PacketHandler
             return;
         }
 
+        if(bodyData.Result != ErrorCode.None)
+        {
+            SendLoginFail(sessionId);
+            return;
+        }
 
         Login(bodyData, sessionId);
     }
@@ -118,7 +119,7 @@ public class PacketHandlerAuth : PacketHandler
 
             if (result != ErrorCode.None)
             {
-                Console.WriteLine($"[C_LoginReqHander] ErrorCode: {result}");
+                Console.WriteLine($"[Login] ErrorCode: {result}");
                 return result;
             }
 

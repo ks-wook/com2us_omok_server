@@ -55,7 +55,7 @@ public class PacketHandlerTokenVerify : PacketHandler
         if (result != ErrorCode.None || bodyData == null)
         {
             Console.WriteLine("토큰 검증 실패");
-            SendRedisFailPacket<MQResVerifyToken>(MQDATAID.MQ_RES_VERIFY_TOKEN, _packetProcessor, result);
+            SendRedisFailPacket<MQResVerifyToken>(MQDATAID.MQ_RES_VERIFY_TOKEN, _packetProcessor, ErrorCode.LoginFail);
             return;
         }
 
@@ -64,7 +64,7 @@ public class PacketHandlerTokenVerify : PacketHandler
         if(result != ErrorCode.None || loginToken == null)
         {
             Console.WriteLine("토큰 검증 실패");
-            SendRedisFailPacket<MQResVerifyToken>(MQDATAID.MQ_RES_VERIFY_TOKEN, _packetProcessor, result);
+            SendRedisFailPacket<MQResVerifyToken>(MQDATAID.MQ_RES_VERIFY_TOKEN, _packetProcessor, ErrorCode.LoginFail);
             return;
         }
 
