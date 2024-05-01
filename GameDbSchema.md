@@ -132,7 +132,7 @@ CREATE TABLE game_result
     `white_user_id`             BIGINT         NOT NULL    COMMENT '백돌 유저 아이디',
     `win_user_id`               BIGINT         NOT NULL    COMMENT '승자 유저 아이디',
     `created_at`                DATETIME       NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '게임 종료 일시', 
-     PRIMARY KEY (uid, account_id)
+     PRIMARY KEY (game_result_id)
 );
 ```
 하이브 계정에 묶인 유저의 정보에 대해 저장하는 테이블.
