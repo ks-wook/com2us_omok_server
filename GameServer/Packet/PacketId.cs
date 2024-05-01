@@ -8,9 +8,6 @@
 
 public enum PACKETID : short
 {
-    C_Test = 101, // 테스트 요청 패킷
-    S_Test = 102, // 테스트 요청 읃답
-
     // Auth 1001 ~
     PKTReqLogin = 1001,
     PKTResLogin = 1002,

@@ -41,5 +41,6 @@ namespace GameServer
 
 
         public string MysqlConnectionStr = "Server=localhost;Port=3306;Database=gamedb;Uid=root;Pwd=0000;";
+        public string RedisConnectionStr = "localhost:6380";
     }
 }

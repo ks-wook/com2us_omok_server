@@ -24,13 +24,14 @@ public class PacketProcessor
 
 
     MysqlProcessor? _mysqlProcessor;
+    RedisProcessor? _redisProcessor;
 
     RoomManager? _roomManager;
     UserManager? _userManager;
 
 
 
-    public void CreateAndStart(RoomManager roomManager, UserManager userManager, MysqlProcessor mysqlProcessor)
+    public void CreateAndStart(RoomManager roomManager, UserManager userManager, MysqlProcessor mysqlProcessor, RedisProcessor redisProcessor)
     {
         if(roomManager == null || userManager == null || mysqlProcessor == null)
         {
@@ -42,6 +43,7 @@ public class PacketProcessor
         _userManager = userManager;
 
         _mysqlProcessor = mysqlProcessor;
+        _redisProcessor = redisProcessor;
 
         // 패킷 처리용 쓰레드를 생성하고, 패킷 처리를 도맡아한다.    
 
@@ -63,7 +65,7 @@ public class PacketProcessor
         }
 
         // 여러 종류의 패킷 핸들러에 선언된 핸들러들을 패킷 프로세서의 핸들러에 최종 등록
-        _packetHandlerAuth = new PacketHandlerAuth(_userManager);
+        _packetHandlerAuth = new PacketHandlerAuth(_userManager, _redisProcessor);
         _packetHandlerAuth.RegisterPacketHandler(_packetHandlerMap);
 
         _packetHandlerRoom = new PacketHandlerRoom(_roomManager, _userManager);

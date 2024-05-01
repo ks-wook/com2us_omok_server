@@ -13,7 +13,7 @@ namespace GameServer;
 public class MysqlProcessor
 {
 
-    Dictionary<int, Func<byte[], Task>> _packetHandlerMap = new Dictionary<int, Func<byte[], Task>>(); // 패킷의 ID와 패킷 핸들러를 같이 등록한다.
+    Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>> _packetHandlerMap = new Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>>(); // 패킷의 ID와 패킷 핸들러를 같이 등록한다.
 
     PacketHandlerGameResult? _packetHandlerGameResult;
 
@@ -21,10 +21,10 @@ public class MysqlProcessor
     System.Threading.Thread? _processThread = null; // 패킷 처리용 쓰레드 선언
     bool IsThreadRunning = false;
 
-    BufferBlock<byte[]> _mysqlRecvBuffer = new BufferBlock<byte[]>();
+    BufferBlock<MemoryPackBinaryRequestInfo> _mysqlRecvBuffer = new BufferBlock<MemoryPackBinaryRequestInfo>();
 
     // db 프로세스마다 고유한 db연결객체
-    MySqlConnection? _mysqlConnection;
+    MySqlConnection? _mysqlConnector;
 
     RoomManager? _roomManager;
     UserManager? _userManager;
@@ -44,7 +44,7 @@ public class MysqlProcessor
         _roomManager = roomManager;
         _userManager = userManager;
 
-        _mysqlConnection = new MySqlConnection(mysqlConnectionStr);
+        _mysqlConnector = new MySqlConnection(mysqlConnectionStr);
 
         _packetProcessor = packetProcessor; 
 
@@ -60,13 +60,13 @@ public class MysqlProcessor
     void RegisterPakcetHandler()
     {
         if (_roomManager == null || _userManager == null 
-            || _mysqlConnection == null || _packetProcessor == null)
+            || _mysqlConnector == null || _packetProcessor == null)
         {
             Console.WriteLine("mysql Processor 패킷 등록에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
-        _packetHandlerGameResult = new PacketHandlerGameResult(_roomManager, _userManager, _mysqlConnection, _packetProcessor);
+        _packetHandlerGameResult = new PacketHandlerGameResult(_roomManager, _userManager, _mysqlConnector, _packetProcessor);
         _packetHandlerGameResult.RegisterPacketHandler(_packetHandlerMap);
     }
 
@@ -78,7 +78,7 @@ public class MysqlProcessor
     }
 
 
-    public void Insert(byte[] data)
+    public void Insert(MemoryPackBinaryRequestInfo data)
     {
         _mysqlRecvBuffer.Post(data);
     }
@@ -92,7 +92,7 @@ public class MysqlProcessor
                 var packet = _mysqlRecvBuffer.Receive();
 
                 var header = new MemoryPackPacketHeadInfo();
-                header.Read(packet);
+                header.Read(packet.Data);
 
                 if (_packetHandlerMap.ContainsKey(header.Id))
                 {

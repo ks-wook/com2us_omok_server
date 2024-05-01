@@ -16,8 +16,11 @@ namespace GameServer
     public class MainServer : AppServer<ClientSession, MemoryPackBinaryRequestInfo>
     {
         SuperSocket.SocketBase.Config.IServerConfig _serverConfig;
+
         PacketProcessor _mainPacketProcessor = new PacketProcessor();
         MysqlProcessor _mysqlProcessor = new MysqlProcessor();
+        RedisProcessor _redisProcessor = new RedisProcessor();
+
         MainServerOption _mainServerOption;
 
 
@@ -60,6 +63,7 @@ namespace GameServer
 
             _mainPacketProcessor.Destory();
             _mysqlProcessor.Destory();
+            _redisProcessor.Destory();
         }
 
         public void CreateAndStart()
@@ -101,10 +105,13 @@ namespace GameServer
             PacketHandler.NetSendFunc = SendData;
 
             // 메인 패킷 프로세서
-            _mainPacketProcessor.CreateAndStart(_roomManager, _userManager, _mysqlProcessor); // 프로세서 초기화
+            _mainPacketProcessor.CreateAndStart(_roomManager, _userManager, _mysqlProcessor, _redisProcessor); // 프로세서 초기화
 
             // mysql 프로세서
             _mysqlProcessor.CreateAndStart(_roomManager, _userManager, _mainServerOption.MysqlConnectionStr, _mainPacketProcessor); // 프로세서 초기화
+
+            // redis 프로세서
+            _redisProcessor.CreateAndStart(_roomManager, _userManager, _mainServerOption.RedisConnectionStr, _mainPacketProcessor); // 프로세서 초기화
         }
 
 

@@ -36,9 +36,9 @@ public class PacketHandlerGameResult : PacketHandler
     }
 
 
-    public override void RegisterPacketHandler(Dictionary<int, Func<byte[], Task>> packetHandlerMap)
+    public override void RegisterPacketHandler(Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>> packetHandlerMap)
     {
-        packetHandlerMap.Add((int)MQDATAID.MQ_REQ_SQVE_GAME_RESULT, MqReqGameRecordHandler);
+        packetHandlerMap.Add((int)MQDATAID.MQ_REQ_SAVE_GAME_RESULT, MqReqGameRecordHandler);
     }
 
 
@@ -46,9 +46,9 @@ public class PacketHandlerGameResult : PacketHandler
 
 
     // 게임 결과 저장
-    public async Task MqReqGameRecordHandler(byte[] packet)
+    public async Task MqReqGameRecordHandler(MemoryPackBinaryRequestInfo packet)
     {
-        (ErrorCode result, MQReqSaveGameResult? bodyData) = DeserializePacket<MQReqSaveGameResult>(packet);
+        (ErrorCode result, MQReqSaveGameResult? bodyData) = DeserializePacket<MQReqSaveGameResult>(packet.Data);
 
         if(result != ErrorCode.None || bodyData == null)
         {
@@ -59,7 +59,7 @@ public class PacketHandlerGameResult : PacketHandler
         result = await InsertGameResult(bodyData);
         if(result != ErrorCode.None) 
         {
-            SendDBFailPacket<PKTNtfEndOmok>(MQDATAID.MQ_RES_SAVE_GAME_RESULT, _packetProcessor, ErrorCode.FailInsertGameResult);
+            SendMysqlFailPacket<PKTNtfEndOmok>(MQDATAID.MQ_RES_SAVE_GAME_RESULT, _packetProcessor, ErrorCode.FailInsertGameResult);
             Console.WriteLine("게임 데이터 저장 실패");
             return;
         }
@@ -103,7 +103,7 @@ public class PacketHandlerGameResult : PacketHandler
         User? user = _userManager.GetUserByUID(packet.WinUserId);
         if (user == null)
         {
-            SendDBFailPacket<MQResSaveGameResult>(MQDATAID.MQ_RES_SAVE_GAME_RESULT, _packetProcessor, ErrorCode.NullUser);
+            SendMysqlFailPacket<MQResSaveGameResult>(MQDATAID.MQ_RES_SAVE_GAME_RESULT, _packetProcessor, ErrorCode.NullUser);
             return;
         }
 
@@ -111,6 +111,6 @@ public class PacketHandlerGameResult : PacketHandler
         MQResSaveGameResult sendData = new MQResSaveGameResult();
         sendData.sessionIds = packet.sessionIds;
         sendData.WinUserId = packet.WinUserId;
-        SendDBPacket<MQResSaveGameResult>(sendData, MQDATAID.MQ_RES_SAVE_GAME_RESULT, user.SessionId, _packetProcessor);
+        SendMysqlResPacket<MQResSaveGameResult>(sendData, MQDATAID.MQ_RES_SAVE_GAME_RESULT, user.SessionId, _packetProcessor);
     }
 }

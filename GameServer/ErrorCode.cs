@@ -16,6 +16,7 @@ namespace GameServer
         AlreadyExsistUser = 20003,
         NullPacket = 20004,
         InvalidRequest = 20005,
+        TokenMismatch = 20006,
 
         // Room 21001 ~ 
         NullRoom = 21001,
@@ -39,10 +40,13 @@ namespace GameServer
 
 
 
-        // ------- DB --------
+        // ------- Mysql --------
         // GameResult 50001 ~
         FailInsertGameResult = 50001,
 
 
+
+        // ------- Redis --------
+        NullLoginToken = 60001,
     }
 }

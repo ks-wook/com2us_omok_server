@@ -174,14 +174,21 @@ namespace GameServer
                 }
 
 
+
+
                 sendDBData.BlackUserId = room.GetOmokGame().blackUserId;
                 sendDBData.WhiteUserId = room.GetOmokGame().whiteUserId;
                 sendDBData.WinUserId = room.GetOmokGame().winUserId;
-                var bytes = MemoryPackSerializer.Serialize<MQReqSaveGameResult>(sendDBData);
-                MemoryPackPacketHeadInfo.Write(bytes, MQDATAID.MQ_REQ_SQVE_GAME_RESULT);
-                
+                //var bytes = MemoryPackSerializer.Serialize<MQReqSaveGameResult>(sendDBData);
+                //MemoryPackPacketHeadInfo.Write(bytes, MQDATAID.MQ_REQ_SAVE_GAME_RESULT);
+                //MemoryPackBinaryRequestInfo sendDBPacket = new MemoryPackBinaryRequestInfo(bytes);
+                //sendDBPacket.SessionID = sessionId;
+
                 // mysql processor로 전송
-                _mysqlProcessor.Insert(bytes);
+                SendMysqlReqPacket<MQReqSaveGameResult>(sendDBData, MQDATAID.MQ_REQ_SAVE_GAME_RESULT, sessionId, _mysqlProcessor);
+
+
+                // _mysqlProcessor.Insert(sendDBPacket);
             }
 
             return ErrorCode.None;
