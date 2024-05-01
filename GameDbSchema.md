@@ -103,9 +103,9 @@ __create query__
 ```
 CREATE TABLE friend
 (
-    `uid`         BIGINT      NOT NULL    COMMENT '유저 아이디', 
-    `friend_uid`  BIGINT      NOT NULL    COMMENT '친구 유저아이디', 
-    `friend_yn`   TINYINT     NOT NULL    DEFAULT 0  COMMENT '친구요청 수락여부(친구상태 여부)', 
+    `uid`          BIGINT      NOT NULL    COMMENT '유저 아이디', 
+    `friend_uid`   BIGINT      NOT NULL    COMMENT '친구 유저아이디', 
+    `friend_yn`    TINYINT     NOT NULL    DEFAULT 0  COMMENT '친구요청 수락여부(친구상태 여부)', 
     `created_at`   DATETIME    NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시', 
      PRIMARY KEY (uid, friend_uid),
      FOREIGN KEY (`uid`) REFERENCES `user_game_data` (`uid`),
@@ -117,6 +117,26 @@ CREATE TABLE friend
 
 친구 여부에 따라 수락된 친구요청인지 아직 미수락된 친구 요청인지 파악한다.
 친구 요청이 거부된 경우 해당 데이터를 삭제한다.
+
+---
+
+
+## *game_result*
+
+__create query__
+```
+CREATE TABLE game_result
+(
+    `game_result_id`            BIGINT         NOT NULL    AUTO_INCREMENT COMMENT '게임 결과 데이터 아이디',
+    `black_user_id`             BIGINT         NOT NULL    COMMENT '흑돌 유저 아이디', 
+    `white_user_id`             BIGINT         NOT NULL    COMMENT '백돌 유저 아이디',
+    `win_user_id`               BIGINT         NOT NULL    COMMENT '승자 유저 아이디',
+    `created_at`                DATETIME       NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '게임 종료 일시', 
+     PRIMARY KEY (uid, account_id)
+);
+```
+하이브 계정에 묶인 유저의 정보에 대해 저장하는 테이블.
+
 
 ---
 
