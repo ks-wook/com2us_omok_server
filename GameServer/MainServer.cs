@@ -154,7 +154,7 @@ namespace GameServer
 
         void OnClosed(ClientSession session, CloseReason closeReason)
         {
-            MainLogger.Info(string.Format("세션 번호 {0} 접속해제: {1}", session.SessionID, reason.ToString()));
+            MainLogger.Info(string.Format("세션 번호 {0} 접속해제: {1}", session.SessionID, closeReason.ToString()));
 
             // 강제 종료시 유저가 방에 있었다면 내보낸다.
             User? user = _userManager.GetUserBySessionId(session.SessionID);
@@ -184,7 +184,7 @@ namespace GameServer
 
         void OnPacketReceived(ClientSession clientSession, MemoryPackBinaryRequestInfo requestInfo)
         {
-            MainLogger.Debug(string.Format("세션 번호 {0} 받은 데이터 크기: {1}, ThreadId: {2}", session.SessionID, reqInfo.Body.Length, System.Threading.Thread.CurrentThread.ManagedThreadId));
+            MainLogger.Debug(string.Format("세션 번호 {0} 받은 데이터 크기: {1}, ThreadId: {2}", clientSession.SessionID, requestInfo.Body.Length, System.Threading.Thread.CurrentThread.ManagedThreadId));
 
             requestInfo.SessionID = clientSession.SessionID;
             _mainPacketProcessor.Insert(requestInfo);
