@@ -37,7 +37,7 @@ public class MysqlProcessor
         if(roomManager == null || userManager == null 
             || mysqlConnectionStr == null || packetProcessor == null)
         {
-            Console.WriteLine("mysql Processor 생성에 실패하였습니다.");
+            MainServer.MainLogger.Error("mysql Processor 생성에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
@@ -62,7 +62,7 @@ public class MysqlProcessor
         if (_roomManager == null || _userManager == null 
             || _mysqlConnector == null || _packetProcessor == null)
         {
-            Console.WriteLine("mysql Processor 패킷 등록에 실패하였습니다.");
+            MainServer.MainLogger.Error("mysql Processor 패킷 등록에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
@@ -100,12 +100,12 @@ public class MysqlProcessor
                 }
                 else
                 {
-                    Console.WriteLine("등록되지 않은 패킷");
+                    MainServer.MainLogger.Error("등록되지 않은 패킷");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                MainServer.MainLogger.Error(ex.ToString());
             }
 
 

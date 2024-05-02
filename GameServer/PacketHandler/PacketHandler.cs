@@ -24,7 +24,7 @@ public class PacketHandler
         T? bodyData = MemoryPackSerializer.Deserialize<T>(bytes);
         if (bodyData == null)
         {
-            Console.WriteLine($"[DesrializePacket] ErrorCode: {ErrorCode.NullPacket}");
+            MainServer.MainLogger.Error($"[DesrializePacket] ErrorCode: {ErrorCode.NullPacket}");
             return (ErrorCode.NullPacket, bodyData);
         }
 

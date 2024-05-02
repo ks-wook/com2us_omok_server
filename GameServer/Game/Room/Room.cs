@@ -42,7 +42,7 @@ namespace GameServer
             roomUser.Set(uid, roomSessionId);
             _roomUsers.Add(roomUser);
 
-            Console.WriteLine($"[{RoomNumber}번 room] Uid {uid} 입장, 현재 인원: {_roomUsers.Count}");
+            MainServer.MainLogger.Info($"[{RoomNumber}번 room] Uid {uid} 입장, 현재 인원: {_roomUsers.Count}");
 
             return ErrorCode.None;
         }
@@ -66,7 +66,7 @@ namespace GameServer
                 return ErrorCode.FailRemoveRoomUser;
             }
 
-            Console.WriteLine($"[{RoomNumber}번 room] Uid {roomUser.UserId} 퇴장, 현재 인원: {_roomUsers.Count}");
+            MainServer.MainLogger.Info($"[{RoomNumber}번 room] Uid {roomUser.UserId} 퇴장, 현재 인원: {_roomUsers.Count}");
 
             return ErrorCode.None;
         }
@@ -116,13 +116,13 @@ namespace GameServer
                 if (roomUser.IsReady == false)
                 {
                     roomUser.IsReady = true;
-                    Console.WriteLine($"[{roomUser.UserId}] 준비완료");
+                    MainServer.MainLogger.Info($"[{roomUser.UserId}] 준비완료");
                     return 1;
                 }
                 else
                 {
                     roomUser.IsReady = false;
-                    Console.WriteLine($"[{roomUser.UserId}] 준비완료 취소");
+                    MainServer.MainLogger.Info($"[{roomUser.UserId}] 준비완료 취소");
                     return 0;
                 }
 
@@ -154,7 +154,7 @@ namespace GameServer
             }
 
             _omokGame.StartGame(sendData.BlackUserId, sendData.WhiteUserId);
-            Console.WriteLine
+            MainServer.MainLogger.Info
                 ($"RoomNumber: {RoomNumber}, 흑돌: {sendData.BlackUserId}, 백돌: {sendData.WhiteUserId} 게임 시작");
 
 

@@ -20,7 +20,7 @@ namespace GameServer
         {
             if (roomManager == null || userManger == null || mysqlProcessor == null)
             {
-                Console.WriteLine("[RoomPacketHandler.Init] Fail Create PacketHandlerGame");
+                MainServer.MainLogger.Error("[RoomPacketHandler.Init] Fail Create PacketHandlerGame");
                 throw new NullReferenceException();
             }
 
@@ -89,7 +89,7 @@ namespace GameServer
             (ErrorCode result, MQResSaveGameResult? bodyData) = DeserializePacket<MQResSaveGameResult>(packet.Data);
             if (result != ErrorCode.None || bodyData == null)
             {
-                Console.WriteLine("DB 패킷 수신 실패");
+                MainServer.MainLogger.Error("DB 패킷 수신 실패");
                 return;
             }
 
@@ -114,7 +114,7 @@ namespace GameServer
             int readyResult = room.ChangeIsReadyBySessionId(sessionId);
             if (readyResult == -1)
             {
-                Console.WriteLine($"[C_ReadyOmokHandler] ErrorCode: {ErrorCode.NullUser}");
+                MainServer.MainLogger.Error($"[ReadyOmok] ErrorCode: {ErrorCode.NullUser}");
                 return ErrorCode.NullUser;
             }
 
@@ -241,14 +241,14 @@ namespace GameServer
             User? user = _userManager.GetUserBySessionId(sessionId);
             if (user == null)
             {
-                Console.WriteLine($"[C_LeaveRoomReqHandler] ErrorCode: {ErrorCode.NullUser}");
+                MainServer.MainLogger.Error($"[GetUserAndRoomBySessionId] ErrorCode: {ErrorCode.NullUser}");
                 return (ErrorCode.NullUser, null, null);
             }
 
             // 유저가 방에 입장한 상태인가
             if (user.RoomNumber == -1)
             {
-                Console.WriteLine($"[C_LeaveRoomReqHandler] ErrorCode: {ErrorCode.InvalidRequest}");
+                MainServer.MainLogger.Error($"[GetUserAndRoomBySessionId] ErrorCode: {ErrorCode.InvalidRequest}");
                 return (ErrorCode.InvalidRequest, null, null);
             }
 
@@ -256,7 +256,7 @@ namespace GameServer
             Room? room = _roomManager.FindRoomByRoomNumber(user.RoomNumber);
             if (room == null)
             {
-                Console.WriteLine($"[C_LeaveRoomReqHandler] ErrorCode: {ErrorCode.NullRoom}");
+                MainServer.MainLogger.Error($"[GetUserAndRoomBySessionId] ErrorCode: {ErrorCode.NullRoom}");
                 return (ErrorCode.NullRoom, null, null);
             }
 
