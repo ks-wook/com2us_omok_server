@@ -2,7 +2,6 @@
 using CloudStructures.Structures;
 using GameAPIServer.Model.DAO.MemoryDb;
 using GameAPIServer.Repository;
-using GameServer.DB.Redis;
 using GameServer.Packet;
 using MySqlConnector;
 using SqlKata.Execution;
@@ -12,9 +11,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameServer;
+namespace GameServer.PacketHandler;
 
-public class PacketHandlerTokenVerify : PacketHandler
+public class PacketHandlerTokenVerify : BasePacketHandler
 {
     RoomManager _roomManager;
     UserManager _userManager;
@@ -38,7 +37,7 @@ public class PacketHandlerTokenVerify : PacketHandler
 
     public override void RegisterPacketHandler(Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>> packetHandlerMap)
     {
-        packetHandlerMap.Add((int)MQDATAID.MQ_REQ_VERIFY_TOKEN, MqReqVerifyTokenHandler);
+        packetHandlerMap.Add((int)InnerPacketId.PKTInnerReqVerifyToken, PKTInnerReqVerifyTokenHandler);
     }
 
 
@@ -46,25 +45,25 @@ public class PacketHandlerTokenVerify : PacketHandler
 
 
     // redis에 저장된 토큰 검증
-    public async Task MqReqVerifyTokenHandler(MemoryPackBinaryRequestInfo packet)
+    public async Task PKTInnerReqVerifyTokenHandler(MemoryPackBinaryRequestInfo packet)
     {
         var sessionId = packet.SessionID;
 
-        (ErrorCode result, MQReqVerifyToken? bodyData) = DeserializePacket<MQReqVerifyToken>(packet.Data);
+        (ErrorCode result, PKTInnerReqVerifyToken? bodyData) = DeserializePacket<PKTInnerReqVerifyToken>(packet.Data);
 
         if (result != ErrorCode.None || bodyData == null)
         {
             MainServer.MainLogger.Error("토큰 검증 실패");
-            SendRedisFailPacket<MQResVerifyToken>(MQDATAID.MQ_RES_VERIFY_TOKEN, _packetProcessor, ErrorCode.LoginFail);
+            SendRedisFailPacket<PKTInnerResVerifyToken>(InnerPacketId.PKTInnerResVerifyToken, _packetProcessor, ErrorCode.LoginFail);
             return;
         }
 
 
         (result, LoginToken? loginToken) = await GetTokenByAccountId(bodyData.AccountId);
-        if(result != ErrorCode.None || loginToken == null)
+        if (result != ErrorCode.None || loginToken == null)
         {
             MainServer.MainLogger.Error("토큰 검증 실패");
-            SendRedisFailPacket<MQResVerifyToken>(MQDATAID.MQ_RES_VERIFY_TOKEN, _packetProcessor, ErrorCode.LoginFail);
+            SendRedisFailPacket<PKTInnerResVerifyToken>(InnerPacketId.PKTInnerResVerifyToken, _packetProcessor, ErrorCode.LoginFail);
             return;
         }
 
@@ -107,7 +106,7 @@ public class PacketHandlerTokenVerify : PacketHandler
         if (string.CompareOrdinal(reqToken, redisToken) != 0) // 토큰이 일치하지 않는 경우
         {
             MainServer.MainLogger.Error("토큰 검증 실패");
-            SendRedisFailPacket<MQResVerifyToken>(MQDATAID.MQ_RES_VERIFY_TOKEN, _packetProcessor, ErrorCode.TokenMismatch);
+            SendRedisFailPacket<PKTInnerResVerifyToken>(InnerPacketId.PKTInnerResVerifyToken, _packetProcessor, ErrorCode.TokenMismatch);
             return;
         }
 
@@ -115,10 +114,10 @@ public class PacketHandlerTokenVerify : PacketHandler
 
 
         // 토큰 인증 완료 패킷 전송
-        MQResVerifyToken sendData = new MQResVerifyToken();
+        PKTInnerResVerifyToken sendData = new PKTInnerResVerifyToken();
         sendData.UserId = userId;
         sendData.Result = ErrorCode.None;
-        SendRedisResPacket<MQResVerifyToken>(sendData, MQDATAID.MQ_RES_VERIFY_TOKEN, sessionId, _packetProcessor);
+        SendRedisResPacket<PKTInnerResVerifyToken>(sendData, InnerPacketId.PKTInnerResVerifyToken, sessionId, _packetProcessor);
     }
 
 

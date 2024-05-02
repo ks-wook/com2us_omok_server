@@ -1,5 +1,5 @@
 ﻿using GameServer.Binary;
-using GameServer.DB.Mysql;
+using GameServer.Packet;
 using MemoryPack;
 using System;
 using System.Collections.Generic;
@@ -71,20 +71,7 @@ public struct MemoryPackPacketHeadInfo
         packetData[pos] = type;
     }
 
-    public static void Write(byte[] packetData, GameServer.DB.Mysql.MQDATAID packetId, byte type = 0)
-    {
-        var pos = PacketHeaderMemoryPackStartPos;
-
-        PtrBinaryWrite.UInt16(packetData, pos, (ushort)packetData.Length);
-        pos += 2;
-
-        PtrBinaryWrite.UInt16(packetData, pos, (ushort)packetId);
-        pos += 2;
-
-        packetData[pos] = type;
-    }
-
-    public static void Write(byte[] packetData, GameServer.DB.Redis.MQDATAID packetId, byte type = 0)
+    public static void Write(byte[] packetData, InnerPacketId packetId, byte type = 0)
     {
         var pos = PacketHeaderMemoryPackStartPos;
 

@@ -1,4 +1,4 @@
-﻿using GameServer.DB.Mysql;
+﻿using GameServer;
 using GameServer.Packet;
 using MemoryPack;
 using System;
@@ -8,13 +8,15 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace GameServer;
 
-public class PacketHandler
+
+public class BasePacketHandler
 {
     public static Func<string, byte[], bool> NetSendFunc;
 
-    public PacketHandler()
+    public BasePacketHandler()
     {
 
     }
@@ -47,7 +49,7 @@ public class PacketHandler
 
 
     // Mysql 완료 패킷 전송
-    public void SendMysqlResPacket<T>(T sendData, GameServer.DB.Mysql.MQDATAID packetId, string sessionId, PacketProcessor packetProcessor)
+    public void SendMysqlResPacket<T>(T sendData, InnerPacketId packetId, string sessionId, PacketProcessor packetProcessor)
     {
         var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
         MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
@@ -57,7 +59,7 @@ public class PacketHandler
     }
 
     // Mysql 요청 패킷 전송
-    public void SendMysqlReqPacket<T>(T sendData, GameServer.DB.Mysql.MQDATAID packetId, string sessionId, MysqlProcessor packetProcessor)
+    public void SendMysqlReqPacket<T>(T sendData, InnerPacketId packetId, string sessionId, MysqlProcessor packetProcessor)
     {
         var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
         MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
@@ -73,7 +75,7 @@ public class PacketHandler
 
 
     // Redis 요청 패킷 전송
-    public void SendRedisReqPacket<T>(T sendData, GameServer.DB.Redis.MQDATAID packetId, string sessionId, RedisProcessor packetProcessor)
+    public void SendRedisReqPacket<T>(T sendData, InnerPacketId packetId, string sessionId, RedisProcessor packetProcessor)
     {
         var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
         MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
@@ -84,7 +86,7 @@ public class PacketHandler
 
 
     // Redis 완료 패킷 전송
-    public void SendRedisResPacket<T>(T sendData, GameServer.DB.Redis.MQDATAID packetId, string sessionId, PacketProcessor packetProcessor)
+    public void SendRedisResPacket<T>(T sendData, InnerPacketId packetId, string sessionId, PacketProcessor packetProcessor)
     {
         var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
         MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
@@ -113,7 +115,7 @@ public class PacketHandler
     }
 
     // Mysql 실패 패킷 전송
-    public void SendMysqlFailPacket<T>(GameServer.DB.Mysql.MQDATAID packetId, PacketProcessor packetProcessor, ErrorCode error) where T : PacketResult, new()
+    public void SendMysqlFailPacket<T>(InnerPacketId packetId, PacketProcessor packetProcessor, ErrorCode error) where T : PacketResult, new()
     {
         T sendData = new T();
         sendData.Result = error;
@@ -124,7 +126,7 @@ public class PacketHandler
     }
 
     // Redis 실패 패킷 전송
-    public void SendRedisFailPacket<T>(GameServer.DB.Redis.MQDATAID packetId, PacketProcessor packetProcessor, ErrorCode error) where T : PacketResult, new()
+    public void SendRedisFailPacket<T>(InnerPacketId packetId, PacketProcessor packetProcessor, ErrorCode error) where T : PacketResult, new()
     {
         T sendData = new T();
         sendData.Result = error;

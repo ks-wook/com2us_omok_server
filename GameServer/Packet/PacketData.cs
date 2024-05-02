@@ -18,6 +18,7 @@ public partial class PacketResult : PkHeader // 결과가 포함된 패킷
 
 
 
+
 [MemoryPackable]
 public partial class PKTReqLogin : PkHeader // 게임 서버 로그인 요청
 {

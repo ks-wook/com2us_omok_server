@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameServer.DB.Mysql;
+namespace GameServer;
 
 // game_result 테이블 접근 객체
 public class GameResult

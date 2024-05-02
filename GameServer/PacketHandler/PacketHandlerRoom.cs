@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GameServer;
 
-public class PacketHandlerRoom : PacketHandler
+public class PacketHandlerRoom : BasePacketHandler
 {
     RoomManager _roomManager;
     UserManager _userManager;
