@@ -52,7 +52,7 @@ public class PacketHandlerGameResult : PacketHandler
 
         if(result != ErrorCode.None || bodyData == null)
         {
-            Console.WriteLine("게임 데이터 저장 실패");
+            MainServer.MainLogger.Error("게임 데이터 저장 실패");
             return;
         }
 
@@ -60,7 +60,7 @@ public class PacketHandlerGameResult : PacketHandler
         if(result != ErrorCode.None) 
         {
             SendMysqlFailPacket<PKTNtfEndOmok>(MQDATAID.MQ_RES_SAVE_GAME_RESULT, _packetProcessor, ErrorCode.FailInsertGameResult);
-            Console.WriteLine("게임 데이터 저장 실패");
+            MainServer.MainLogger.Error("게임 데이터 저장 실패");
             return;
         }
 

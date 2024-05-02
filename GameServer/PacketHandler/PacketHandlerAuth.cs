@@ -20,7 +20,7 @@ public class PacketHandlerAuth : PacketHandler
     {
         if (userManager == null || redisProcessor == null)
         {
-            Console.WriteLine("[RoomPacketHandler.Init] roomList null");
+            MainServer.MainLogger.Error("[RoomPacketHandler.Init] roomList null");
             throw new NullReferenceException();
         }
 
@@ -104,7 +104,7 @@ public class PacketHandlerAuth : PacketHandler
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[CheckAuthToken] ErrorCode: {ErrorCode.InvaildToken}, {ex.ToString()}");
+            MainServer.MainLogger.Error($"[CheckAuthToken] ErrorCode: {ErrorCode.InvaildToken}, {ex.ToString()}");
             return ErrorCode.InvaildToken;
         }
     }
@@ -119,7 +119,7 @@ public class PacketHandlerAuth : PacketHandler
 
             if (result != ErrorCode.None)
             {
-                Console.WriteLine($"[Login] ErrorCode: {result}");
+                MainServer.MainLogger.Error($"[Login] ErrorCode: {result}");
                 return result;
             }
 
@@ -133,7 +133,7 @@ public class PacketHandlerAuth : PacketHandler
         }
         catch(Exception ex)
         {
-            Console.WriteLine($"[Login] ErrorCode : {ErrorCode.LoginFail}, {ex.ToString()}");
+            MainServer.MainLogger.Error($"[Login] ErrorCode : {ErrorCode.LoginFail}, {ex.ToString()}");
             SendLoginFail(sessionId);
             return ErrorCode.LoginFail;
         }

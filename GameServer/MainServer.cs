@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using GameServer.Session;
 using GameServer.Packet;
 using MemoryPack;
+using System.Security.Cryptography.Xml;
 
 namespace GameServer
 {
@@ -16,6 +17,7 @@ namespace GameServer
     public class MainServer : AppServer<ClientSession, MemoryPackBinaryRequestInfo>
     {
         SuperSocket.SocketBase.Config.IServerConfig _serverConfig;
+        public static SuperSocket.SocketBase.Logging.ILog MainLogger;
 
         PacketProcessor _mainPacketProcessor = new PacketProcessor();
         MysqlProcessor _mysqlProcessor = new MysqlProcessor();
@@ -70,22 +72,25 @@ namespace GameServer
         {
             try
             {
-                bool result = Setup(new SuperSocket.SocketBase.Config.RootConfig(), _serverConfig, logFactory: new ConsoleLogFactory());
+                bool result = Setup(new SuperSocket.SocketBase.Config.RootConfig(), _serverConfig, logFactory: new NLogLogFactory());
 
                 if (result == false)
                 {
-                    Console.WriteLine("ChatServer 초기화 실패");
+                    Console.WriteLine("[Error] GameServer 초기화 실패");
                     return;
                 }
                 else if (result == true)
                 {
-                    Console.WriteLine("ChatServer 초기화 성공");
+                    MainLogger = base.Logger;
+                    MainLogger.Error("서버 초기화 성공");
                 }
 
                 CreateComponent();
 
 
                 Start(); // 서버 Listening 시작
+
+                MainLogger.Info("서버 생성 성공");
             }
             catch (Exception ex)
             {
@@ -95,7 +100,7 @@ namespace GameServer
         }
 
         // 패킷 프로세서 생성 및 실행
-        void CreateComponent()
+        ErrorCode CreateComponent()
         {
             // 매니저 초기화
             _userManager.Init(_mainServerOption);
@@ -112,6 +117,9 @@ namespace GameServer
 
             // redis 프로세서
             _redisProcessor.CreateAndStart(_roomManager, _userManager, _mainServerOption.RedisConnectionStr, _mainPacketProcessor); // 프로세서 초기화
+
+            MainLogger.Info("CreateComponent - Success");
+            return ErrorCode.None;
         }
 
 
@@ -130,6 +138,8 @@ namespace GameServer
             }
             catch (Exception ex)
             {
+                MainServer.MainLogger.Error($"{ex.ToString()},  {ex.StackTrace}");
+
                 Console.WriteLine(ex.ToString());
                 session.Close();
             }
@@ -139,12 +149,12 @@ namespace GameServer
 
         void OnConnected(ClientSession session)
         {
-            Console.WriteLine($"[OnConnected] sesseionID: {session.SessionID}");
+            MainLogger.Info(string.Format("세션 번호 {0} 접속", session.SessionID));
         }
 
         void OnClosed(ClientSession session, CloseReason closeReason)
         {
-            Console.WriteLine($"[OnClosed] sesseionID: {session.SessionID}, ${closeReason.ToString()}");
+            MainLogger.Info(string.Format("세션 번호 {0} 접속해제: {1}", session.SessionID, reason.ToString()));
 
             // 강제 종료시 유저가 방에 있었다면 내보낸다.
             User? user = _userManager.GetUserBySessionId(session.SessionID);
@@ -174,8 +184,8 @@ namespace GameServer
 
         void OnPacketReceived(ClientSession clientSession, MemoryPackBinaryRequestInfo requestInfo)
         {
-            Console.WriteLine($"세션 번호 {clientSession.SessionID} 받은 데이터 크기: {requestInfo.Body.Length}, ThreadId: {Thread.CurrentThread.ManagedThreadId}");
-            
+            MainLogger.Debug(string.Format("세션 번호 {0} 받은 데이터 크기: {1}, ThreadId: {2}", session.SessionID, reqInfo.Body.Length, System.Threading.Thread.CurrentThread.ManagedThreadId));
+
             requestInfo.SessionID = clientSession.SessionID;
             _mainPacketProcessor.Insert(requestInfo);
         }

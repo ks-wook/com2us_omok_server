@@ -35,7 +35,7 @@ public class PacketProcessor
     {
         if(roomManager == null || userManager == null || mysqlProcessor == null)
         {
-            Console.WriteLine("[PacketProcessor.CreateAndStart] Packet Processor 생성 실패");
+            MainServer.MainLogger.Error("[CreateAndStart] Packet Processor 생성 실패");
             throw new NullReferenceException();
         }
 
@@ -60,7 +60,7 @@ public class PacketProcessor
     {
         if (_roomManager == null || _userManager == null || _mysqlProcessor == null)
         {
-            Console.WriteLine("[RegisterPakcetHandler] Managers Null");
+            MainServer.MainLogger.Error("[RegisterPakcetHandler] Managers Null");
             throw new NullReferenceException();
         }
 
@@ -112,7 +112,7 @@ public class PacketProcessor
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                MainServer.MainLogger.Error(ex.ToString());
             }
         }
     }

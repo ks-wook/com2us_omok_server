@@ -35,7 +35,7 @@ public class RedisProcessor
         if (roomManager == null || userManager == null
             || redisConnectionStr == null || packetProcessor == null)
         {
-            Console.WriteLine("redis Processor 생성에 실패하였습니다.");
+            MainServer.MainLogger.Error("redis Processor 생성에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
@@ -61,7 +61,7 @@ public class RedisProcessor
         if (_roomManager == null || _userManager == null
             || _redisConnector == null || _packetProcessor == null)
         {
-            Console.WriteLine("redis Processor 패킷 등록에 실패하였습니다.");
+            MainServer.MainLogger.Error("redis Processor 패킷 등록에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
@@ -99,12 +99,12 @@ public class RedisProcessor
                 }
                 else
                 {
-                    Console.WriteLine("등록되지 않은 패킷");
+                    MainServer.MainLogger.Error("등록되지 않은 패킷");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                MainServer.MainLogger.Error(ex.ToString());
             }
 
 
