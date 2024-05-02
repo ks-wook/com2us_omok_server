@@ -54,7 +54,7 @@ public class PacketHandlerTokenVerify : PacketHandler
 
         if (result != ErrorCode.None || bodyData == null)
         {
-            Console.WriteLine("토큰 검증 실패");
+            MainServer.MainLogger.Error("토큰 검증 실패");
             SendRedisFailPacket<MQResVerifyToken>(MQDATAID.MQ_RES_VERIFY_TOKEN, _packetProcessor, ErrorCode.LoginFail);
             return;
         }
@@ -63,13 +63,13 @@ public class PacketHandlerTokenVerify : PacketHandler
         (result, LoginToken? loginToken) = await GetTokenByAccountId(bodyData.AccountId);
         if(result != ErrorCode.None || loginToken == null)
         {
-            Console.WriteLine("토큰 검증 실패");
+            MainServer.MainLogger.Error("토큰 검증 실패");
             SendRedisFailPacket<MQResVerifyToken>(MQDATAID.MQ_RES_VERIFY_TOKEN, _packetProcessor, ErrorCode.LoginFail);
             return;
         }
 
 
-        ResVerifyToken(bodyData.Token, loginToken.Token, sessionId);
+        ResVerifyToken(bodyData.Token, loginToken.Token, sessionId, bodyData.AccountId.ToString());
     }
 
 
@@ -101,24 +101,22 @@ public class PacketHandlerTokenVerify : PacketHandler
     }
 
     // 토큰 검증 후 요청 응답
-    public void ResVerifyToken(string reqToken, string redisToken, string sessionId)
+    public void ResVerifyToken(string reqToken, string redisToken, string sessionId, string userId)
     {
-
-        Console.WriteLine("reqToken : " + reqToken);
-        Console.WriteLine("redisToken : " + redisToken);
-
-
         // 얻어온 토큰 검사
         if (string.CompareOrdinal(reqToken, redisToken) != 0) // 토큰이 일치하지 않는 경우
         {
-            Console.WriteLine("토큰 검증 실패");
+            MainServer.MainLogger.Error("토큰 검증 실패");
             SendRedisFailPacket<MQResVerifyToken>(MQDATAID.MQ_RES_VERIFY_TOKEN, _packetProcessor, ErrorCode.TokenMismatch);
             return;
         }
 
+        MainServer.MainLogger.Info("토큰 검증 성공");
+
 
         // 토큰 인증 완료 패킷 전송
         MQResVerifyToken sendData = new MQResVerifyToken();
+        sendData.UserId = userId;
         sendData.Result = ErrorCode.None;
         SendRedisResPacket<MQResVerifyToken>(sendData, MQDATAID.MQ_RES_VERIFY_TOKEN, sessionId, _packetProcessor);
     }
