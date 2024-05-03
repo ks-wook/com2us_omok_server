@@ -41,3 +41,12 @@ public partial class PKTInnerResVerifyToken : PacketResult // 로그인 토큰 �
     public string UserId { get; set; } = string.Empty;
 }
 
+
+
+
+[MemoryPackable]
+public partial class PKTInnerNtfTurnChange : PkHeader // 유저의 턴을 강제로 넘기라는 요청
+{
+    public int RoomNumber { get; set; }
+}
+

@@ -11,10 +11,6 @@ namespace GameServer.PacketHandler;
 
 public class PacketHandlerGameResult : BasePacketHandler
 {
-    RoomManager _roomManager;
-    UserManager _userManager;
-
-
     MySqlConnection _dbConnector;
     SqlKata.Compilers.MySqlCompiler _dbCompiler;
     QueryFactory _queryFactory;
@@ -23,11 +19,8 @@ public class PacketHandlerGameResult : BasePacketHandler
 
 
 
-    public PacketHandlerGameResult(RoomManager roomManager, UserManager userManager, MySqlConnection mysqlGameConnection, PacketProcessor packetProcessor)
+    public PacketHandlerGameResult(MySqlConnection mysqlGameConnection, PacketProcessor packetProcessor)
     {
-        _roomManager = roomManager;
-        _userManager = userManager;
-
         _dbConnector = mysqlGameConnection;
         _dbCompiler = new SqlKata.Compilers.MySqlCompiler();
         _queryFactory = new QueryFactory(_dbConnector, _dbCompiler);
@@ -47,7 +40,9 @@ public class PacketHandlerGameResult : BasePacketHandler
     // 게임 결과 저장
     public async Task MqReqGameRecordHandler(MemoryPackBinaryRequestInfo packet)
     {
-        (ErrorCode result, PKTInnerReqSaveGameResult? bodyData) = DeserializePacket<PKTInnerReqSaveGameResult>(packet.Data);
+        var sessionId = packet.SessionID;
+
+        (ErrorCode result, PKTInnerReqSaveGameResult? bodyData) = DeserializeNullablePacket<PKTInnerReqSaveGameResult>(packet.Data);
 
         if (result != ErrorCode.None || bodyData == null)
         {
@@ -63,7 +58,7 @@ public class PacketHandlerGameResult : BasePacketHandler
             return;
         }
 
-        ResSaveGameResult(bodyData);
+        ResSaveGameResult(bodyData, sessionId);
     }
 
 
@@ -97,19 +92,12 @@ public class PacketHandlerGameResult : BasePacketHandler
     }
 
 
-    public void ResSaveGameResult(PKTInnerReqSaveGameResult packet)
+    public void ResSaveGameResult(PKTInnerReqSaveGameResult packet, string sessionId)
     {
-        User? user = _userManager.GetUserByUID(packet.WinUserId);
-        if (user == null)
-        {
-            SendMysqlFailPacket<PKTInnerResSaveGameResult>(InnerPacketId.PKTInnerResSaveGameResult, _packetProcessor, ErrorCode.NullUser);
-            return;
-        }
-
         // 게임 결과 저장 완료 패킷 전송
         PKTInnerResSaveGameResult sendData = new PKTInnerResSaveGameResult();
         sendData.sessionIds = packet.sessionIds;
         sendData.WinUserId = packet.WinUserId;
-        SendMysqlResPacket<PKTInnerResSaveGameResult>(sendData, InnerPacketId.PKTInnerResSaveGameResult, user.SessionId, _packetProcessor);
+        SendInnerResPacket<PKTInnerResSaveGameResult>(sendData, InnerPacketId.PKTInnerResSaveGameResult, sessionId, _packetProcessor);
     }
 }

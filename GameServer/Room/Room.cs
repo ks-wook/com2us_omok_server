@@ -1,6 +1,7 @@
 ﻿using MemoryPack;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,6 +11,12 @@ namespace GameServer;
 
 public class Room
 {
+    public RoomState State { get; set; } = RoomState.None;
+
+    public DateTime lastTurnChangeTime;
+    public string CurTurnUserId { get; set; } = string.Empty; // 현재 턴인 유저 아이디
+
+
     public int RoomNumber { get; set; }
     public int RoomMaxUserCount { get; set; }
     List<RoomUser> _roomUsers = new List<RoomUser>();
@@ -152,6 +159,11 @@ public class Room
             sendData.WhiteUserId = _roomUsers[0].UserId;
         }
 
+
+        UpdateLastTurnChangeTime();
+        CurTurnUserId = sendData.BlackUserId;
+
+
         _omokGame.StartGame(sendData.BlackUserId, sendData.WhiteUserId);
         MainServer.MainLogger.Info
             ($"RoomNumber: {RoomNumber}, 흑돌: {sendData.BlackUserId}, 백돌: {sendData.WhiteUserId} 게임 시작");
@@ -160,17 +172,33 @@ public class Room
         // 모든 유저에게 오목 게임 시작 패킷 전송
         NotifyRoomUsers(NetSendFunc, sendData, PACKETID.PKTNtfStartOmok);
 
+        
 
-
-        // TODO 타이머 실행
-
-
-
-
-
-
-
-
+        State = RoomState.InGame; // 게임 상태 전환
     }
 
+    public void OmokGameEnd()
+    {
+        State = RoomState.None; // 게임 종료
+    }
+
+    // 턴 변경 시간 갱신
+    public void UpdateLastTurnChangeTime()
+    {
+        lastTurnChangeTime = DateTime.Now;
+        UpdateCurTurnUser(); 
+    }
+
+    // 현재 턴인 유저 아이디 갱신
+    void UpdateCurTurnUser()
+    {
+        if(CurTurnUserId == _omokGame.blackUserId)
+        {
+            CurTurnUserId = _omokGame.whiteUserId;
+        }
+        else
+        {
+            CurTurnUserId = _omokGame.blackUserId;
+        }
+    }
 }

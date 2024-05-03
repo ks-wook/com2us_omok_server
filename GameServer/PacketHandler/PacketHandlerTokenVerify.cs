@@ -15,21 +15,14 @@ namespace GameServer.PacketHandler;
 
 public class PacketHandlerTokenVerify : BasePacketHandler
 {
-    RoomManager _roomManager;
-    UserManager _userManager;
-
-
     RedisConnection _redisConnector;
 
     PacketProcessor _packetProcessor;
 
 
 
-    public PacketHandlerTokenVerify(RoomManager roomManager, UserManager userManager, RedisConnection redisConnector, PacketProcessor packetProcessor)
+    public PacketHandlerTokenVerify(RedisConnection redisConnector, PacketProcessor packetProcessor)
     {
-        _roomManager = roomManager;
-        _userManager = userManager;
-
         _redisConnector = redisConnector;
         _packetProcessor = packetProcessor;
     }
@@ -49,7 +42,7 @@ public class PacketHandlerTokenVerify : BasePacketHandler
     {
         var sessionId = packet.SessionID;
 
-        (ErrorCode result, PKTInnerReqVerifyToken? bodyData) = DeserializePacket<PKTInnerReqVerifyToken>(packet.Data);
+        (ErrorCode result, PKTInnerReqVerifyToken? bodyData) = DeserializeNullablePacket<PKTInnerReqVerifyToken>(packet.Data);
 
         if (result != ErrorCode.None || bodyData == null)
         {
@@ -117,10 +110,7 @@ public class PacketHandlerTokenVerify : BasePacketHandler
         PKTInnerResVerifyToken sendData = new PKTInnerResVerifyToken();
         sendData.UserId = userId;
         sendData.Result = ErrorCode.None;
-        SendRedisResPacket<PKTInnerResVerifyToken>(sendData, InnerPacketId.PKTInnerResVerifyToken, sessionId, _packetProcessor);
+        SendInnerResPacket<PKTInnerResVerifyToken>(sendData, InnerPacketId.PKTInnerResVerifyToken, sessionId, _packetProcessor);
     }
-
-
-
 
 }

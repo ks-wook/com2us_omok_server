@@ -8,10 +8,10 @@ namespace GameServer.Packet;
 
 public enum InnerPacketId
 {
-    // game result 2501 ~
+    // game 2501 ~
     PKTInnerReqSaveGameResult = 2501,
     PKTInnerResSaveGameResult = 2502,
-
+    PKTInnerNtfTurnChange = 2503,
 
 
     // login token 3501 ~ 

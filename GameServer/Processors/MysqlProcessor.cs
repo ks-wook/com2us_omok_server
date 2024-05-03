@@ -27,23 +27,18 @@ public class MysqlProcessor
     // db 프로세스마다 고유한 db연결객체
     MySqlConnection? _mysqlConnector;
 
-    RoomManager? _roomManager;
-    UserManager? _userManager;
-
     PacketProcessor? _packetProcessor;
 
 
-    public void CreateAndStart(RoomManager roomManager, UserManager userManager, string mysqlConnectionStr, PacketProcessor? packetProcessor)
+    public void CreateAndStart(string mysqlConnectionStr, PacketProcessor? packetProcessor)
     {
-        if(roomManager == null || userManager == null 
-            || mysqlConnectionStr == null || packetProcessor == null)
+        if(mysqlConnectionStr == null || packetProcessor == null)
         {
             MainServer.MainLogger.Error("mysql Processor 생성에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
-        _roomManager = roomManager;
-        _userManager = userManager;
+
 
         _mysqlConnector = new MySqlConnection(mysqlConnectionStr);
 
@@ -60,14 +55,13 @@ public class MysqlProcessor
 
     void RegisterPakcetHandler()
     {
-        if (_roomManager == null || _userManager == null 
-            || _mysqlConnector == null || _packetProcessor == null)
+        if (_mysqlConnector == null || _packetProcessor == null)
         {
             MainServer.MainLogger.Error("mysql Processor 패킷 등록에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
-        _packetHandlerGameResult = new PacketHandlerGameResult(_roomManager, _userManager, _mysqlConnector, _packetProcessor);
+        _packetHandlerGameResult = new PacketHandlerGameResult(_mysqlConnector, _packetProcessor);
         _packetHandlerGameResult.RegisterPacketHandler(_packetHandlerMap);
     }
 

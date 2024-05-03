@@ -14,10 +14,16 @@ public enum StoneType
     White
 }
 
+public class OmokRule
+{
+    public static int MaxTurnTime = 5; // 한번에 주어지는 턴의 시간
+}
+
 public class OmokGame
 {
     StoneType[,] board;
     public int BoardSize = 19;
+
 
     public string winUserId = string.Empty; // white or black user id
     public string blackUserId = string.Empty;
@@ -53,10 +59,10 @@ public class OmokGame
     {
         StoneType stone = board[lastRow, lastCol];
 
-        // TEST -------
-        setWinner(stone);
-        return true;
-        // ------------
+        //// TEST -------
+        //setWinner(stone);
+        //return true;
+        //// ------------
 
         // 가로 체크
         int count = 1;

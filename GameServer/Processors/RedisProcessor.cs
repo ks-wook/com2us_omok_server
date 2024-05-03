@@ -25,24 +25,16 @@ public class RedisProcessor
     // db 프로세스마다 고유한 db연결객체
     RedisConnection? _redisConnector;
 
-    RoomManager? _roomManager;
-    UserManager? _userManager;
-
     PacketProcessor? _packetProcessor;
 
 
-    public void CreateAndStart(RoomManager roomManager, UserManager userManager, string redisConnectionStr, PacketProcessor? packetProcessor)
+    public void CreateAndStart(string redisConnectionStr, PacketProcessor? packetProcessor)
     {
-        if (roomManager == null || userManager == null
-            || redisConnectionStr == null || packetProcessor == null)
+        if (redisConnectionStr == null || packetProcessor == null)
         {
             MainServer.MainLogger.Error("redis Processor 생성에 실패하였습니다.");
             throw new NullReferenceException();
         }
-
-        _roomManager = roomManager;
-        _userManager = userManager;
-
 
         _redisConnector = new RedisConnection(new RedisConfig("defalut", redisConnectionStr));
 
@@ -59,14 +51,13 @@ public class RedisProcessor
 
     void RegisterPakcetHandler()
     {
-        if (_roomManager == null || _userManager == null
-            || _redisConnector == null || _packetProcessor == null)
+        if (_redisConnector == null || _packetProcessor == null)
         {
             MainServer.MainLogger.Error("redis Processor 패킷 등록에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
-        _packetHandlerTokenVeriry = new PacketHandlerTokenVerify(_roomManager, _userManager, _redisConnector, _packetProcessor);
+        _packetHandlerTokenVeriry = new PacketHandlerTokenVerify(_redisConnector, _packetProcessor);
         _packetHandlerTokenVeriry.RegisterPacketHandler(_packetHandlerMap);
     }
 

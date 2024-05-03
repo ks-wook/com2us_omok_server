@@ -103,7 +103,7 @@ namespace GameServer
         {
             // 매니저 초기화
             _userManager.Init(_mainServerOption);
-            _roomManager.Init(_mainServerOption);
+            _roomManager.Init(_mainServerOption, _mainPacketProcessor.Insert);
 
 
             BasePacketHandler.NetSendFunc = SendData;
@@ -112,10 +112,10 @@ namespace GameServer
             _mainPacketProcessor.CreateAndStart(_roomManager, _userManager, _mysqlProcessor, _redisProcessor); // 프로세서 초기화
 
             // mysql 프로세서
-            _mysqlProcessor.CreateAndStart(_roomManager, _userManager, _mainServerOption.MysqlConnectionStr, _mainPacketProcessor); // 프로세서 초기화
+            _mysqlProcessor.CreateAndStart(_mainServerOption.MysqlConnectionStr, _mainPacketProcessor); // 프로세서 초기화
 
             // redis 프로세서
-            _redisProcessor.CreateAndStart(_roomManager, _userManager, _mainServerOption.RedisConnectionStr, _mainPacketProcessor); // 프로세서 초기화
+            _redisProcessor.CreateAndStart(_mainServerOption.RedisConnectionStr, _mainPacketProcessor); // 프로세서 초기화
 
             MainLogger.Info("CreateComponent - Success");
             return ErrorCode.None;

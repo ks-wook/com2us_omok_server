@@ -21,7 +21,7 @@ public class BasePacketHandler
 
     }
 
-    public (ErrorCode, T?) DeserializePacket<T>(byte[] bytes)
+    public (ErrorCode, T?) DeserializeNullablePacket<T>(byte[] bytes)
     {
         T? bodyData = MemoryPackSerializer.Deserialize<T>(bytes);
         if (bodyData == null)
@@ -34,6 +34,12 @@ public class BasePacketHandler
     }
 
 
+#pragma warning disable 8603  
+    public T DeserializePacket<T>(byte[] bytes)
+    {
+        return MemoryPackSerializer.Deserialize<T>(bytes);
+    }
+#pragma warning restore 8603 
 
 
     // 일반 패킷 전송
@@ -46,20 +52,8 @@ public class BasePacketHandler
 
 
 
-
-
-    // Mysql 완료 패킷 전송
-    public void SendMysqlResPacket<T>(T sendData, InnerPacketId packetId, string sessionId, PacketProcessor packetProcessor)
-    {
-        var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
-        MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
-        MemoryPackBinaryRequestInfo memoryPackReq = new MemoryPackBinaryRequestInfo(sendPacket);
-        memoryPackReq.SessionID = sessionId;
-        packetProcessor.Insert(memoryPackReq);
-    }
-
     // Mysql 요청 패킷 전송
-    public void SendMysqlReqPacket<T>(T sendData, InnerPacketId packetId, string sessionId, MysqlProcessor packetProcessor)
+    public void SendInnerReqPacket<T>(T sendData, InnerPacketId packetId, string sessionId, MysqlProcessor packetProcessor)
     {
         var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
         MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
@@ -67,15 +61,9 @@ public class BasePacketHandler
         memoryPackReq.SessionID = sessionId;
         packetProcessor.Insert(memoryPackReq);
     }
-
-
-
-
-
-
 
     // Redis 요청 패킷 전송
-    public void SendRedisReqPacket<T>(T sendData, InnerPacketId packetId, string sessionId, RedisProcessor packetProcessor)
+    public void SendInnerReqPacket<T>(T sendData, InnerPacketId packetId, string sessionId, RedisProcessor packetProcessor)
     {
         var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
         MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
@@ -85,8 +73,13 @@ public class BasePacketHandler
     }
 
 
-    // Redis 완료 패킷 전송
-    public void SendRedisResPacket<T>(T sendData, InnerPacketId packetId, string sessionId, PacketProcessor packetProcessor)
+
+
+
+
+
+    // Inner 패킷 요청 완료 전송
+    public void SendInnerResPacket<T>(T sendData, InnerPacketId packetId, string sessionId, PacketProcessor packetProcessor)
     {
         var sendPacket = MemoryPackSerializer.Serialize<T>(sendData);
         MemoryPackPacketHeadInfo.Write(sendPacket, packetId);
@@ -94,8 +87,6 @@ public class BasePacketHandler
         memoryPackReq.SessionID = sessionId;
         packetProcessor.Insert(memoryPackReq);
     }
-
-
 
 
 

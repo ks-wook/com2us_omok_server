@@ -46,7 +46,7 @@ public class PacketHandlerAuth : BasePacketHandler
         var sessionId = packet.SessionID;
 
 
-        (ErrorCode result, PKTReqLogin? bodyData) = DeserializePacket<PKTReqLogin>(packet.Data);
+        (ErrorCode result, PKTReqLogin? bodyData) = DeserializeNullablePacket<PKTReqLogin>(packet.Data);
 
         if (result != ErrorCode.None || bodyData == null)
         {
@@ -56,14 +56,23 @@ public class PacketHandlerAuth : BasePacketHandler
 
 
 
-        result = CheckAuthToken(bodyData, sessionId);
+        //result = CheckAuthToken(bodyData, sessionId);
 
-        if(result != ErrorCode.None)
-        {
-            SendLoginFail(sessionId);
-            return;
-        }
+        //if(result != ErrorCode.None)
+        //{
+        //    SendLoginFail(sessionId);
+        //    return;
+        //}
 
+
+        // TEST 무조건 로그인 성공
+        _ = _userManager.AddUser(bodyData.UserId, sessionId);
+        PKTResLogin sendData = new PKTResLogin();
+        sendData.UserId = bodyData.UserId;
+        var sendPacket = MemoryPackSerializer.Serialize<PKTResLogin>(sendData);
+        MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResLogin);
+        NetSendFunc(sessionId, sendPacket);
+        // TEST ------------------
     }
 
     public void MQResVerifyTokenHandler(MemoryPackBinaryRequestInfo packet)
@@ -71,7 +80,7 @@ public class PacketHandlerAuth : BasePacketHandler
         var sessionId = packet.SessionID;
 
 
-        (ErrorCode result, PKTInnerResVerifyToken? bodyData) = DeserializePacket<PKTInnerResVerifyToken>(packet.Data);
+        (ErrorCode result, PKTInnerResVerifyToken? bodyData) = DeserializeNullablePacket<PKTInnerResVerifyToken>(packet.Data);
 
         if (result != ErrorCode.None || bodyData == null)
         {
@@ -97,7 +106,7 @@ public class PacketHandlerAuth : BasePacketHandler
             PKTInnerReqVerifyToken sendData = new PKTInnerReqVerifyToken();
             sendData.AccountId = Int64.Parse(bodyData.UserId);
             sendData.Token = bodyData.AuthToken;
-            SendRedisReqPacket<PKTInnerReqVerifyToken>(sendData, InnerPacketId.PKTInnerReqVerifyToken, sessionId, _redisProcessor);
+            SendInnerReqPacket<PKTInnerReqVerifyToken>(sendData, InnerPacketId.PKTInnerReqVerifyToken, sessionId, _redisProcessor);
 
             return ErrorCode.None;
         }
@@ -111,32 +120,23 @@ public class PacketHandlerAuth : BasePacketHandler
 
     public ErrorCode Login(PKTInnerResVerifyToken packet, string sessionId)
     {
-        try
+
+        // 유저 매니저에 추가하고 서버 접속 처리
+        ErrorCode result = _userManager.AddUser(packet.UserId, sessionId);
+
+        if (result != ErrorCode.None)
         {
-            // 유저 매니저에 추가하고 서버 접속 처리
-            ErrorCode result = _userManager.AddUser(packet.UserId, sessionId);
-
-            if (result != ErrorCode.None)
-            {
-                MainServer.MainLogger.Error($"[Login] ErrorCode: {result}");
-                return result;
-            }
-
-            PKTResLogin sendData = new PKTResLogin();
-            sendData.UserId = packet.UserId;
-            var sendPacket = MemoryPackSerializer.Serialize<PKTResLogin>(sendData);
-            MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResLogin);
-            NetSendFunc(sessionId, sendPacket);
-
-            return ErrorCode.None;
+            MainServer.MainLogger.Error($"[Login] ErrorCode: {result}");
+            return result;
         }
-        catch(Exception ex)
-        {
-            MainServer.MainLogger.Error($"[Login] ErrorCode : {ErrorCode.LoginFail}, {ex.ToString()}");
-            SendLoginFail(sessionId);
-            return ErrorCode.LoginFail;
-        }
-        
+
+        PKTResLogin sendData = new PKTResLogin();
+        sendData.UserId = packet.UserId;
+        var sendPacket = MemoryPackSerializer.Serialize<PKTResLogin>(sendData);
+        MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResLogin);
+        NetSendFunc(sessionId, sendPacket);
+
+        return ErrorCode.None;
     }
 
     // 로그인 실패 패킷 전송

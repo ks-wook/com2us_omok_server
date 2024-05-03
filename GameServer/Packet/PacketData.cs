@@ -130,6 +130,8 @@ public partial class PKTResPutMok : PacketResult // 돌 두기 요청 응답
     public string UserId { get; set; } = string.Empty;
     public int PosX;
     public int PosY;
+    public bool IsTimeout { get; set; } = false;
+
 }
 
 

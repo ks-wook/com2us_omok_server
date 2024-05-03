@@ -41,7 +41,7 @@ public class PacketHandlerRoom : BasePacketHandler
     {
         var sessionId = packet.SessionID;
 
-        (ErrorCode result, PKTReqRoomEnter? bodyData) = DeserializePacket<PKTReqRoomEnter>(packet.Data);
+        (ErrorCode result, PKTReqRoomEnter? bodyData) = DeserializeNullablePacket<PKTReqRoomEnter>(packet.Data);
 
         if (result != ErrorCode.None || bodyData == null)
         {
@@ -63,7 +63,7 @@ public class PacketHandlerRoom : BasePacketHandler
     {
         var sessionId = packet.SessionID;
 
-        (ErrorCode result, PKTReqRoomLeave? bodyData) = DeserializePacket<PKTReqRoomLeave>(packet.Data);
+        (ErrorCode result, PKTReqRoomLeave? bodyData) = DeserializeNullablePacket<PKTReqRoomLeave>(packet.Data);
         if(result != ErrorCode.None || bodyData == null)
         {
             SendFailPacket<PKTResRoomLeave>(PACKETID.PKTResRoomLeave, sessionId, result);
@@ -83,7 +83,7 @@ public class PacketHandlerRoom : BasePacketHandler
     {
         var sessionId = packet.SessionID;
 
-        (ErrorCode result, PKTReqRoomChat? bodyData) = DeserializePacket<PKTReqRoomChat>(packet.Data);
+        (ErrorCode result, PKTReqRoomChat? bodyData) = DeserializeNullablePacket<PKTReqRoomChat>(packet.Data);
         if (result != ErrorCode.None || bodyData == null)
         {
             SendFailPacket<PKTResRoomChat>(PACKETID.PKTResRoomChat, sessionId, result);
