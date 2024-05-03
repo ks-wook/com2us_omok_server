@@ -9,12 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="SuperSocketLite">
-      <HintPath>SuperSocketLite\SuperSocketLite.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="CloudStructures" Version="3.3.0" />
     <PackageReference Include="MemoryPack" Version="1.21.1" />
     <PackageReference Include="MySqlConnector" Version="2.3.7" />
@@ -27,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GameAPIServer\GameAPIServer.csproj" />
+    <ProjectReference Include="..\SuperSocketLite\SuperSocketLite.csproj" />
   </ItemGroup>
 
 </Project>
