@@ -42,7 +42,7 @@ public class PacketHandlerTokenVerify : BasePacketHandler
     {
         var sessionId = packet.SessionID;
 
-        (ErrorCode result, PKTInnerReqVerifyToken? bodyData) = DeserializePacket<PKTInnerReqVerifyToken>(packet.Data);
+        (ErrorCode result, PKTInnerReqVerifyToken? bodyData) = DeserializeNullablePacket<PKTInnerReqVerifyToken>(packet.Data);
 
         if (result != ErrorCode.None || bodyData == null)
         {
@@ -110,10 +110,7 @@ public class PacketHandlerTokenVerify : BasePacketHandler
         PKTInnerResVerifyToken sendData = new PKTInnerResVerifyToken();
         sendData.UserId = userId;
         sendData.Result = ErrorCode.None;
-        SendRedisResPacket<PKTInnerResVerifyToken>(sendData, InnerPacketId.PKTInnerResVerifyToken, sessionId, _packetProcessor);
+        SendInnerResPacket<PKTInnerResVerifyToken>(sendData, InnerPacketId.PKTInnerResVerifyToken, sessionId, _packetProcessor);
     }
-
-
-
 
 }

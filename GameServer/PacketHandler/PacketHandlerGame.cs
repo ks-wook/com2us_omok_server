@@ -3,6 +3,7 @@ using MemoryPack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -36,8 +37,10 @@ public class PacketHandlerGame : BasePacketHandler
         packetHandlerMap.Add((int)PACKETID.PKTReqPutMok, PKTReqPutMokHandler);
 
 
-        // DB res
+
+        // InnerPacket
         packetHandlerMap.Add((int)InnerPacketId.PKTInnerResSaveGameResult, MqResSaveGameResultHandler);
+        packetHandlerMap.Add((int)InnerPacketId.PKTInnerNtfTurnChange, PKTInnerNtfTurnChangeHandler);
 
     }
 
@@ -46,7 +49,7 @@ public class PacketHandlerGame : BasePacketHandler
     {
         var sessionId = packet.SessionID;
 
-        (ErrorCode result, PKTReqReadyOmok? bodyData) = DeserializePacket<PKTReqReadyOmok>(packet.Data);
+        (ErrorCode result, PKTReqReadyOmok? bodyData) = DeserializeNullablePacket<PKTReqReadyOmok>(packet.Data);
         if (result != ErrorCode.None || bodyData == null)
         {
             SendFailPacket<PKTResReadyOmok>(PACKETID.PKTResReadyOmok, sessionId, result);
@@ -65,7 +68,7 @@ public class PacketHandlerGame : BasePacketHandler
     {
         var sessionId = packet.SessionID;
 
-        (ErrorCode result, PKTReqPutMok? bodyData) = DeserializePacket<PKTReqPutMok>(packet.Data);
+        (ErrorCode result, PKTReqPutMok? bodyData) = DeserializeNullablePacket<PKTReqPutMok>(packet.Data);
         if (result != ErrorCode.None || bodyData == null)
         {
             SendFailPacket<PKTResPutMok>(PACKETID.PKTResRoomChat, sessionId, result);
@@ -85,7 +88,7 @@ public class PacketHandlerGame : BasePacketHandler
     {
         var sessionId = packet.SessionID;
 
-        (ErrorCode result, PKTInnerResSaveGameResult? bodyData) = DeserializePacket<PKTInnerResSaveGameResult>(packet.Data);
+        (ErrorCode result, PKTInnerResSaveGameResult? bodyData) = DeserializeNullablePacket<PKTInnerResSaveGameResult>(packet.Data);
         if (result != ErrorCode.None || bodyData == null)
         {
             MainServer.MainLogger.Error("DB 패킷 수신 실패");
@@ -96,8 +99,13 @@ public class PacketHandlerGame : BasePacketHandler
     }
 
 
+    // 강제로 턴을 바꾸는 패킷 핸들러
+    public void PKTInnerNtfTurnChangeHandler(MemoryPackBinaryRequestInfo packet)
+    {
+        var bodyData = DeserializePacket<PKTInnerNtfTurnChange>(packet.Data);
 
-
+        ForceTurnChange(bodyData);
+    }
 
 
 
@@ -161,20 +169,12 @@ public class PacketHandlerGame : BasePacketHandler
         sendData.PosY = packet.PosY;
         room.NotifyRoomUsers<PKTResPutMok>(NetSendFunc, sendData, PACKETID.PKTResPutMok);
 
+        room.UpdateLastTurnChangeTime();
+
 
         // 승부가 났는지 확인
         if (room.GetOmokGame().CheckWinner(packet.PosX, packet.PosY))
         {
-            // TODO 룸의 게임 타이머 종료
-
-
-
-
-
-
-
-
-
             // 종료된 게임을 db에 저장한다.
             PKTInnerReqSaveGameResult sendDBData = new PKTInnerReqSaveGameResult();
             foreach (RoomUser roomUser in room.GetRoomUserList())
@@ -187,22 +187,10 @@ public class PacketHandlerGame : BasePacketHandler
             sendDBData.WinUserId = room.GetOmokGame().winUserId;
 
             // mysql processor로 전송
-            SendMysqlReqPacket<PKTInnerReqSaveGameResult>(sendDBData, InnerPacketId.PKTInnerReqSaveGameResult, sessionId, _mysqlProcessor);
+            SendInnerReqPacket<PKTInnerReqSaveGameResult>(sendDBData, InnerPacketId.PKTInnerReqSaveGameResult, sessionId, _mysqlProcessor);
 
             return ErrorCode.None;
         }
-
-
-        // TODO 룸의 게임 타이머 재시작
-
-
-
-
-
-
-
-
-
 
         return ErrorCode.None;
     }
@@ -229,7 +217,9 @@ public class PacketHandlerGame : BasePacketHandler
         }
 
 
+        room.OmokGameEnd();
         room.NotifyRoomUsers<PKTNtfEndOmok>(NetSendFunc, endGameData, PACKETID.PKTNtfEndOmok);
+    
     }
 
 
@@ -260,6 +250,25 @@ public class PacketHandlerGame : BasePacketHandler
         }
 
         return (ErrorCode.None, user, room);
+    }
+
+
+    // Inner Packet이므로 패킷이 깨지거나 유효하지않은 요청일수 없다.
+    public void ForceTurnChange(PKTInnerNtfTurnChange bodyData)
+    {
+#pragma warning disable 8600, 8602
+        Room room = _roomManager.FindRoomByRoomNumber(bodyData.RoomNumber);
+
+        // 턴 변경 패킷 전송
+        PKTResPutMok sendData = new PKTResPutMok();
+        sendData.UserId = room.CurTurnUserId;
+        sendData.IsTimeout = true;
+        room.NotifyRoomUsers<PKTResPutMok>(NetSendFunc, sendData, PACKETID.PKTResPutMok);
+
+        // 턴 변경시간 업데이트
+        room.UpdateLastTurnChangeTime();
+
+#pragma warning restore 8600, 8602
     }
 
 }

@@ -103,7 +103,7 @@ namespace GameServer
         {
             // 매니저 초기화
             _userManager.Init(_mainServerOption);
-            _roomManager.Init(_mainServerOption);
+            _roomManager.Init(_mainServerOption, _mainPacketProcessor.Insert);
 
 
             BasePacketHandler.NetSendFunc = SendData;

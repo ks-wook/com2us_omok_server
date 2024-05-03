@@ -42,7 +42,7 @@ public class PacketHandlerGameResult : BasePacketHandler
     {
         var sessionId = packet.SessionID;
 
-        (ErrorCode result, PKTInnerReqSaveGameResult? bodyData) = DeserializePacket<PKTInnerReqSaveGameResult>(packet.Data);
+        (ErrorCode result, PKTInnerReqSaveGameResult? bodyData) = DeserializeNullablePacket<PKTInnerReqSaveGameResult>(packet.Data);
 
         if (result != ErrorCode.None || bodyData == null)
         {
@@ -98,6 +98,6 @@ public class PacketHandlerGameResult : BasePacketHandler
         PKTInnerResSaveGameResult sendData = new PKTInnerResSaveGameResult();
         sendData.sessionIds = packet.sessionIds;
         sendData.WinUserId = packet.WinUserId;
-        SendMysqlResPacket<PKTInnerResSaveGameResult>(sendData, InnerPacketId.PKTInnerResSaveGameResult, sessionId, _packetProcessor);
+        SendInnerResPacket<PKTInnerResSaveGameResult>(sendData, InnerPacketId.PKTInnerResSaveGameResult, sessionId, _packetProcessor);
     }
 }
