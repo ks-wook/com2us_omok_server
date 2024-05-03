@@ -1,5 +1,4 @@
-﻿using GameServer.DB.Redis;
-using GameServer.Packet;
+﻿using GameServer.Packet;
 using MemoryPack;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GameServer;
 
-public class PacketHandlerAuth : PacketHandler
+public class PacketHandlerAuth : BasePacketHandler
 {
     UserManager _userManager;
 
@@ -37,7 +36,7 @@ public class PacketHandlerAuth : PacketHandler
 
 
         // Redis 응답
-        packetHandlerMap.Add((int)MQDATAID.MQ_RES_VERIFY_TOKEN, MQResVerifyTokenHandler);
+        packetHandlerMap.Add((int)InnerPacketId.PKTInnerResVerifyToken, MQResVerifyTokenHandler);
     }
 
 
@@ -72,7 +71,7 @@ public class PacketHandlerAuth : PacketHandler
         var sessionId = packet.SessionID;
 
 
-        (ErrorCode result, MQResVerifyToken? bodyData) = DeserializePacket<MQResVerifyToken>(packet.Data);
+        (ErrorCode result, PKTInnerResVerifyToken? bodyData) = DeserializePacket<PKTInnerResVerifyToken>(packet.Data);
 
         if (result != ErrorCode.None || bodyData == null)
         {
@@ -95,10 +94,10 @@ public class PacketHandlerAuth : PacketHandler
         try
         {
             // 레디스에서 토큰 검증
-            MQReqVerifyToken sendData = new MQReqVerifyToken();
+            PKTInnerReqVerifyToken sendData = new PKTInnerReqVerifyToken();
             sendData.AccountId = Int64.Parse(bodyData.UserId);
             sendData.Token = bodyData.AuthToken;
-            SendRedisReqPacket<MQReqVerifyToken>(sendData, MQDATAID.MQ_REQ_VERIFY_TOKEN, sessionId, _redisProcessor);
+            SendRedisReqPacket<PKTInnerReqVerifyToken>(sendData, InnerPacketId.PKTInnerReqVerifyToken, sessionId, _redisProcessor);
 
             return ErrorCode.None;
         }
@@ -110,7 +109,7 @@ public class PacketHandlerAuth : PacketHandler
     }
 
 
-    public ErrorCode Login(MQResVerifyToken packet, string sessionId)
+    public ErrorCode Login(PKTInnerResVerifyToken packet, string sessionId)
     {
         try
         {

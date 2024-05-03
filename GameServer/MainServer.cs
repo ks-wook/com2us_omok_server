@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GameServer.Session;
 using GameServer.Packet;
 using MemoryPack;
 using System.Security.Cryptography.Xml;
@@ -107,7 +106,7 @@ namespace GameServer
             _roomManager.Init(_mainServerOption);
 
 
-            PacketHandler.NetSendFunc = SendData;
+            BasePacketHandler.NetSendFunc = SendData;
 
             // 메인 패킷 프로세서
             _mainPacketProcessor.CreateAndStart(_roomManager, _userManager, _mysqlProcessor, _redisProcessor); // 프로세서 초기화
@@ -191,4 +190,16 @@ namespace GameServer
         }
 
     }
+
+
+    public class ClientSession : AppSession<ClientSession, MemoryPackBinaryRequestInfo>
+    {
+        // TODO 마지막으로 ping을 보낸 시간을 기록
+
+
+
+
+
+    }
+
 }

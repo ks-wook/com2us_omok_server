@@ -9,7 +9,7 @@ namespace GameServer;
 public class User
 {
     public string Id { get; set; } = string.Empty;
-    public string SessionId {  get; set; } = string.Empty;
+    public string SessionId { get; set; } = string.Empty;
     public UserState State { get; set; } = UserState.Login;
     public int RoomNumber { get; private set; } = -1;
 
@@ -21,13 +21,13 @@ public class User
 
     public void EnteredRoom(int roomNumber)
     {
-        this.State = UserState.InRoom;
+        State = UserState.InRoom;
         RoomNumber = roomNumber;
     }
 
     public void LeavedRoom()
     {
-        this.State = UserState.Login;
+        State = UserState.Login;
         RoomNumber = -1;
     }
 }
