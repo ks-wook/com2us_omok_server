@@ -15,21 +15,14 @@ namespace GameServer.PacketHandler;
 
 public class PacketHandlerTokenVerify : BasePacketHandler
 {
-    RoomManager _roomManager;
-    UserManager _userManager;
-
-
     RedisConnection _redisConnector;
 
     PacketProcessor _packetProcessor;
 
 
 
-    public PacketHandlerTokenVerify(RoomManager roomManager, UserManager userManager, RedisConnection redisConnector, PacketProcessor packetProcessor)
+    public PacketHandlerTokenVerify(RedisConnection redisConnector, PacketProcessor packetProcessor)
     {
-        _roomManager = roomManager;
-        _userManager = userManager;
-
         _redisConnector = redisConnector;
         _packetProcessor = packetProcessor;
     }
