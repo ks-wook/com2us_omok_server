@@ -95,7 +95,7 @@ public class BasePacketHandler
 
 
     // 실패 패킷 전송
-    public void SendFailPacket<T>(PACKETID packetId, string sessionId, ErrorCode error) where T : PacketResult, new()
+    public void SendFailPacket<T>(PACKETID packetId, string sessionId, ErrorCode error) where T : PkResult, new()
     {
         T sendData = new T();
         sendData.Result = error;
@@ -106,7 +106,7 @@ public class BasePacketHandler
     }
 
     // Mysql 실패 패킷 전송
-    public void SendMysqlFailPacket<T>(InnerPacketId packetId, PacketProcessor packetProcessor, ErrorCode error) where T : PacketResult, new()
+    public void SendMysqlFailPacket<T>(InnerPacketId packetId, PacketProcessor packetProcessor, ErrorCode error) where T : PkResult, new()
     {
         T sendData = new T();
         sendData.Result = error;
@@ -117,7 +117,7 @@ public class BasePacketHandler
     }
 
     // Redis 실패 패킷 전송
-    public void SendRedisFailPacket<T>(InnerPacketId packetId, PacketProcessor packetProcessor, ErrorCode error) where T : PacketResult, new()
+    public void SendRedisFailPacket<T>(InnerPacketId packetId, PacketProcessor packetProcessor, ErrorCode error) where T : PkResult, new()
     {
         T sendData = new T();
         sendData.Result = error;
@@ -130,7 +130,7 @@ public class BasePacketHandler
 
 
 
-    public void SendFailPacket<T>(PACKETID packetId, List<string> sessionIds, ErrorCode error) where T : PacketResult, new()
+    public void SendFailPacket<T>(PACKETID packetId, List<string> sessionIds, ErrorCode error) where T : PkResult, new()
     {
         T sendData = new T();
         sendData.Result = error;

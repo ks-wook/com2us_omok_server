@@ -17,84 +17,77 @@ public class RoomManager
 
     Action<MemoryPackBinaryRequestInfo> _insertInnerPacket;
     
-    double timerWeight = 0.5; // 방 검사 타이머 오차 보정값
-    int roomCheckStartIndex = -1; // 방 검사 시작할 인덱스
+    double timerWeight = 0.5; // 방 검사 타이머 오차 보정값 네트워크 상황에 따라 조정
+    int _roomCheckStartIndex = -1; // 방 검사 시작할 인덱스
 
-    private int RoomMaxCount { get; set; } = 0;
-    private int RoomStartNumber { get; set; } = 0;
-    private int RoomMaxUserCount { get; set; } = 0;
-    private int CheckFrequencyRoom { get; set; } = 0;
-    private int CheckAtOnceRoomCount { get; set; } = 0;
-
+    int _roomMaxCount { get; set; } = 0;
+    int _roomStartNumber { get; set; } = 0;
+    int _roomMaxUserCount { get; set; } = 0;
+    int _checkFrequencyRoom { get; set; } = 0;
+    int _checkAtOnceRoomCount { get; set; } = 0;
 
     public void Init(MainServerOption option, Action<MemoryPackBinaryRequestInfo> InsertInnerPacket)
     {
         // 지정된 개수만큼 룸 생성후 풀링
-        RoomMaxCount = option.RoomMaxCount;
-        RoomStartNumber = option.RoomStartNumber;
-        RoomMaxUserCount = option.RoomMaxUserCount;
-        CheckFrequencyRoom = option.CheckFrequencyRoom;
-        CheckAtOnceRoomCount = option.CheckAtOnceRoomCount;
+        _roomMaxCount = option.RoomMaxCount;
+        _roomStartNumber = option.RoomStartNumber;
+        _roomMaxUserCount = option.RoomMaxUserCount;
+        _checkFrequencyRoom = option.CheckFrequencyRoom;
+        _checkAtOnceRoomCount = option.CheckAtOnceRoomCount;
 
-        for (int i = 0; i < RoomMaxCount; i++)
+        for (int i = 0; i < _roomMaxCount; i++)
         {
             var room = new Room();
-            room.Init(RoomStartNumber + i, RoomMaxUserCount);
+            room.Init(_roomStartNumber + i, _roomMaxUserCount);
             rooms.Add(room);
         }
 
         // 룸 체크 타이머 설정
-        int awakeUpTime = CheckFrequencyRoom / (RoomMaxCount / CheckAtOnceRoomCount);
+        int awakeUpTime = _checkFrequencyRoom / (_roomMaxCount / _checkAtOnceRoomCount);
         roomCheckTimer = new System.Timers.Timer(awakeUpTime);
         roomCheckTimer.Elapsed += CheckRoomState;
         roomCheckTimer.AutoReset = true;
         roomCheckTimer.Enabled = true;
 
-        roomCheckStartIndex = 0;
+        _roomCheckStartIndex = 0;
 
-        this._insertInnerPacket = InsertInnerPacket;
+        _insertInnerPacket = InsertInnerPacket;
     }
 
     public List<Room> GetRoomList() { return rooms; }
-
 
     public Room? FindRoomByRoomNumber(int roomNumber)
     {
         return rooms.Find(r => r.RoomNumber == roomNumber);
     }
 
-
     void CheckRoomState(Object? source, ElapsedEventArgs e)
     {
-        for(int i = 0; i < CheckAtOnceRoomCount; i++, roomCheckStartIndex++)
+        for(int i = 0; i < _checkAtOnceRoomCount; i++, _roomCheckStartIndex++)
         {
-
-            if (roomCheckStartIndex >= rooms.Count)
+            if (_roomCheckStartIndex >= rooms.Count)
             {
-                roomCheckStartIndex = 0;
+                _roomCheckStartIndex = 0;
             }
 
-            Room curRoom = rooms[roomCheckStartIndex];
+            Room curRoom = rooms[_roomCheckStartIndex];
 
             if (curRoom.State == RoomState.None)
                 continue;
 
-
             if(CheckTurnTimeout(curRoom) == false)
                 continue;
-
 
             // 강제로 턴을 넘기는 패킷을 전송한다.
             PKTInnerNtfTurnChange innerSendData = new PKTInnerNtfTurnChange();
             innerSendData.RoomNumber = curRoom.RoomNumber;
+            innerSendData.CurTurnUserId = curRoom.CurTurnUserId;
             var innerSendPacket = MemoryPackSerializer.Serialize(innerSendData);
             MemoryPackPacketHeadInfo.Write(innerSendPacket, InnerPacketId.PKTInnerNtfTurnChange);
             _insertInnerPacket(new MemoryPackBinaryRequestInfo(innerSendPacket));
-
         }
 
     }
-
 
     public bool CheckTurnTimeout(Room room)
     {
@@ -110,7 +103,6 @@ public class RoomManager
     }
 
 }
-
 
 // 방 상태 조사시 InGame인 상태만 조사한다.
 public enum RoomState

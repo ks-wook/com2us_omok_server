@@ -48,5 +48,9 @@ namespace GameServer
         // Timer Option
         public int CheckAtOnceRoomCount { get; set; } = 5; // 한번에 검사할 룸의 개수
         public int CheckFrequencyRoom { get; set; } = 5000; // 방을 검사하는 빈도수
+
+        public int CheckFrequencyUser { get; set; } = 250; // 유저 입장에서 검사받는 빈도수 ex) 250 -> 0.25초에 한번
+        public int CheckAtOnceUserRatio { get; set; } = 4; // 한번에 검사할 유저수의 비율 ex) 4 -> 한번에 1 / 4 유저씩 검사
+        public double MaxPingDelayTime { get; set; } = 0.25; // 핑이 도착해야할 최대 지연 시간
     }
 }

@@ -29,14 +29,11 @@ public class PacketHandlerGame : BasePacketHandler
         this._mysqlProcessor = mysqlProcessor;
     }
 
-
     public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap)
     {
         // Client req
         packetHandlerMap.Add((int)PACKETID.PKTReqReadyOmok, PKTReqReadyOmokHandler);
         packetHandlerMap.Add((int)PACKETID.PKTReqPutMok, PKTReqPutMokHandler);
-
-
 
         // InnerPacket
         packetHandlerMap.Add((int)InnerPacketId.PKTInnerResSaveGameResult, MqResSaveGameResultHandler);
@@ -71,7 +68,7 @@ public class PacketHandlerGame : BasePacketHandler
         (ErrorCode result, PKTReqPutMok? bodyData) = DeserializeNullablePacket<PKTReqPutMok>(packet.Data);
         if (result != ErrorCode.None || bodyData == null)
         {
-            SendFailPacket<PKTResPutMok>(PACKETID.PKTResRoomChat, sessionId, result);
+            SendFailPacket<PKTResPutMok>(PACKETID.PKTResPutMok, sessionId, result);
             return;
         }
 
@@ -159,6 +156,10 @@ public class PacketHandlerGame : BasePacketHandler
             return ErrorCode.FailReadyOmok;
         }
 
+        if (room.CheckCurrentTurnUserId(user.Id) == false)
+        {
+            return ErrorCode.InvalidRequest;
+        }
 
         room.GetOmokGame().PlaceStone(packet.PosX, packet.PosY, user.Id);
 
@@ -171,7 +172,6 @@ public class PacketHandlerGame : BasePacketHandler
 
         room.UpdateLastTurnChangeTime();
 
-
         // 승부가 났는지 확인
         if (room.GetOmokGame().CheckWinner(packet.PosX, packet.PosY))
         {
@@ -182,9 +182,9 @@ public class PacketHandlerGame : BasePacketHandler
                 sendDBData.sessionIds.Add(roomUser.RoomSessionID);
             }
 
-            sendDBData.BlackUserId = room.GetOmokGame().blackUserId;
-            sendDBData.WhiteUserId = room.GetOmokGame().whiteUserId;
-            sendDBData.WinUserId = room.GetOmokGame().winUserId;
+            sendDBData.BlackUserId = room.GetOmokGame().BlackUserId;
+            sendDBData.WhiteUserId = room.GetOmokGame().WhiteUserId;
+            sendDBData.WinUserId = room.GetOmokGame().WinUserId;
 
             // mysql processor로 전송
             SendInnerReqPacket<PKTInnerReqSaveGameResult>(sendDBData, InnerPacketId.PKTInnerReqSaveGameResult, sessionId, _mysqlProcessor);
@@ -216,10 +216,8 @@ public class PacketHandlerGame : BasePacketHandler
             return;
         }
 
-
         room.OmokGameEnd();
         room.NotifyRoomUsers<PKTNtfEndOmok>(NetSendFunc, endGameData, PACKETID.PKTNtfEndOmok);
-    
     }
 
 
@@ -259,12 +257,17 @@ public class PacketHandlerGame : BasePacketHandler
 #pragma warning disable 8600, 8602
         Room room = _roomManager.FindRoomByRoomNumber(bodyData.RoomNumber);
 
+        if (room.CheckCurrentTurnUserId(bodyData.CurTurnUserId) == false)
+        {
+            return;
+        }
+
         // 턴 변경 패킷 전송
         PKTResPutMok sendData = new PKTResPutMok();
         sendData.UserId = room.CurTurnUserId;
         sendData.IsTimeout = true;
         room.NotifyRoomUsers<PKTResPutMok>(NetSendFunc, sendData, PACKETID.PKTResPutMok);
-
+        
         // 턴 변경시간 업데이트
         room.UpdateLastTurnChangeTime();
 

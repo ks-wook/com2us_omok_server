@@ -10,6 +10,10 @@ public class User
 {
     public string Id { get; set; } = string.Empty;
     public string SessionId { get; set; } = string.Empty;
+
+    public DateTime lastPingCheckTime; // 마지막으로 핑 응답을 받은 시간
+
+
     public UserState State { get; set; } = UserState.Login;
     public int RoomNumber { get; private set; } = -1;
 
@@ -17,6 +21,8 @@ public class User
     {
         Id = id;
         SessionId = sessionId;
+
+        UpdateLastPingCheckTime();
     }
 
     public void EnteredRoom(int roomNumber)
@@ -29,6 +35,11 @@ public class User
     {
         State = UserState.Login;
         RoomNumber = -1;
+    }
+
+    public void UpdateLastPingCheckTime()
+    {
+        lastPingCheckTime = DateTime.Now;
     }
 }
 

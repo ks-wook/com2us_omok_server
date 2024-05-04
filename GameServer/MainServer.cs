@@ -23,7 +23,7 @@ namespace GameServer
         RedisProcessor _redisProcessor = new RedisProcessor();
 
         MainServerOption _mainServerOption;
-
+        
 
         // 매니저 생성
         RoomManager _roomManager = new RoomManager();
@@ -55,7 +55,7 @@ namespace GameServer
                 SendBufferSize = option.SendBufferSize, // send 버퍼 사이즈 2048 할당
             };
 
-
+            
         }
 
         public void StopServer()
@@ -86,7 +86,6 @@ namespace GameServer
 
                 CreateComponent();
 
-
                 Start(); // 서버 Listening 시작
 
                 MainLogger.Info("서버 생성 성공");
@@ -102,9 +101,8 @@ namespace GameServer
         ErrorCode CreateComponent()
         {
             // 매니저 초기화
-            _userManager.Init(_mainServerOption);
+            _userManager.Init(_mainServerOption, _mainPacketProcessor.Insert, CloseConnection);
             _roomManager.Init(_mainServerOption, _mainPacketProcessor.Insert);
-
 
             BasePacketHandler.NetSendFunc = SendData;
 
@@ -146,6 +144,48 @@ namespace GameServer
         }
 
 
+        public void CloseConnection(string sessionId)
+        {
+            var sessions = GetAllSessions();
+
+            foreach (var session in sessions)
+            {
+                if (sessionId == session.SessionID)
+                {
+                    session.Close();
+                    break;
+                }
+            }
+
+        }
+
+        public void OnUserClosed(string sessionId)
+        {
+            // 강제 종료시 유저가 방에 있었다면 내보낸다.
+            User? user = _userManager.GetUserBySessionId(sessionId);
+            if (user != null)
+            {
+                // 방에 있던 상태였다면
+                if (user.RoomNumber != -1)
+                {
+                    Room? room = _roomManager.FindRoomByRoomNumber(user.RoomNumber);
+                    if (room != null)
+                    {
+                        room.RemoveUserBySessionId(sessionId);
+
+                        // 방에 남아있는 유저에게도 접속 종료 패킷 전송
+                        PKTResRoomLeave leaveRoomReq = new PKTResRoomLeave();
+                        leaveRoomReq.UserId = user.Id;
+                        room.NotifyRoomUsers(SendData, leaveRoomReq, PACKETID.PKTResRoomLeave);
+                    }
+                }
+
+                // 유저 매니저에서 삭제
+                _userManager.RemoveUserBySessionId(sessionId);
+            }
+        }
+
+
         void OnConnected(ClientSession session)
         {
             MainLogger.Info(string.Format("세션 번호 {0} 접속", session.SessionID));
@@ -155,36 +195,13 @@ namespace GameServer
         {
             MainLogger.Info(string.Format("세션 번호 {0} 접속해제: {1}", session.SessionID, closeReason.ToString()));
 
-            // 강제 종료시 유저가 방에 있었다면 내보낸다.
-            User? user = _userManager.GetUserBySessionId(session.SessionID);
-            if (user != null)
-            {
-                // 게임 중이거나 방에 있던 상태였다면
-                if(user.State == UserState.InGame || user.State == UserState.InRoom) 
-                {
-                    Room? room = _roomManager.FindRoomByRoomNumber(user.RoomNumber);
-                    if (room != null)
-                    {
-                        room.RemoveUserBySessionId(session.SessionID);
-
-                        // 방에 남아있는 유저에게도 접속 종료 패킷 전송
-                        PKTResRoomLeave leaveRoomReq = new PKTResRoomLeave();
-                        leaveRoomReq.UserId = user.Id;
-                        room.NotifyRoomUsers(SendData, leaveRoomReq, PACKETID.PKTResRoomLeave);
-                    }
-                }
-
-
-                // 유저 매니저에서 삭제
-                _userManager.RemoveUserBySessionId(session.SessionID);
-            }
-
+            OnUserClosed(session.SessionID);
         }
 
         void OnPacketReceived(ClientSession clientSession, MemoryPackBinaryRequestInfo requestInfo)
         {
-            MainLogger.Debug(string.Format("세션 번호 {0} 받은 데이터 크기: {1}, ThreadId: {2}", clientSession.SessionID, requestInfo.Body.Length, System.Threading.Thread.CurrentThread.ManagedThreadId));
-
+            // MainLogger.Debug(string.Format("세션 번호 {0} 받은 데이터 크기: {1}, ThreadId: {2}", clientSession.SessionID, requestInfo.Body.Length, System.Threading.Thread.CurrentThread.ManagedThreadId));
+            
             requestInfo.SessionID = clientSession.SessionID;
             _mainPacketProcessor.Insert(requestInfo);
         }
@@ -194,12 +211,6 @@ namespace GameServer
 
     public class ClientSession : AppSession<ClientSession, MemoryPackBinaryRequestInfo>
     {
-        // TODO 마지막으로 ping을 보낸 시간을 기록
-
-
-
-
-
     }
 
 }
