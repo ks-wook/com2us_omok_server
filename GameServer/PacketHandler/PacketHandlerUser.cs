@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace GameServer;
 
-public class PacketHandlerAuth : BasePacketHandler
+public class PacketHandlerUser : BasePacketHandler
 {
     UserManager _userManager;
 
     RedisProcessor _redisProcessor;
 
-    public PacketHandlerAuth(UserManager? userManager, RedisProcessor? redisProcessor)
+    public PacketHandlerUser(UserManager? userManager, RedisProcessor? redisProcessor)
     {
         if (userManager == null || redisProcessor == null)
         {
@@ -29,14 +29,15 @@ public class PacketHandlerAuth : BasePacketHandler
 
     public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap)
     {
-        // 클라이언트 요청
+        // 클라이언트
         packetHandlerMap.Add((int)PACKETID.PKTReqLogin, PKTReqLoginHandler);
+        packetHandlerMap.Add((int)PACKETID.PKTResPing, PKTResPingHandler);
 
 
-
-
-        // Redis 응답
+        // Inner Packet
         packetHandlerMap.Add((int)InnerPacketId.PKTInnerResVerifyToken, MQResVerifyTokenHandler);
+        packetHandlerMap.Add((int)InnerPacketId.PKTInnerNtfSendPing, PKTInnerNtfSendPingHandler);
+        packetHandlerMap.Add((int)InnerPacketId.PKTInnerNtfCloseConnection, PKTInnerNtfCloseConnectionHandler);
     }
 
 
@@ -98,6 +99,29 @@ public class PacketHandlerAuth : BasePacketHandler
     }
 
 
+    public void PKTResPingHandler(MemoryPackBinaryRequestInfo packet)
+    {
+        var sessionId = packet.SessionID;
+
+        CheckUserState(sessionId);
+    }
+
+    public void PKTInnerNtfSendPingHandler(MemoryPackBinaryRequestInfo packet)
+    {
+        var bodyData = DeserializePacket<PKTInnerNtfSendPing>(packet.Data);
+
+        SendPing(bodyData.SessionId);
+    }
+
+    public void PKTInnerNtfCloseConnectionHandler(MemoryPackBinaryRequestInfo packet)
+    {
+        var sessionId = packet.SessionID;
+        
+        var bodyData = DeserializePacket<PKTInnerNtfCloseConnection>(packet.Data);
+        
+        _userManager.CloseConnectionBySessionId(bodyData.SessionId);
+    }
+
     public ErrorCode CheckAuthToken(PKTReqLogin bodyData, string sessionId)
     {
         try
@@ -116,7 +140,6 @@ public class PacketHandlerAuth : BasePacketHandler
             return ErrorCode.InvaildToken;
         }
     }
-
 
     public ErrorCode Login(PKTInnerResVerifyToken packet, string sessionId)
     {
@@ -148,5 +171,24 @@ public class PacketHandlerAuth : BasePacketHandler
         var sendPacket = MemoryPackSerializer.Serialize<PKTResLogin>(sendData);
         MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResLogin);
         NetSendFunc(sessionId, sendPacket);
+    }
+    
+    public void CheckUserState(string sessionId)
+    {
+        User? user = _userManager.GetUserBySessionId(sessionId);
+        if (user == null)
+        {
+            MainServer.MainLogger.Error($"찾을 수 없는 유저의 Ping 응답");
+            return;
+        }
+
+        // 응답 시간 업데이트
+        user.UpdateLastPingCheckTime();
+    }
+
+    public void SendPing(string sessionId)
+    {
+        PKTReqPing sendData = new PKTReqPing();
+        SendPacket<PKTReqPing>(sendData, PACKETID.PKTReqPing, sessionId);
     }
 }

@@ -82,7 +82,6 @@ public class Room
         return _roomUsers;
     }
 
-
     // 룸에서 방의 모든 사람에게 패킷 전송
     public void NotifyRoomUsers<T>(Func<string, byte[], bool> NetSendFunc, T sendData, PACKETID packetId)
     {
@@ -159,27 +158,28 @@ public class Room
             sendData.WhiteUserId = _roomUsers[0].UserId;
         }
 
-
         UpdateLastTurnChangeTime();
         CurTurnUserId = sendData.BlackUserId;
-
 
         _omokGame.StartGame(sendData.BlackUserId, sendData.WhiteUserId);
         MainServer.MainLogger.Info
             ($"RoomNumber: {RoomNumber}, 흑돌: {sendData.BlackUserId}, 백돌: {sendData.WhiteUserId} 게임 시작");
 
-
         // 모든 유저에게 오목 게임 시작 패킷 전송
         NotifyRoomUsers(NetSendFunc, sendData, PACKETID.PKTNtfStartOmok);
 
         
-
         State = RoomState.InGame; // 게임 상태 전환
     }
 
     public void OmokGameEnd()
     {
         State = RoomState.None; // 게임 종료
+        
+        foreach(RoomUser roomUser in _roomUsers)
+        {
+            roomUser.IsReady = false;
+        }
     }
 
     // 턴 변경 시간 갱신
@@ -192,13 +192,23 @@ public class Room
     // 현재 턴인 유저 아이디 갱신
     void UpdateCurTurnUser()
     {
-        if(CurTurnUserId == _omokGame.blackUserId)
+        if(CurTurnUserId == _omokGame.BlackUserId)
         {
-            CurTurnUserId = _omokGame.whiteUserId;
+            CurTurnUserId = _omokGame.WhiteUserId;
         }
         else
         {
-            CurTurnUserId = _omokGame.blackUserId;
+            CurTurnUserId = _omokGame.BlackUserId;
         }
+    }
+
+    public bool CheckCurrentTurnUserId(string userId)
+    {
+        if(string.CompareOrdinal(CurTurnUserId, userId) != 0)
+        {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -16,7 +16,7 @@ public enum StoneType
 
 public class OmokRule
 {
-    public static int MaxTurnTime = 5; // 한번에 주어지는 턴의 시간
+    public static double MaxTurnTime = 6; // 한번에 주어지는 턴의 시간
 }
 
 public class OmokGame
@@ -24,10 +24,9 @@ public class OmokGame
     StoneType[,] board;
     public int BoardSize = 19;
 
-
-    public string winUserId = string.Empty; // white or black user id
-    public string blackUserId = string.Empty;
-    public string whiteUserId = string.Empty;
+    public string WinUserId { get; set; } = string.Empty; // white or black user id
+    public string BlackUserId { get; set; } = string.Empty;
+    public string WhiteUserId { get; set; } = string.Empty;
 
     public OmokGame()
     {
@@ -37,18 +36,18 @@ public class OmokGame
     public void StartGame(string blackUserId, string whiteUserId)
     {
         ClearBoard();
-        this.blackUserId = blackUserId;
-        this.whiteUserId = whiteUserId;
+        BlackUserId = blackUserId;
+        WhiteUserId = whiteUserId;
     }
 
     // 돌을 둔 위치를 오목판에 반영
     public void PlaceStone(int row, int col, string userId)
     {
-        if(userId == blackUserId)
+        if(userId == BlackUserId)
         {
             board[row, col] = StoneType.Black;
         }
-        else if(userId == whiteUserId)
+        else if(userId == WhiteUserId)
         {
             board[row, col] = StoneType.White;
         }
@@ -135,11 +134,11 @@ public class OmokGame
     {
         if(stone == StoneType.Black)
         {
-            winUserId = blackUserId;
+            WinUserId = BlackUserId;
         }
         else if(stone == StoneType.White)
         {
-            winUserId = whiteUserId;
+            WinUserId = WhiteUserId;
         }
     }
 

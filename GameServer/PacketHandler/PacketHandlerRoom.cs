@@ -14,7 +14,6 @@ public class PacketHandlerRoom : BasePacketHandler
     RoomManager _roomManager;
     UserManager _userManager;
 
-
     public PacketHandlerRoom(RoomManager? roomManager, UserManager? userManger)
     {
         if(roomManager == null || userManger == null)
@@ -27,14 +26,12 @@ public class PacketHandlerRoom : BasePacketHandler
         this._userManager = userManger;
     }
 
-
     public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap)
     {
         packetHandlerMap.Add((int)PACKETID.PKTReqRoomEnter, PKTReqRoomEnterHandler);
         packetHandlerMap.Add((int)PACKETID.PKTReqRoomLeave, PKTReqRoomLeaveHandler);
         packetHandlerMap.Add((int)PACKETID.PKTReqRoomChat, PKTReqRoomChatHandler);
     }
-
    
     // 방 입장 요청
     public void PKTReqRoomEnterHandler(MemoryPackBinaryRequestInfo packet)
@@ -57,7 +54,6 @@ public class PacketHandlerRoom : BasePacketHandler
         }
     }
     
-
     // 방 퇴장 요청
     public void PKTReqRoomLeaveHandler(MemoryPackBinaryRequestInfo packet)
     {
@@ -76,7 +72,6 @@ public class PacketHandlerRoom : BasePacketHandler
             SendFailPacket<PKTResRoomLeave>(PACKETID.PKTResRoomLeave, sessionId, result);
         }
     }
-
 
     // 방 채팅
     public void PKTReqRoomChatHandler(MemoryPackBinaryRequestInfo packet)
@@ -97,9 +92,6 @@ public class PacketHandlerRoom : BasePacketHandler
         }
 
     }
-
-    
-   
     public ErrorCode EnterRoom(PKTReqRoomEnter packet, string sessionId)
     {
         User? user = _userManager.GetUserBySessionId(sessionId);
@@ -189,88 +181,6 @@ public class PacketHandlerRoom : BasePacketHandler
 
         return ErrorCode.None;
     }
-
-
-    public ErrorCode ReadyOmok(PKTReqReadyOmok packet, string sessionId)
-    {
-        (ErrorCode result, User? user, Room? room) = GetUserAndRoomBySessionId(sessionId);
-
-        if (result != ErrorCode.None || user == null || room == null)
-        {
-            return ErrorCode.FailReadyOmok;
-        }
-
-        int readyResult = room.ChangeIsReadyBySessionId(sessionId);
-        if (readyResult == -1)
-        {
-            Console.WriteLine($"[C_ReadyOmokHandler] ErrorCode: {ErrorCode.NullUser}");
-            return ErrorCode.NullUser;
-        }
-
-        // 준비상태 변경 응답
-        PKTResReadyOmok sendData = new PKTResReadyOmok();
-        sendData.UserId = user.Id;
-
-        if (readyResult == 0)
-        {
-            sendData.IsReady = false;
-
-        }
-        else if (readyResult == 1)
-        {
-            sendData.IsReady = true;
-        }
-
-        room.NotifyRoomUsers<PKTResReadyOmok>(NetSendFunc, sendData, PACKETID.PKTResReadyOmok);
-
-        // 모든 유저의 준비가 끝났는지 검사
-        if (room.CheckAllUsersReady())
-        {
-            room.OmokGameStart(NetSendFunc);
-        }
-
-        return ErrorCode.None;
-    }
-
-    public ErrorCode PutMok(PKTReqPutMok packet,  string sessionId)
-    {
-        (ErrorCode result, User? user, Room? room) = GetUserAndRoomBySessionId(sessionId);
-
-        if (result != ErrorCode.None || user == null || room == null)
-        {
-            return ErrorCode.FailReadyOmok;
-        }
-
-
-        room.GetOmokGame().PlaceStone(packet.PosX, packet.PosY, user.Id);
-
-        // 돌을 두었다는 완료 패킷 전송
-        PKTResPutMok sendData = new PKTResPutMok();
-        sendData.UserId = user.Id;
-        sendData.PosX = packet.PosX;
-        sendData.PosY = packet.PosY;
-        room.NotifyRoomUsers<PKTResPutMok>(NetSendFunc, sendData,PACKETID.PKTResPutMok);
-
-
-        // 승부가 났는지 확인
-        if (room.GetOmokGame().CheckWinner(packet.PosX, packet.PosY))
-        {
-            // TODO 게임 종료 패킷을 바로 보내는 것이 아니라 DB에 게임 결과를 저장한 후 저장이 완료된 시점에 보낸다.
-
-
-
-
-
-
-            PKTNtfEndOmok endGameData = new PKTNtfEndOmok();
-            endGameData.WinUserId = user.Id;
-            room.NotifyRoomUsers<PKTNtfEndOmok>(NetSendFunc, endGameData, PACKETID.PKTNtfEndOmok);
-        }
-
-        return ErrorCode.None;
-    }
-
-
 
     public (ErrorCode, User?, Room?) GetUserAndRoomBySessionId(string sessionId)
     {
