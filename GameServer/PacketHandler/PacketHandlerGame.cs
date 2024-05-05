@@ -1,5 +1,6 @@
 ﻿using GameServer.Packet;
 using MemoryPack;
+using SuperSocket.SocketBase.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,22 +12,26 @@ namespace GameServer;
 
 public class PacketHandlerGame : BasePacketHandler
 {
-    MysqlProcessor _mysqlProcessor;
+    ILog _logger;
+
+    Action<MemoryPackBinaryRequestInfo> _mysqlInsert;
 
     RoomManager _roomManager;
     UserManager _userManager;
 
-    public PacketHandlerGame(RoomManager? roomManager, UserManager? userManger, MysqlProcessor mysqlProcessor)
+    public PacketHandlerGame(ILog logger, RoomManager? roomManager, UserManager? userManger, Action<MemoryPackBinaryRequestInfo> mysqlInsert)
     {
-        if (roomManager == null || userManger == null || mysqlProcessor == null)
+        _logger = logger;
+
+        if (roomManager == null || userManger == null || mysqlInsert == null)
         {
-            MainServer.MainLogger.Error("[RoomPacketHandler.Init] Fail Create PacketHandlerGame");
+            _logger.Error("[RoomPacketHandler.Init] Fail Create PacketHandlerGame");
             throw new NullReferenceException();
         }
 
-        this._roomManager = roomManager;
-        this._userManager = userManger;
-        this._mysqlProcessor = mysqlProcessor;
+        _roomManager = roomManager;
+        _userManager = userManger;
+        _mysqlInsert = mysqlInsert;
     }
 
     public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap)
@@ -38,7 +43,6 @@ public class PacketHandlerGame : BasePacketHandler
         // InnerPacket
         packetHandlerMap.Add((int)InnerPacketId.PKTInnerResSaveGameResult, MqResSaveGameResultHandler);
         packetHandlerMap.Add((int)InnerPacketId.PKTInnerNtfTurnChange, PKTInnerNtfTurnChangeHandler);
-
     }
 
     // 오목 준비 완료 요청
@@ -79,7 +83,6 @@ public class PacketHandlerGame : BasePacketHandler
         }
     }
 
-
     // 게임 결과 DB 저장 완료 응답
     public void MqResSaveGameResultHandler(MemoryPackBinaryRequestInfo packet)
     {
@@ -88,13 +91,12 @@ public class PacketHandlerGame : BasePacketHandler
         (ErrorCode result, PKTInnerResSaveGameResult? bodyData) = DeserializeNullablePacket<PKTInnerResSaveGameResult>(packet.Data);
         if (result != ErrorCode.None || bodyData == null)
         {
-            MainServer.MainLogger.Error("DB 패킷 수신 실패");
+            _logger.Error("DB 패킷 수신 실패");
             return;
         }
 
         NotifyEndGame(bodyData);
     }
-
 
     // 강제로 턴을 바꾸는 패킷 핸들러
     public void PKTInnerNtfTurnChangeHandler(MemoryPackBinaryRequestInfo packet)
@@ -103,8 +105,6 @@ public class PacketHandlerGame : BasePacketHandler
 
         ForceTurnChange(bodyData);
     }
-
-
 
     public ErrorCode ReadyOmok(PKTReqReadyOmok packet, string sessionId)
     {
@@ -118,8 +118,16 @@ public class PacketHandlerGame : BasePacketHandler
         int readyResult = room.ChangeIsReadyBySessionId(sessionId);
         if (readyResult == -1)
         {
-            MainServer.MainLogger.Error($"[ReadyOmok] ErrorCode: {ErrorCode.NullUser}");
+            _logger.Error($"[ReadyOmok] ErrorCode: {ErrorCode.NullUser}");
             return ErrorCode.NullUser;
+        }
+        else if( readyResult == 0)
+        {
+            _logger.Info($"[{sessionId}] 준비완료 취소");
+        }
+        else
+        {
+            _logger.Info($"[{sessionId}] 준비완료");
         }
 
         // 준비상태 변경 응답
@@ -142,6 +150,7 @@ public class PacketHandlerGame : BasePacketHandler
         if (room.CheckAllUsersReady())
         {
             room.OmokGameStart(NetSendFunc);
+            _logger.Info($"RoomNumber: {room.RoomNumber}, 흑돌: {room.GetOmokGame().BlackUserId}, 백돌: {room.GetOmokGame().WhiteUserId} 게임 시작");
         }
 
         return ErrorCode.None;
@@ -187,7 +196,7 @@ public class PacketHandlerGame : BasePacketHandler
             sendDBData.WinUserId = room.GetOmokGame().WinUserId;
 
             // mysql processor로 전송
-            SendInnerReqPacket<PKTInnerReqSaveGameResult>(sendDBData, InnerPacketId.PKTInnerReqSaveGameResult, sessionId, _mysqlProcessor);
+            SendInnerReqPacket<PKTInnerReqSaveGameResult>(sendDBData, InnerPacketId.PKTInnerReqSaveGameResult, sessionId, _mysqlInsert);
 
             return ErrorCode.None;
         }
@@ -228,14 +237,14 @@ public class PacketHandlerGame : BasePacketHandler
         User? user = _userManager.GetUserBySessionId(sessionId);
         if (user == null)
         {
-            MainServer.MainLogger.Error($"[GetUserAndRoomBySessionId] ErrorCode: {ErrorCode.NullUser}");
+            _logger.Error($"[GetUserAndRoomBySessionId] ErrorCode: {ErrorCode.NullUser}");
             return (ErrorCode.NullUser, null, null);
         }
 
         // 유저가 방에 입장한 상태인가
         if (user.RoomNumber == -1)
         {
-            MainServer.MainLogger.Error($"[GetUserAndRoomBySessionId] ErrorCode: {ErrorCode.InvalidRequest}");
+            _logger.Error($"[GetUserAndRoomBySessionId] ErrorCode: {ErrorCode.InvalidRequest}");
             return (ErrorCode.InvalidRequest, null, null);
         }
 
@@ -243,7 +252,7 @@ public class PacketHandlerGame : BasePacketHandler
         Room? room = _roomManager.FindRoomByRoomNumber(user.RoomNumber);
         if (room == null)
         {
-            MainServer.MainLogger.Error($"[GetUserAndRoomBySessionId] ErrorCode: {ErrorCode.NullRoom}");
+            _logger.Error($"[GetUserAndRoomBySessionId] ErrorCode: {ErrorCode.NullRoom}");
             return (ErrorCode.NullRoom, null, null);
         }
 

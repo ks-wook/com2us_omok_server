@@ -1,4 +1,5 @@
 ﻿using GameServer.Packet;
+using SuperSocket.SocketBase.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,11 @@ namespace GameServer;
 
 public class PacketProcessor
 {
+    ILog _logger;
+
     Dictionary<int, Action<MemoryPackBinaryRequestInfo>>_packetHandlerMap = new Dictionary<int, Action<MemoryPackBinaryRequestInfo>>(); // 패킷의 ID와 패킷 핸들러를 같이 등록한다.
     
-    PacketHandlerUser? _packetHandlerAuth;
+    PacketHandlerUser? _packetHandlerUser;
     PacketHandlerRoom? _packetHandlerRoom;
     PacketHandlerGame? _packetHandlerGame;
     
@@ -23,33 +26,34 @@ public class PacketProcessor
     BufferBlock<MemoryPackBinaryRequestInfo> _recvBuffer = new BufferBlock<MemoryPackBinaryRequestInfo>();
 
 
-    MysqlProcessor? _mysqlProcessor;
-    RedisProcessor? _redisProcessor;
+    Action<MemoryPackBinaryRequestInfo> _mysqlInsert;
+    Action<MemoryPackBinaryRequestInfo> _redisInsert;
 
     RoomManager? _roomManager;
     UserManager? _userManager;
 
+    
 
-
-    public void CreateAndStart(RoomManager roomManager, UserManager userManager, MysqlProcessor mysqlProcessor, RedisProcessor redisProcessor)
+    public void CreateAndStart(ILog Logger, RoomManager roomManager, UserManager userManager, 
+        Action<MemoryPackBinaryRequestInfo> MysqlInsert, Action<MemoryPackBinaryRequestInfo> RedisInsert)
     {
-        if(roomManager == null || userManager == null || mysqlProcessor == null)
+        if(roomManager == null || userManager == null || MysqlInsert == null || RedisInsert == null)
         {
-            MainServer.MainLogger.Error("[CreateAndStart] Packet Processor 생성 실패");
+            _logger.Error("[CreateAndStart] Packet Processor 생성 실패");
             throw new NullReferenceException();
         }
+
+        _logger = Logger;
 
         _roomManager = roomManager;
         _userManager = userManager;
 
-        _mysqlProcessor = mysqlProcessor;
-        _redisProcessor = redisProcessor;
+        _mysqlInsert = MysqlInsert;
+        _redisInsert = RedisInsert;
 
         // 패킷 처리용 쓰레드를 생성하고, 패킷 처리를 도맡아한다.    
 
         RegisterPakcetHandler();
-
-
 
         IsThreadRunning = true;
         _processThread = new System.Threading.Thread(this.Process);
@@ -58,20 +62,20 @@ public class PacketProcessor
 
     void RegisterPakcetHandler()
     {
-        if (_roomManager == null || _userManager == null || _mysqlProcessor == null)
+        if (_roomManager == null || _userManager == null || _mysqlInsert == null || _redisInsert == null)
         {
-            MainServer.MainLogger.Error("[RegisterPakcetHandler] Managers Null");
+            _logger.Error("[RegisterPakcetHandler] Managers Null");
             throw new NullReferenceException();
         }
 
         // 여러 종류의 패킷 핸들러에 선언된 핸들러들을 패킷 프로세서의 핸들러에 최종 등록
-        _packetHandlerAuth = new PacketHandlerUser(_userManager, _redisProcessor);
-        _packetHandlerAuth.RegisterPacketHandler(_packetHandlerMap);
+        _packetHandlerUser = new PacketHandlerUser(_logger, _userManager, _redisInsert);
+        _packetHandlerUser.RegisterPacketHandler(_packetHandlerMap);
 
-        _packetHandlerRoom = new PacketHandlerRoom(_roomManager, _userManager);
+        _packetHandlerRoom = new PacketHandlerRoom(_logger, _roomManager, _userManager);
         _packetHandlerRoom.RegisterPacketHandler(_packetHandlerMap);
 
-        _packetHandlerGame= new PacketHandlerGame(_roomManager, _userManager, _mysqlProcessor);
+        _packetHandlerGame= new PacketHandlerGame(_logger, _roomManager, _userManager, _mysqlInsert);
         _packetHandlerGame.RegisterPacketHandler(_packetHandlerMap);
     }
 
@@ -112,7 +116,7 @@ public class PacketProcessor
             }
             catch (Exception ex)
             {
-                MainServer.MainLogger.Error(ex.ToString());
+                _logger.Error(ex.ToString());
             }
         }
     }
