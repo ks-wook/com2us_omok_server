@@ -1,5 +1,6 @@
 ﻿using GameServer.Packet;
 using MemoryPack;
+using SuperSocket.SocketBase.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +12,15 @@ namespace GameServer;
 
 public class PacketHandlerRoom : BasePacketHandler
 {
+    ILog _logger;
+
     RoomManager _roomManager;
     UserManager _userManager;
 
-    public PacketHandlerRoom(RoomManager? roomManager, UserManager? userManger)
+    public PacketHandlerRoom(ILog logger, RoomManager? roomManager, UserManager? userManger)
     {
+        _logger = logger;
+
         if(roomManager == null || userManger == null)
         {
             Console.WriteLine("[RoomPacketHandler.Init] roomList null");
@@ -116,6 +121,7 @@ public class PacketHandlerRoom : BasePacketHandler
             return result;
         }
 
+        _logger.Info($"[{packet.RoomNumber}번 room] Uid {sessionId} 입장, 현재 인원: {room}");
 
         // 방 입장 성공 응답
         PKTResRoomEnter sendData = new PKTResRoomEnter();

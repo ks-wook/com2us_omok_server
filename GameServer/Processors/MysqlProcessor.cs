@@ -1,6 +1,7 @@
 ﻿using GameServer.Packet;
 using GameServer.PacketHandler;
 using MySqlConnector;
+using SuperSocket.SocketBase.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,11 @@ namespace GameServer;
 
 public class MysqlProcessor
 {
+    ILog _logger;
 
     Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>> _packetHandlerMap = new Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>>(); // 패킷의 ID와 패킷 핸들러를 같이 등록한다.
 
     PacketHandlerGameResult? _packetHandlerGameResult;
-
 
     System.Threading.Thread? _processThread = null; // 패킷 처리용 쓰레드 선언
     bool IsThreadRunning = false;
@@ -27,22 +28,21 @@ public class MysqlProcessor
     // db 프로세스마다 고유한 db연결객체
     MySqlConnection? _mysqlConnector;
 
-    PacketProcessor? _packetProcessor;
+    Action<MemoryPackBinaryRequestInfo>? _mainPacketInsert;
 
-
-    public void CreateAndStart(string mysqlConnectionStr, PacketProcessor? packetProcessor)
+    public void CreateAndStart(ILog logger, string mysqlConnectionStr, Action<MemoryPackBinaryRequestInfo> mainPacketInsert)
     {
-        if(mysqlConnectionStr == null || packetProcessor == null)
+        _logger = logger;
+
+        if(mysqlConnectionStr == null || mainPacketInsert == null)
         {
-            MainServer.MainLogger.Error("mysql Processor 생성에 실패하였습니다.");
+            logger.Error("mysql Processor 생성에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
-
-
         _mysqlConnector = new MySqlConnection(mysqlConnectionStr);
 
-        _packetProcessor = packetProcessor; 
+        _mainPacketInsert = mainPacketInsert; 
 
         RegisterPakcetHandler();
 
@@ -51,27 +51,23 @@ public class MysqlProcessor
         _processThread.Start();
     }
 
-
-
     void RegisterPakcetHandler()
     {
-        if (_mysqlConnector == null || _packetProcessor == null)
+        if (_mysqlConnector == null || _mainPacketInsert == null)
         {
-            MainServer.MainLogger.Error("mysql Processor 패킷 등록에 실패하였습니다.");
+            _logger.Error("mysql Processor 패킷 등록에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
-        _packetHandlerGameResult = new PacketHandlerGameResult(_mysqlConnector, _packetProcessor);
+        _packetHandlerGameResult = new PacketHandlerGameResult(_logger, _mysqlConnector, _mainPacketInsert);
         _packetHandlerGameResult.RegisterPacketHandler(_packetHandlerMap);
     }
-
 
     public void Destory()
     {
         IsThreadRunning = false;
         _mysqlRecvBuffer.Complete();
     }
-
 
     public void Insert(MemoryPackBinaryRequestInfo data)
     {
@@ -95,18 +91,14 @@ public class MysqlProcessor
                 }
                 else
                 {
-                    MainServer.MainLogger.Error("등록되지 않은 패킷");
+                    _logger.Error("등록되지 않은 패킷");
                 }
             }
             catch (Exception ex)
             {
-                MainServer.MainLogger.Error(ex.ToString());
+                _logger.Error(ex.ToString());
             }
-
-
         }
-
-
     }
 
 }

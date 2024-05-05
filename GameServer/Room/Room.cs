@@ -16,21 +16,17 @@ public class Room
     public DateTime lastTurnChangeTime;
     public string CurTurnUserId { get; set; } = string.Empty; // 현재 턴인 유저 아이디
 
-
     public int RoomNumber { get; set; }
     public int RoomMaxUserCount { get; set; }
     List<RoomUser> _roomUsers = new List<RoomUser>();
 
-
     OmokGame _omokGame = new OmokGame(); // 오목 게임 객체
-
 
     public void Init(int roomNumber, int roomMaxUserCount)
     {
         RoomNumber = roomNumber;
         RoomMaxUserCount = roomMaxUserCount;
     }
-
 
     public ErrorCode AddRoomUser(string uid, string roomSessionId)
     {
@@ -48,11 +44,8 @@ public class Room
         roomUser.Set(uid, roomSessionId);
         _roomUsers.Add(roomUser);
 
-        MainServer.MainLogger.Info($"[{RoomNumber}번 room] Uid {uid} 입장, 현재 인원: {_roomUsers.Count}");
-
         return ErrorCode.None;
     }
-
 
     public RoomUser? GetRoomUserBySessionId(string sessionId)
     {
@@ -71,8 +64,6 @@ public class Room
         {
             return ErrorCode.FailRemoveRoomUser;
         }
-
-        MainServer.MainLogger.Info($"[{RoomNumber}번 room] Uid {roomUser.UserId} 퇴장, 현재 인원: {_roomUsers.Count}");
 
         return ErrorCode.None;
     }
@@ -121,24 +112,19 @@ public class Room
             if (roomUser.IsReady == false)
             {
                 roomUser.IsReady = true;
-                MainServer.MainLogger.Info($"[{roomUser.UserId}] 준비완료");
                 return 1;
             }
             else
             {
                 roomUser.IsReady = false;
-                MainServer.MainLogger.Info($"[{roomUser.UserId}] 준비완료 취소");
                 return 0;
             }
-
         }
-
         return -1;
     }
 
     // 오목 게임 획득
     public OmokGame GetOmokGame() { return _omokGame; }
-
 
     // 오목 게임 시작
     public void OmokGameStart(Func<string, byte[], bool> NetSendFunc)
@@ -162,13 +148,10 @@ public class Room
         CurTurnUserId = sendData.BlackUserId;
 
         _omokGame.StartGame(sendData.BlackUserId, sendData.WhiteUserId);
-        MainServer.MainLogger.Info
-            ($"RoomNumber: {RoomNumber}, 흑돌: {sendData.BlackUserId}, 백돌: {sendData.WhiteUserId} 게임 시작");
 
         // 모든 유저에게 오목 게임 시작 패킷 전송
         NotifyRoomUsers(NetSendFunc, sendData, PACKETID.PKTNtfStartOmok);
 
-        
         State = RoomState.InGame; // 게임 상태 전환
     }
 

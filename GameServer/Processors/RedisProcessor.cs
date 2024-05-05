@@ -1,6 +1,7 @@
 ﻿using CloudStructures;
 using GameServer.Packet;
 using GameServer.PacketHandler;
+using SuperSocket.SocketBase.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace GameServer;
 
 public class RedisProcessor
 {
+    ILog _logger;
+
     Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>> _packetHandlerMap = new Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>>(); // 패킷의 ID와 패킷 핸들러를 같이 등록한다.
 
     PacketHandlerTokenVerify? _packetHandlerTokenVeriry;
@@ -25,20 +28,21 @@ public class RedisProcessor
     // db 프로세스마다 고유한 db연결객체
     RedisConnection? _redisConnector;
 
-    PacketProcessor? _packetProcessor;
+    Action<MemoryPackBinaryRequestInfo>? _mainPacketInsert;
 
-
-    public void CreateAndStart(string redisConnectionStr, PacketProcessor? packetProcessor)
+    public void CreateAndStart(ILog logger, string redisConnectionStr, Action<MemoryPackBinaryRequestInfo> mainPacketInsert)
     {
-        if (redisConnectionStr == null || packetProcessor == null)
+        _logger = logger;
+
+        if (redisConnectionStr == null || mainPacketInsert == null)
         {
-            MainServer.MainLogger.Error("redis Processor 생성에 실패하였습니다.");
+            _logger.Error("redis Processor 생성에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
         _redisConnector = new RedisConnection(new RedisConfig("defalut", redisConnectionStr));
 
-        _packetProcessor = packetProcessor;
+        _mainPacketInsert = mainPacketInsert;
 
         RegisterPakcetHandler();
 
@@ -51,13 +55,13 @@ public class RedisProcessor
 
     void RegisterPakcetHandler()
     {
-        if (_redisConnector == null || _packetProcessor == null)
+        if (_redisConnector == null || _mainPacketInsert == null)
         {
-            MainServer.MainLogger.Error("redis Processor 패킷 등록에 실패하였습니다.");
+            _logger.Error("redis Processor 패킷 등록에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
-        _packetHandlerTokenVeriry = new PacketHandlerTokenVerify(_redisConnector, _packetProcessor);
+        _packetHandlerTokenVeriry = new PacketHandlerTokenVerify(_logger, _redisConnector, _mainPacketInsert);
         _packetHandlerTokenVeriry.RegisterPacketHandler(_packetHandlerMap);
     }
 
@@ -91,12 +95,12 @@ public class RedisProcessor
                 }
                 else
                 {
-                    MainServer.MainLogger.Error("등록되지 않은 패킷");
+                    _logger.Error("등록되지 않은 패킷");
                 }
             }
             catch (Exception ex)
             {
-                MainServer.MainLogger.Error(ex.ToString());
+                _logger.Error(ex.ToString());
             }
 
 

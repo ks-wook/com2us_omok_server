@@ -16,6 +16,7 @@ public class UserManager
     List<User> users = new List<User>();
 
     System.Timers.Timer? _userCheckTimer;
+    double _timerWeight = 0.5;
 
     Action<MemoryPackBinaryRequestInfo> _insertInnerPacket;
     Action<string> _closeConnection;
@@ -91,10 +92,10 @@ public class UserManager
     {
         // 마지막으로 핑이 도착한 시간과 현재 시간을 비교하여 강제로 넘길지 결정
         TimeSpan timeSpan = DateTime.Now - user.lastPingCheckTime;
-        // MainServer.MainLogger.Info($"ping : {timeSpan.TotalMilliseconds}  {user.Id} 시간차");
 
-        if (timeSpan.TotalSeconds > _maxPingDelayTime + 0.5)
+        if (timeSpan.TotalSeconds > _maxPingDelayTime + _timerWeight)
         {
+            // Console.WriteLine($"ping : {timeSpan.TotalSeconds}  {user.Id} 시간차");
             return true;
         }
 

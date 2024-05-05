@@ -1,5 +1,6 @@
 ﻿using GameServer.Packet;
 using MemoryPack;
+using SuperSocket.SocketBase.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,20 +12,24 @@ namespace GameServer;
 
 public class PacketHandlerUser : BasePacketHandler
 {
+    ILog _logger;
+
     UserManager _userManager;
 
-    RedisProcessor _redisProcessor;
+    Action<MemoryPackBinaryRequestInfo> _redisInsert;
 
-    public PacketHandlerUser(UserManager? userManager, RedisProcessor? redisProcessor)
+    public PacketHandlerUser(ILog logger, UserManager? userManager, Action<MemoryPackBinaryRequestInfo> redisInsert)
     {
-        if (userManager == null || redisProcessor == null)
+        _logger = logger;
+
+        if (userManager == null || redisInsert == null)
         {
-            MainServer.MainLogger.Error("[RoomPacketHandler.Init] roomList null");
+            _logger.Error("[PacketHandlerUser] roomList null");
             throw new NullReferenceException();
         }
 
         _userManager = userManager;
-        _redisProcessor = redisProcessor;
+        _redisInsert = redisInsert;
     }
 
     public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap)
@@ -130,13 +135,13 @@ public class PacketHandlerUser : BasePacketHandler
             PKTInnerReqVerifyToken sendData = new PKTInnerReqVerifyToken();
             sendData.AccountId = Int64.Parse(bodyData.UserId);
             sendData.Token = bodyData.AuthToken;
-            SendInnerReqPacket<PKTInnerReqVerifyToken>(sendData, InnerPacketId.PKTInnerReqVerifyToken, sessionId, _redisProcessor);
+            SendInnerReqPacket<PKTInnerReqVerifyToken>(sendData, InnerPacketId.PKTInnerReqVerifyToken, sessionId, _redisInsert);
 
             return ErrorCode.None;
         }
         catch (Exception ex)
         {
-            MainServer.MainLogger.Error($"[CheckAuthToken] ErrorCode: {ErrorCode.InvaildToken}, {ex.ToString()}");
+            _logger.Error($"[CheckAuthToken] ErrorCode: {ErrorCode.InvaildToken}, {ex.ToString()}");
             return ErrorCode.InvaildToken;
         }
     }
@@ -149,7 +154,7 @@ public class PacketHandlerUser : BasePacketHandler
 
         if (result != ErrorCode.None)
         {
-            MainServer.MainLogger.Error($"[Login] ErrorCode: {result}");
+            _logger.Error($"[Login] ErrorCode: {result}");
             return result;
         }
 
@@ -178,7 +183,7 @@ public class PacketHandlerUser : BasePacketHandler
         User? user = _userManager.GetUserBySessionId(sessionId);
         if (user == null)
         {
-            MainServer.MainLogger.Error($"찾을 수 없는 유저의 Ping 응답");
+            _logger.Error($"찾을 수 없는 유저의 Ping 응답");
             return;
         }
 

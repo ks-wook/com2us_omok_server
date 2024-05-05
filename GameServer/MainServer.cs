@@ -16,7 +16,7 @@ namespace GameServer
     public class MainServer : AppServer<ClientSession, MemoryPackBinaryRequestInfo>
     {
         SuperSocket.SocketBase.Config.IServerConfig _serverConfig;
-        public static SuperSocket.SocketBase.Logging.ILog MainLogger;
+        SuperSocket.SocketBase.Logging.ILog _mainLogger;
 
         PacketProcessor _mainPacketProcessor = new PacketProcessor();
         MysqlProcessor _mysqlProcessor = new MysqlProcessor();
@@ -49,13 +49,11 @@ namespace GameServer
                 Ip = "Any", // 모든 주소 연결 허용
                 Port = option.Port,
                 Mode = SocketMode.Tcp,
-                MaxConnectionNumber = option.MaxConnectionNumber, // 최대 동접 수
+                MaxConnectionNumber = option.MaxConnectionNumber,
                 MaxRequestLength = option.MaxRequestLength,
-                ReceiveBufferSize = option.ReceiveBufferSize, // recv 버퍼 사이즈 2048 할당
-                SendBufferSize = option.SendBufferSize, // send 버퍼 사이즈 2048 할당
+                ReceiveBufferSize = option.ReceiveBufferSize, 
+                SendBufferSize = option.SendBufferSize, 
             };
-
-            
         }
 
         public void StopServer()
@@ -80,15 +78,15 @@ namespace GameServer
                 }
                 else if (result == true)
                 {
-                    MainLogger = base.Logger;
-                    MainLogger.Error("서버 초기화 성공");
+                    _mainLogger = base.Logger;
+                    _mainLogger.Error("서버 초기화 성공");
                 }
 
                 CreateComponent();
 
                 Start(); // 서버 Listening 시작
 
-                MainLogger.Info("서버 생성 성공");
+                _mainLogger.Info("서버 생성 성공");
             }
             catch (Exception ex)
             {
@@ -107,18 +105,17 @@ namespace GameServer
             BasePacketHandler.NetSendFunc = SendData;
 
             // 메인 패킷 프로세서
-            _mainPacketProcessor.CreateAndStart(_roomManager, _userManager, _mysqlProcessor, _redisProcessor); // 프로세서 초기화
+            _mainPacketProcessor.CreateAndStart(_mainLogger, _roomManager, _userManager, _mysqlProcessor.Insert, _redisProcessor.Insert); // 프로세서 초기화
 
             // mysql 프로세서
-            _mysqlProcessor.CreateAndStart(_mainServerOption.MysqlConnectionStr, _mainPacketProcessor); // 프로세서 초기화
+            _mysqlProcessor.CreateAndStart(_mainLogger, _mainServerOption.MysqlConnectionStr, _mainPacketProcessor.Insert); // 프로세서 초기화
 
             // redis 프로세서
-            _redisProcessor.CreateAndStart(_mainServerOption.RedisConnectionStr, _mainPacketProcessor); // 프로세서 초기화
+            _redisProcessor.CreateAndStart(_mainLogger, _mainServerOption.RedisConnectionStr, _mainPacketProcessor.Insert); // 프로세서 초기화
 
-            MainLogger.Info("CreateComponent - Success");
+            _mainLogger.Info("CreateComponent - Success");
             return ErrorCode.None;
         }
-
 
         public bool SendData(string sessionID, byte[] sendData)
         {
@@ -135,14 +132,13 @@ namespace GameServer
             }
             catch (Exception ex)
             {
-                MainServer.MainLogger.Error($"{ex.ToString()},  {ex.StackTrace}");
+                _mainLogger.Error($"{ex.ToString()}, {ex.StackTrace}");
 
                 Console.WriteLine(ex.ToString());
                 session.Close();
             }
             return true;
         }
-
 
         public void CloseConnection(string sessionId)
         {
@@ -180,7 +176,6 @@ namespace GameServer
                     }
                 }
 
-                // 유저 매니저에서 삭제
                 _userManager.RemoveUserBySessionId(sessionId);
             }
         }
@@ -188,12 +183,12 @@ namespace GameServer
 
         void OnConnected(ClientSession session)
         {
-            MainLogger.Info(string.Format("세션 번호 {0} 접속", session.SessionID));
+            _mainLogger.Info(string.Format("세션 번호 {0} 접속", session.SessionID));
         }
 
         void OnClosed(ClientSession session, CloseReason closeReason)
         {
-            MainLogger.Info(string.Format("세션 번호 {0} 접속해제: {1}", session.SessionID, closeReason.ToString()));
+            _mainLogger.Info(string.Format("세션 번호 {0} 접속해제: {1}", session.SessionID, closeReason.ToString()));
 
             OnUserClosed(session.SessionID);
         }
@@ -208,9 +203,7 @@ namespace GameServer
 
     }
 
-
     public class ClientSession : AppSession<ClientSession, MemoryPackBinaryRequestInfo>
     {
     }
-
 }
