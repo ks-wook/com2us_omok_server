@@ -23,6 +23,7 @@ Host.CreateDefaultBuilder()
     {
         logging.ClearProviders();
 
+
         // TEST 콘솔에 로그 출력
         logging.AddZLoggerConsole();
 

@@ -41,7 +41,7 @@ public class PacketHandlerGame : BasePacketHandler
         packetHandlerMap.Add((int)PACKETID.PKTReqPutMok, PKTReqPutMokHandler);
 
         // InnerPacket
-        packetHandlerMap.Add((int)InnerPacketId.PKTInnerResSaveGameResult, MqResSaveGameResultHandler);
+        packetHandlerMap.Add((int)InnerPacketId.PKTInnerResSaveGameResult, PKTInnerResSaveGameResultHandler);
         packetHandlerMap.Add((int)InnerPacketId.PKTInnerNtfTurnChange, PKTInnerNtfTurnChangeHandler);
     }
 
@@ -84,16 +84,11 @@ public class PacketHandlerGame : BasePacketHandler
     }
 
     // 게임 결과 DB 저장 완료 응답
-    public void MqResSaveGameResultHandler(MemoryPackBinaryRequestInfo packet)
+    public void PKTInnerResSaveGameResultHandler(MemoryPackBinaryRequestInfo packet)
     {
         var sessionId = packet.SessionID;
 
-        (ErrorCode result, PKTInnerResSaveGameResult? bodyData) = DeserializeNullablePacket<PKTInnerResSaveGameResult>(packet.Data);
-        if (result != ErrorCode.None || bodyData == null)
-        {
-            _logger.Error("DB 패킷 수신 실패");
-            return;
-        }
+        PKTInnerResSaveGameResult? bodyData = DeserializePacket<PKTInnerResSaveGameResult>(packet.Body);
 
         NotifyEndGame(bodyData);
     }
@@ -151,6 +146,13 @@ public class PacketHandlerGame : BasePacketHandler
         {
             room.OmokGameStart(NetSendFunc);
             _logger.Info($"RoomNumber: {room.RoomNumber}, 흑돌: {room.GetOmokGame().BlackUserId}, 백돌: {room.GetOmokGame().WhiteUserId} 게임 시작");
+# pragma warning disable 8600, 8602
+            foreach(RoomUser roomUser in room.GetRoomUserList())
+            {
+                User gameStartUser = _userManager.GetUserBySessionId(roomUser.RoomSessionID);
+                gameStartUser.State = UserState.InGame;
+            }
+#pragma warning restore 8600, 8602
         }
 
         return ErrorCode.None;
@@ -204,7 +206,6 @@ public class PacketHandlerGame : BasePacketHandler
         return ErrorCode.None;
     }
 
-
     // 게임 종료 통보 전송
     public void NotifyEndGame(PKTInnerResSaveGameResult packet)
     {
@@ -227,10 +228,45 @@ public class PacketHandlerGame : BasePacketHandler
 
         room.OmokGameEnd();
         room.NotifyRoomUsers<PKTNtfEndOmok>(NetSendFunc, endGameData, PACKETID.PKTNtfEndOmok);
+
+        // 유저 상태 변경
+        foreach(RoomUser roomUser in room.GetRoomUserList())
+        {
+            user = _userManager.GetUserBySessionId(roomUser.RoomSessionID);
+
+            if (user == null)
+            {
+                SendFailPacket<PKTNtfEndOmok>(PACKETID.PKTNtfEndOmok, packet.sessionIds, ErrorCode.NullUser);
+                return;
+            }
+
+            user.State = UserState.InRoom;
+        }
     }
 
+    // 게임 취소 패킷 전송
+    public void NotifyCancelGame(Room room)
+    {
+        PKTNtfEndOmok endGameData = new PKTNtfEndOmok();
+        endGameData.WinUserId = "Game Cancel";
 
+        room.OmokGameEnd();
+        room.NotifyRoomUsers<PKTNtfEndOmok>(NetSendFunc, endGameData, PACKETID.PKTNtfEndOmok);
 
+        // 유저 상태 변경
+        foreach (RoomUser roomUser in room.GetRoomUserList())
+        {
+            User? user = _userManager.GetUserBySessionId(roomUser.RoomSessionID);
+
+            if (user == null)
+            {
+                SendFailPacket<PKTNtfEndOmok>(PACKETID.PKTNtfEndOmok, roomUser.RoomSessionID, ErrorCode.NullUser);
+                return;
+            }
+
+            user.State = UserState.InRoom;
+        }
+    }
 
     public (ErrorCode, User?, Room?) GetUserAndRoomBySessionId(string sessionId)
     {
@@ -259,15 +295,24 @@ public class PacketHandlerGame : BasePacketHandler
         return (ErrorCode.None, user, room);
     }
 
-
     // Inner Packet이므로 패킷이 깨지거나 유효하지않은 요청일수 없다.
     public void ForceTurnChange(PKTInnerNtfTurnChange bodyData)
     {
 #pragma warning disable 8600, 8602
         Room room = _roomManager.FindRoomByRoomNumber(bodyData.RoomNumber);
 
+        // 강제 턴 넘기기 + putMok 패킷이 절묘하게 겹치는 경우 방지
         if (room.CheckCurrentTurnUserId(bodyData.CurTurnUserId) == false)
         {
+            return;
+        }
+
+        room.GameCancelStack++;
+        Console.WriteLine(room.GameCancelStack);
+        bool gameCancel = room.CheckGameCancel();
+        if(gameCancel) // 게임 취소
+        {
+            NotifyCancelGame(room);
             return;
         }
 
@@ -282,5 +327,4 @@ public class PacketHandlerGame : BasePacketHandler
 
 #pragma warning restore 8600, 8602
     }
-
 }

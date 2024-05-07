@@ -66,7 +66,7 @@ public class UserManager
 
             // 핑 성공 시에 다시 핑요청을 보내고
             // 핑 지연시간이 초과한 경우 끊어낸다.
-            if(CheckPingTimeout(curUser) == true)
+            if(curUser.State != UserState.Disconnected && CheckPingTimeout(curUser) == true)
             {
                 // 이 유저를 끊어내라는 요청을 보낸다.
                 PKTInnerNtfCloseConnection ntfCloseConnection = new PKTInnerNtfCloseConnection();
@@ -74,6 +74,8 @@ public class UserManager
                 var ntfCloseConnectionPacket = MemoryPackSerializer.Serialize(ntfCloseConnection);
                 MemoryPackPacketHeadInfo.Write(ntfCloseConnectionPacket, InnerPacketId.PKTInnerNtfCloseConnection);
                 _insertInnerPacket(new MemoryPackBinaryRequestInfo(ntfCloseConnectionPacket));
+
+                curUser.State = UserState.Disconnected; // 상태 변경
 
                 continue;
             }
@@ -85,7 +87,6 @@ public class UserManager
             MemoryPackPacketHeadInfo.Write(innerSendPacket, InnerPacketId.PKTInnerNtfSendPing);
             _insertInnerPacket(new MemoryPackBinaryRequestInfo(innerSendPacket));
         }
-
     }
 
     public bool CheckPingTimeout(User user)
@@ -169,7 +170,12 @@ public class UserManager
     }
 
     public void CloseConnectionBySessionId(string sessionId)
-    { 
-        _closeConnection(sessionId);
+    {
+        User? user = GetUserBySessionId(sessionId);
+        if (user != null)
+        {
+            _closeConnection(user.SessionId); // 연결 종료
+            users.Remove(user); // 유저 목록에서 삭제
+        }
     }
 }

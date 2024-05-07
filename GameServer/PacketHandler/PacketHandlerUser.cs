@@ -45,8 +45,6 @@ public class PacketHandlerUser : BasePacketHandler
         packetHandlerMap.Add((int)InnerPacketId.PKTInnerNtfCloseConnection, PKTInnerNtfCloseConnectionHandler);
     }
 
-
-
     public void PKTReqLoginHandler(MemoryPackBinaryRequestInfo packet)
     {
         var sessionId = packet.SessionID;
@@ -59,8 +57,6 @@ public class PacketHandlerUser : BasePacketHandler
             SendLoginFail(sessionId);
             return;
         }
-
-
 
         //result = CheckAuthToken(bodyData, sessionId);
 
@@ -102,7 +98,6 @@ public class PacketHandlerUser : BasePacketHandler
 
         Login(bodyData, sessionId);
     }
-
 
     public void PKTResPingHandler(MemoryPackBinaryRequestInfo packet)
     {
@@ -148,7 +143,6 @@ public class PacketHandlerUser : BasePacketHandler
 
     public ErrorCode Login(PKTInnerResVerifyToken packet, string sessionId)
     {
-
         // 유저 매니저에 추가하고 서버 접속 처리
         ErrorCode result = _userManager.AddUser(packet.UserId, sessionId);
 

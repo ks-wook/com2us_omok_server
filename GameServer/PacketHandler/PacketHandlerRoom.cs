@@ -121,7 +121,7 @@ public class PacketHandlerRoom : BasePacketHandler
             return result;
         }
 
-        _logger.Info($"[{packet.RoomNumber}번 room] Uid {sessionId} 입장, 현재 인원: {room}");
+        _logger.Info($"[{packet.RoomNumber}번 room] Uid {sessionId} 입장, 현재 인원: {room.GetRoomUserCount()}");
 
         // 방 입장 성공 응답
         PKTResRoomEnter sendData = new PKTResRoomEnter();
@@ -154,11 +154,12 @@ public class PacketHandlerRoom : BasePacketHandler
             return result;
         }
 
+        _logger.Info($"[{room.RoomNumber}번 room] Uid {sessionId} 퇴장, 현재 인원: {room.GetRoomUserCount()}");
+
         // 방 퇴장 성공 응답
         PKTResRoomLeave sendData = new PKTResRoomLeave();
         sendData.UserId = user.Id;
         room.NotifyRoomUsers(NetSendFunc, sendData, PACKETID.PKTResRoomLeave);
-
 
         // 방을 나간 유저에게는 따로 보낸다.
         SendPacket<PKTResRoomLeave>(sendData, PACKETID.PKTResRoomLeave, sessionId);
