@@ -32,11 +32,11 @@ public class PacketHandlerGameResult : BasePacketHandler
 
     public override void RegisterPacketHandler(Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>> packetHandlerMap)
     {
-        packetHandlerMap.Add((int)InnerPacketId.PKTInnerReqSaveGameResult, MqReqGameRecordHandler);
+        packetHandlerMap.Add((int)InnerPacketId.PKTInnerReqSaveGameResult, PKTInnerReqSaveGameResultHandler);
     }
 
     // 게임 결과 저장
-    public async Task MqReqGameRecordHandler(MemoryPackBinaryRequestInfo packet)
+    public async Task PKTInnerReqSaveGameResultHandler(MemoryPackBinaryRequestInfo packet)
     {
         var sessionId = packet.SessionID;
 

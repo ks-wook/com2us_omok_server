@@ -17,6 +17,7 @@ public enum StoneType
 public class OmokRule
 {
     public static double MaxTurnTime = 6; // 한번에 주어지는 턴의 시간
+    public static int MaxTimeoutTurn = 6; // 연속으로 턴이 넘어가면 게임이 종료되는 턴 수
 }
 
 public class OmokGame
@@ -57,11 +58,6 @@ public class OmokGame
     public bool CheckWinner(int lastRow, int lastCol)
     {
         StoneType stone = board[lastRow, lastCol];
-
-        //// TEST -------
-        //setWinner(stone);
-        //return true;
-        //// ------------
 
         // 가로 체크
         int count = 1;

@@ -22,6 +22,8 @@ public class Room
 
     OmokGame _omokGame = new OmokGame(); // 오목 게임 객체
 
+    public int GameCancelStack { get; set; } = 0;
+
     public void Init(int roomNumber, int roomMaxUserCount)
     {
         RoomNumber = roomNumber;
@@ -71,6 +73,11 @@ public class Room
     public List<RoomUser> GetRoomUserList()
     {
         return _roomUsers;
+    }
+
+    public int GetRoomUserCount()
+    {
+        return _roomUsers.Count;
     }
 
     // 룸에서 방의 모든 사람에게 패킷 전송
@@ -193,5 +200,25 @@ public class Room
         }
 
         return true;
+    }
+
+    public RoomUser? GetRoomUserIfOneUser()
+    {
+        if(_roomUsers.Count == 1)
+        {
+            return _roomUsers[0];
+        }
+
+        return null;
+    }
+
+    public bool CheckGameCancel()
+    {
+        if(GameCancelStack == OmokRule.MaxTimeoutTurn)
+        {
+            return true;
+        }
+
+        return false;
     }
 }

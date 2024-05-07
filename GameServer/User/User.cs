@@ -13,7 +13,6 @@ public class User
 
     public DateTime lastPingCheckTime; // 마지막으로 핑 응답을 받은 시간
 
-
     public UserState State { get; set; } = UserState.Login;
     public int RoomNumber { get; private set; } = -1;
 
@@ -50,8 +49,7 @@ public enum UserState : short
     InRoom = 1002,
     InGame = 1003,
 
-
-
+    Disconnected = 1004,
 }
 
 

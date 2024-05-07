@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using GameServer.Packet;
 using MemoryPack;
 using System.Security.Cryptography.Xml;
+using System.Net.Sockets;
 
 namespace GameServer
 {
@@ -169,11 +170,37 @@ namespace GameServer
                     {
                         room.RemoveUserBySessionId(sessionId);
 
+                        _mainLogger.Info($"[{room.RoomNumber}번 room] Uid {sessionId} 퇴장, 현재 인원: {room.GetRoomUserCount()}");
+
                         // 방에 남아있는 유저에게도 접속 종료 패킷 전송
                         PKTResRoomLeave leaveRoomReq = new PKTResRoomLeave();
                         leaveRoomReq.UserId = user.Id;
                         room.NotifyRoomUsers(SendData, leaveRoomReq, PACKETID.PKTResRoomLeave);
-                    }
+
+                        // 게임 중이었다면 게임을 종료 시킨다.
+                        if (user.State == UserState.InGame)
+                        {
+                            // 룸에 사람이 남아있다면 그 사람이 승자가 된다.
+                            RoomUser? winRoomUser = room.GetRoomUserIfOneUser();
+                            if(winRoomUser != null)
+                            {
+                                // 종료된 게임을 db에 저장한다.
+                                PKTInnerReqSaveGameResult sendDBData = new PKTInnerReqSaveGameResult();
+                                foreach (RoomUser ru in room.GetRoomUserList())
+                                {
+                                    sendDBData.sessionIds.Add(ru.RoomSessionID);
+                                }
+
+                                sendDBData.BlackUserId = room.GetOmokGame().BlackUserId;
+                                sendDBData.WhiteUserId = room.GetOmokGame().WhiteUserId;
+                                sendDBData.WinUserId = winRoomUser.UserId;
+
+                                var sendDbPacket = MemoryPackSerializer.Serialize(sendDBData);
+                                MemoryPackPacketHeadInfo.Write(sendDbPacket, InnerPacketId.PKTInnerReqSaveGameResult);
+                                _mysqlProcessor.Insert(new MemoryPackBinaryRequestInfo(sendDbPacket));
+                            }
+                        }
+                    } 
                 }
 
                 _userManager.RemoveUserBySessionId(sessionId);
