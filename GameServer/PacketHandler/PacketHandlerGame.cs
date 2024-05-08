@@ -179,9 +179,15 @@ public class PacketHandlerGame : BasePacketHandler
         sendData.UserId = user.Id;
         sendData.PosX = packet.PosX;
         sendData.PosY = packet.PosY;
+        if(room.GetOmokGame().BlackUserId == user.Id)
+        {
+            sendData.IsBlack = true;
+        }
+
         room.NotifyRoomUsers<PKTResPutMok>(NetSendFunc, sendData, PACKETID.PKTResPutMok);
 
         room.UpdateLastTurnChangeTime();
+        room.GameCancelStack = 0;
 
         // 승부가 났는지 확인
         if (room.GetOmokGame().CheckWinner(packet.PosX, packet.PosY))
@@ -199,6 +205,8 @@ public class PacketHandlerGame : BasePacketHandler
 
             // mysql processor로 전송
             SendInnerReqPacket<PKTInnerReqSaveGameResult>(sendDBData, InnerPacketId.PKTInnerReqSaveGameResult, sessionId, _mysqlInsert);
+
+            _logger.Info($"게임 종료 승자 : uid: {room.GetOmokGame().WinUserId}");
 
             return ErrorCode.None;
         }
@@ -308,7 +316,7 @@ public class PacketHandlerGame : BasePacketHandler
         }
 
         room.GameCancelStack++;
-        Console.WriteLine(room.GameCancelStack);
+
         bool gameCancel = room.CheckGameCancel();
         if(gameCancel) // 게임 취소
         {

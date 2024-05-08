@@ -58,22 +58,22 @@ public class PacketHandlerUser : BasePacketHandler
             return;
         }
 
-        //result = CheckAuthToken(bodyData, sessionId);
+        result = CheckAuthToken(bodyData, sessionId);
 
-        //if(result != ErrorCode.None)
-        //{
-        //    SendLoginFail(sessionId);
-        //    return;
-        //}
+        if (result != ErrorCode.None)
+        {
+            SendLoginFail(sessionId);
+            return;
+        }
 
 
         // TEST 무조건 로그인 성공
-        _ = _userManager.AddUser(bodyData.UserId, sessionId);
-        PKTResLogin sendData = new PKTResLogin();
-        sendData.UserId = bodyData.UserId;
-        var sendPacket = MemoryPackSerializer.Serialize<PKTResLogin>(sendData);
-        MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResLogin);
-        NetSendFunc(sessionId, sendPacket);
+        //_ = _userManager.AddUser(bodyData.UserId, sessionId);
+        //PKTResLogin sendData = new PKTResLogin();
+        //sendData.UserId = bodyData.UserId;
+        //var sendPacket = MemoryPackSerializer.Serialize<PKTResLogin>(sendData);
+        //MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResLogin);
+        //NetSendFunc(sessionId, sendPacket);
         // TEST ------------------
     }
 

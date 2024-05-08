@@ -16,7 +16,7 @@ public class UserManager
     List<User> users = new List<User>();
 
     System.Timers.Timer? _userCheckTimer;
-    double _timerWeight = 0.5;
+    double _timerWeight = 2.0;
 
     Action<MemoryPackBinaryRequestInfo> _insertInnerPacket;
     Action<string> _closeConnection;

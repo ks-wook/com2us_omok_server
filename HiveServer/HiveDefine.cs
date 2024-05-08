@@ -2,8 +2,8 @@
 
 public static class HiveDefine
 {
-    // TEST 1분
-    public static short LoginTokenExpireMin = 5;
+    // TEST 10분
+    public static short LoginTokenExpireMin = 10;
 
 
 }

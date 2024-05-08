@@ -81,6 +81,9 @@ public class PacketHandlerGameResult : BasePacketHandler
             return ErrorCode.FailInsertGameResult;
         }
 
+        _logger.Info("게임 데이터 저장 성공");
+
+
         return ErrorCode.None;
     }
 
