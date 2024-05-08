@@ -96,8 +96,8 @@ public partial class PKTResPutMok : PkResult // 돌 두기 요청 응답
     public string UserId { get; set; } = string.Empty;
     public int PosX;
     public int PosY;
+    public bool IsBlack { get; set; } = false;
     public bool IsTimeout { get; set; } = false;
-
 }
 
 [MemoryPackable]
