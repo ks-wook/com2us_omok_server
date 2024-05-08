@@ -1,6 +1,7 @@
 using GameAPIServer.Repository;
 using GameAPIServer.Services;
 using Microsoft.Extensions.Logging;
+using System.Net;
 using ZLogger;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,8 @@ builder.Services.AddTransient<IFriendService, FriendService>();
 builder.Services.AddTransient<IMailService, MailService>();
 builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddControllers();
+
+builder.WebHost.UseUrls("http://*:5015");
 
 
 // Logger Setting
@@ -53,4 +56,4 @@ app.UseEndpoints(endpoints => { _ = endpoints.MapControllers(); });
 
 
 
-app.Run(configuration["GameAPIServerAddr"]);
+app.Run();
