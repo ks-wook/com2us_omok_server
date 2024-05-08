@@ -65,16 +65,6 @@ public class PacketHandlerUser : BasePacketHandler
             SendLoginFail(sessionId);
             return;
         }
-
-
-        // TEST 무조건 로그인 성공
-        //_ = _userManager.AddUser(bodyData.UserId, sessionId);
-        //PKTResLogin sendData = new PKTResLogin();
-        //sendData.UserId = bodyData.UserId;
-        //var sendPacket = MemoryPackSerializer.Serialize<PKTResLogin>(sendData);
-        //MemoryPackPacketHeadInfo.Write(sendPacket, PACKETID.PKTResLogin);
-        //NetSendFunc(sessionId, sendPacket);
-        // TEST ------------------
     }
 
     public void MQResVerifyTokenHandler(MemoryPackBinaryRequestInfo packet)
