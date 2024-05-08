@@ -4,6 +4,7 @@ using SqlKata.Execution;
 using ZLogger;
 using Microsoft.Extensions.Logging;
 using HiveServer.Repository;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 IConfiguration configuration = builder.Configuration;
@@ -15,6 +16,14 @@ builder.Services.Configure<MemoryDbConfig>(configuration.GetSection(nameof(Memor
 builder.Services.AddTransient<IHiveDb,  HiveDb>();
 builder.Services.AddSingleton<IMemoryDb,  MemoryDb>();
 builder.Services.AddControllers();
+
+builder.WebHost.ConfigureKestrel((context, serverOptions) =>
+{
+    serverOptions.Listen(IPAddress.Loopback, 5014, listenOptions =>
+    {
+        serverOptions.ListenAnyIP(5014);
+    });
+});
 
 
 // Logger Setting
@@ -52,4 +61,4 @@ app.UseEndpoints(endpoints => { _ = endpoints.MapControllers(); });
 
 
 
-app.Run(configuration["HiveServerAddr"]);
+app.Run();

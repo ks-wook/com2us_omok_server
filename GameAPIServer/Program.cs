@@ -1,6 +1,7 @@
 using GameAPIServer.Repository;
 using GameAPIServer.Services;
 using Microsoft.Extensions.Logging;
+using System.Net;
 using ZLogger;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,13 @@ builder.Services.AddTransient<IMailService, MailService>();
 builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddControllers();
 
+builder.WebHost.ConfigureKestrel((context, serverOptions) =>
+{
+    serverOptions.Listen(IPAddress.Loopback, 5015, listenOptions =>
+    {
+        serverOptions.ListenAnyIP(5015);
+    });
+});
 
 // Logger Setting
 Host.CreateDefaultBuilder()
@@ -53,4 +61,4 @@ app.UseEndpoints(endpoints => { _ = endpoints.MapControllers(); });
 
 
 
-app.Run(configuration["GameAPIServerAddr"]);
+app.Run();
