@@ -19,13 +19,8 @@ builder.Services.AddTransient<IMailService, MailService>();
 builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddControllers();
 
-builder.WebHost.ConfigureKestrel((context, serverOptions) =>
-{
-    serverOptions.Listen(IPAddress.Loopback, 5015, listenOptions =>
-    {
-        serverOptions.ListenAnyIP(5015);
-    });
-});
+builder.WebHost.UseUrls("http://*:5015");
+
 
 // Logger Setting
 Host.CreateDefaultBuilder()

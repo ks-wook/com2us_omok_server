@@ -17,13 +17,7 @@ builder.Services.AddTransient<IHiveDb,  HiveDb>();
 builder.Services.AddSingleton<IMemoryDb,  MemoryDb>();
 builder.Services.AddControllers();
 
-builder.WebHost.ConfigureKestrel((context, serverOptions) =>
-{
-    serverOptions.Listen(IPAddress.Loopback, 5014, listenOptions =>
-    {
-        serverOptions.ListenAnyIP(5014);
-    });
-});
+builder.WebHost.UseUrls("http://*:5014");
 
 
 // Logger Setting
@@ -50,7 +44,6 @@ Host.CreateDefaultBuilder()
 
 
 var app = builder.Build();
-
 
 
 app.UseRouting();
