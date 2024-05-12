@@ -41,4 +41,5 @@ public enum ErrorCode : short
 
     // Match 15501 ~
     FailRequestMatch = 15501,
+    FailCheckMatch = 15502,
 }

@@ -10,14 +10,12 @@ namespace GameAPIServer.Controllers;
 public class RequestMatchingController : ControllerBase
 {
     readonly ILogger<RequestMatchingController> _logger;
-    readonly IMemoryDb _memoryDb;
     string _requestMatchAPI;
 
-    public RequestMatchingController(ILogger<RequestMatchingController> logger, IConfiguration configuration, IMemoryDb memoryDb)
+    public RequestMatchingController(ILogger<RequestMatchingController> logger, IConfiguration configuration)
     {
         _logger = logger;
         _requestMatchAPI = configuration.GetSection("MatchAPIServer").Value + "/RequestMatching";
-        _memoryDb = memoryDb;
     }
 
     [HttpPost]
@@ -39,7 +37,7 @@ public class RequestMatchingController : ControllerBase
 
         if (httpRes == null || httpRes.StatusCode != System.Net.HttpStatusCode.OK)
         {
-            _logger.ZLogDebug($"[RequestMatching] ErrorCode:{ErrorCode.FailRequestMatch}, " +
+            _logger.ZLogDebug($"[RequestMatching] ErrorCode: {ErrorCode.FailRequestMatch}, " +
                 $"userId = {request.UserID}, StatusCode = {httpRes?.StatusCode}");
             return ErrorCode.FailRequestMatch;
         }

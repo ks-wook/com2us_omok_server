@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ZLogger;
 
-
 namespace APIServer.Controllers;
 
 [ApiController]
@@ -31,7 +30,7 @@ public class RequestMatching : ControllerBase
     {
         MatchResponse response = new();
 
-        _matchWorker.AddUser(request.UserID);
+        _matchWorker.AddUser(request.UserID); // 매칭 큐에 추가
 
         return response;
     }

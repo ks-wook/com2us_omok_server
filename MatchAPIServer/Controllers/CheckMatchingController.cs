@@ -14,7 +14,6 @@ public class CheckMatching : Controller
 {
     IMatchWoker _matchWorker;
 
-
     public CheckMatching(IMatchWoker matchWorker)
     {
         _matchWorker = matchWorker;
@@ -27,19 +26,20 @@ public class CheckMatching : Controller
 
         (var result, var completeMatchingData) = _matchWorker.GetCompleteMatching(request.UserID);
 
-        //TODO: 결과를 담아서 보낸다
+        //TODO 결과를 담아서 보낸다
+
+
+
+
 
         return response;
     }
-
-
 }
 
 public class CheckMatchingReq
 {
     public string UserID { get; set; }
 }
-
 
 public class CheckMatchingRes
 {

@@ -43,8 +43,7 @@ public class MatchWoker : IMatchWoker
         _matchingRedisSubKey = matchingConfig.Value.SubKey;
 
 
-        //TODO: Redis 연결 및 초기화 한다
-
+        //TODO: Redis 연결 및 pub/sub 초기화
 
         _reqWorker = new System.Threading.Thread(this.RunMatching);
         _reqWorker.Start();
@@ -61,6 +60,12 @@ public class MatchWoker : IMatchWoker
     public (bool, CompleteMatchingData) GetCompleteMatching(string userID)
     {
         //TODO: _completeDic에서 검색해서 있으면 반환한다.
+
+
+
+
+
+
 
         return (false, null);
     }
@@ -80,7 +85,14 @@ public class MatchWoker : IMatchWoker
 
                 //TODO: 큐에서 2명을 가져온다. 두명을 매칭시킨다
 
+
+
+
+
                 //TODO: Redis의 Pub/Sub을 이용해서 매칭된 유저들을 게임서버에 전달한다.
+
+
+
 
 
             }
@@ -97,10 +109,24 @@ public class MatchWoker : IMatchWoker
         {
             try
             {
-                //TODO: Redis의 Pub/Sub을 이용해서 매칭된 결과를 게임서버로 받는다
+                //TODO: Redis의 Pub/Sub을 이용해서 매칭된 결과를 게임서버로부터 받는다
+
+
+
+
+
+
+
 
                 //TODO: 매칭 결과를 _completeDic에 넣는다
                 // 2명이 하므로 각각 유저를 대상으로 총 2개를 _completeDic에 넣어야 한다
+
+
+
+
+
+
+
             }
             catch (Exception ex)
             {
@@ -109,15 +135,13 @@ public class MatchWoker : IMatchWoker
         }
     }
 
-
-
     public void Dispose()
     {
         Console.WriteLine("MatchWoker 소멸자 호출");
     }
 }
 
-
+// 서버가 pub을 통해 보내주는 매칭 완료 응답
 public class CompleteMatchingData
 {
     public string ServerAddress { get; set; }
