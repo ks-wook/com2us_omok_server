@@ -16,7 +16,7 @@ public class MysqlProcessor
 {
     ILog _logger;
 
-    Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>> _packetHandlerMap = new Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>>(); // 패킷의 ID와 패킷 핸들러를 같이 등록한다.
+    Dictionary<int, Action<MemoryPackBinaryRequestInfo>> _packetHandlerMap = new Dictionary<int, Action<MemoryPackBinaryRequestInfo>>(); // 패킷의 ID와 패킷 핸들러를 같이 등록한다.
 
     PacketHandlerGameResult? _packetHandlerGameResult;
 
