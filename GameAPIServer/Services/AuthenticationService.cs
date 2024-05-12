@@ -22,7 +22,6 @@ public class AuthenticationService : IAuthenticationService
         _gameService = gameService;
     }
 
-    
     // 게임 API 서버 로그인 처리
     public async Task<ErrorCode> Login(Int64 accountId, string loginToken)
     {
@@ -36,7 +35,6 @@ public class AuthenticationService : IAuthenticationService
             return result;
         }
 
-
         // Game redis에 인증된 토큰을 삽입한다.
         result = await _memoryDb.InsertGameLoginTokenAsync(accountId, loginToken);
         if (result != ErrorCode.None)
@@ -48,8 +46,6 @@ public class AuthenticationService : IAuthenticationService
 
         return result;
     }
-
-
 
     // Hive 서버로 로그인한 계정의 토큰 유효성 검증을 요청
     public async Task<ErrorCode> LoginTokenVerify(Int64 accuountId, string loginToken)
@@ -72,18 +68,15 @@ public class AuthenticationService : IAuthenticationService
                 return ErrorCode.InvalidResFromHive;
             }
 
-
             TokenValidationCheckRes res = await httpRes.Content.ReadFromJsonAsync<TokenValidationCheckRes>()
                 ?? new TokenValidationCheckRes{ Result = ErrorCode.InvalidResFromHive };
             
-
             if(res.Result != ErrorCode.None)
             {
                 _logger.ZLogInformation
                     ($"[LoginTokenVerify] ErrorCode:{ErrorCode.InvalidResFromHive}, AccountId = {accuountId}, Token = {loginToken}");
                 return ErrorCode.InvalidResFromHive;
             }
-
 
             return ErrorCode.None;
         }
@@ -94,6 +87,4 @@ public class AuthenticationService : IAuthenticationService
             return ErrorCode.InvalidResFromHive;
         }
     }
-
-
 }
