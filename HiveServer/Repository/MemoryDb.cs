@@ -10,7 +10,6 @@ using ZLogger;
 
 public class MemoryDb : IMemoryDb
 {
-
     readonly ILogger<MemoryDb> _logger;
     readonly IOptions<MemoryDbConfig> _momoryDbConfig;
 
@@ -24,8 +23,6 @@ public class MemoryDb : IMemoryDb
 
         _redisConnector = new RedisConnection(rc);
     }
-
-
 
     // 로그인 유저 토큰 삽입
     public async Task<ErrorCode> InsertHiveLoginTokenAsync(Int64 accountId, string token)

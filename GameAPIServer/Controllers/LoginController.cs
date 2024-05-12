@@ -33,8 +33,6 @@ namespace GameAPIServer.Controllers
         {
             LoginRes res = new LoginRes();
 
-
-
             res.Result = await _authenticationService.Login(req.AccountId, req.Token);
 
             if(res.Result != ErrorCode.None)
@@ -43,8 +41,6 @@ namespace GameAPIServer.Controllers
                     ($"[Login] ErrorCode: {ErrorCode.FailLogin}, accountId: {req.AccountId}");
                 return res;
             }
-
-
 
             // 로그인 성공 시 게임 데이터 로드
             res.UserGameData = await _gameService.LoadGameData(req.AccountId);
