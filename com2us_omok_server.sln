@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameAPIServer", "GameAPISer
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameServer", "GameServer\GameServer.csproj", "{551183D5-C892-4F66-8935-340CBE1F1B20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSocketLite", "SuperSocketLite\SuperSocketLite.csproj", "{CE23E8F0-D1E6-433B-BCDE-39D3442E118C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperSocketLite", "SuperSocketLite\SuperSocketLite.csproj", "{CE23E8F0-D1E6-433B-BCDE-39D3442E118C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", "{C01F77BB-C6CE-4475-969B-D1679F6D3EE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatchAPIServer", "MatchAPIServer\MatchAPIServer.csproj", "{FABB0901-0440-407B-9F8F-62295BAFA551}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{551183D5-C892-4F66-8935-340CBE1F1B20}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CE23E8F0-D1E6-433B-BCDE-39D3442E118C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CE23E8F0-D1E6-433B-BCDE-39D3442E118C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FABB0901-0440-407B-9F8F-62295BAFA551}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FABB0901-0440-407B-9F8F-62295BAFA551}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FABB0901-0440-407B-9F8F-62295BAFA551}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FABB0901-0440-407B-9F8F-62295BAFA551}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
