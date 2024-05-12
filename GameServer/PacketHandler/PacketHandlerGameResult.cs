@@ -30,13 +30,13 @@ public class PacketHandlerGameResult : BasePacketHandler
         _mainPacketInsert = mainPacketInsert;
     }
 
-    public override void RegisterPacketHandler(Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>> packetHandlerMap)
+    public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap)
     {
         packetHandlerMap.Add((int)InnerPacketId.PKTInnerReqSaveGameResult, PKTInnerReqSaveGameResultHandler);
     }
 
     // 게임 결과 저장
-    public async Task PKTInnerReqSaveGameResultHandler(MemoryPackBinaryRequestInfo packet)
+    public void PKTInnerReqSaveGameResultHandler(MemoryPackBinaryRequestInfo packet)
     {
         var sessionId = packet.SessionID;
 
@@ -48,7 +48,7 @@ public class PacketHandlerGameResult : BasePacketHandler
             return;
         }
 
-        result = await InsertGameResult(bodyData);
+        result = InsertGameResult(bodyData);
         if (result != ErrorCode.None)
         {
             SendInnerFailPacket<PKTNtfEndOmok>(InnerPacketId.PKTInnerResSaveGameResult, ErrorCode.FailInsertGameResult, _mainPacketInsert);
@@ -59,7 +59,7 @@ public class PacketHandlerGameResult : BasePacketHandler
         ResSaveGameResult(bodyData, sessionId);
     }
 
-    public async Task<ErrorCode> InsertGameResult(PKTInnerReqSaveGameResult packet)
+    public ErrorCode InsertGameResult(PKTInnerReqSaveGameResult packet)
     {
         // string -> Int62 parsing
         long blackUserId = long.Parse(packet.BlackUserId);
@@ -67,8 +67,8 @@ public class PacketHandlerGameResult : BasePacketHandler
         long winUserId = long.Parse(packet.WinUserId);
 
         // 게임 결과 데이터 저장
-        var insertSuccess = await _queryFactory.Query("game_result")
-                .InsertAsync(new
+        var insertSuccess = _queryFactory.Query("game_result")
+                .Insert(new
                 {
                     black_user_id = blackUserId,
                     white_user_id = whiteUserId,
