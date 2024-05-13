@@ -26,9 +26,16 @@ public class CheckMatching : Controller
 
         (var result, var completeMatchingData) = _matchWorker.GetCompleteMatching(request.UserID);
 
-        //TODO 결과를 담아서 보낸다
-
-
+        if(result == false || completeMatchingData == null)
+        {
+            response.IsMatched = false;
+        }
+        else
+        {
+            response.IsMatched = true;
+            response.ServerAddress = completeMatchingData.ServerAddress;
+            response.RoomNumber = completeMatchingData.RoomNumber;
+        }
 
         return response;
     }
@@ -36,12 +43,13 @@ public class CheckMatching : Controller
 
 public class CheckMatchingReq
 {
-    public string UserID { get; set; }
+    public string UserID { get; set; } = "";
 }
 
 public class CheckMatchingRes
 {
     public ErrorCode Result { get; set; } = ErrorCode.None;
+    public bool IsMatched { get; set; } = false;
     public string ServerAddress { get; set; } = "";
     public int RoomNumber { get; set; } = 0;
 }

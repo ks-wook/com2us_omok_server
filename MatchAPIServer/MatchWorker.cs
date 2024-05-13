@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Options;
+﻿using CloudStructures;
+using CloudStructures.Structures;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,12 +14,17 @@ public interface IMatchWoker : IDisposable
 {
     public void AddUser(string userID);
 
-    public (bool, CompleteMatchingData) GetCompleteMatching(string userID);
+    public (bool, CompleteMatchingData?) GetCompleteMatching(string userID);
 }
 
 public class MatchWoker : IMatchWoker
 {
+    readonly ILogger<MatchWoker> _logger;
+
     List<string> _pvpServerAddressList = new();
+
+    RedisList<MatchedPlayers> _redisMatchedPlayerList;
+    RedisList<CompleteMatchingData> _redisCompleteList;
 
     System.Threading.Thread _reqWorker = null;
     ConcurrentQueue<string> _reqQueue = new();
@@ -24,26 +32,37 @@ public class MatchWoker : IMatchWoker
     System.Threading.Thread _completeWorker = null;
 
     // key는 유저ID
-    ConcurrentDictionary<string, string> _completeDic = new();
-
-    //TODO: 2개의 Pub/Sub을 사용하므로 Redis 객체가 2개 있어야 한다.
-    // 매칭서버에서 -> 게임서버, 게임서버 -> 매칭서버로
+    ConcurrentDictionary<string, CompleteMatchingData> _completeDic = new();
 
     string _redisAddress = "";
-    string _matchingRedisPubKey = "MatchingReq";
-    string _matchingRedisSubKey = "MatchingReq";
+    string _matchListKey = "";
+    string _matchCompleteListKey = "";
 
+    RedisConnection _redisConnector;
 
-    public MatchWoker(IOptions<MatchingConfig> matchingConfig)
+    public MatchWoker(ILogger<MatchWoker> logger, IOptions<MatchingConfig> matchingConfig, IOptions<PvpServerAddressConfig> pvpServerAddressConfig)
     {
-        Console.WriteLine("MatchWoker 생성자 호출");
+        _logger = logger;
 
-        _redisAddress = matchingConfig.Value.RedisAddress;
-        _matchingRedisPubKey = matchingConfig.Value.PubKey;
-        _matchingRedisSubKey = matchingConfig.Value.SubKey;
+        // 매칭 서버 참조 값 설정
+        _redisAddress = matchingConfig.Value.GameRedis;
+        _matchListKey = matchingConfig.Value.MatchListKey;
+        _matchCompleteListKey = matchingConfig.Value.MatchCompleteListKey;
+        _pvpServerAddressList = pvpServerAddressConfig.Value.PvpServerAddresses;
 
+        foreach(string s in _pvpServerAddressList)
+        {
+            Console.WriteLine(s);
+        }
 
-        //TODO: Redis 연결 및 pub/sub 초기화
+        // Redis 연결
+        RedisConfig rc = new RedisConfig("defalut", _redisAddress);
+        _redisConnector = new RedisConnection(rc);
+
+        // 소켓 서버 매칭 요청 리스트, 매칭 요청 완료 리스트
+        var defalutExpiry = TimeSpan.FromDays(1);
+        _redisMatchedPlayerList = new RedisList<MatchedPlayers>(_redisConnector, _matchListKey, defalutExpiry);
+        _redisCompleteList = new RedisList<CompleteMatchingData>(_redisConnector, _matchCompleteListKey, defalutExpiry);
 
         _reqWorker = new System.Threading.Thread(this.RunMatching);
         _reqWorker.Start();
@@ -57,80 +76,70 @@ public class MatchWoker : IMatchWoker
         _reqQueue.Enqueue(userID);
     }
 
-    public (bool, CompleteMatchingData) GetCompleteMatching(string userID)
+    public (bool, CompleteMatchingData?) GetCompleteMatching(string userID)
     {
-        //TODO: _completeDic에서 검색해서 있으면 반환한다.
+        // _completeDic에서 검색해서 있으면 반환한다.
+        CompleteMatchingData? matchingCmplData;
+        _completeDic.TryGetValue(userID, out matchingCmplData);
+        if(matchingCmplData == null) // 해당 유저에 대해 매칭 완료된 정보가 없는 경우
+        {
+            return (false, null);
+        }
 
-
-
-
-
-
-
-        return (false, null);
+        return (true, matchingCmplData);
     }
 
-    void RunMatching()
+    async void RunMatching()
     {
         while (true)
         {
             try
             {
-
                 if (_reqQueue.Count < 2)
                 {
                     System.Threading.Thread.Sleep(1);
                     continue;
                 }
 
-                //TODO: 큐에서 2명을 가져온다. 두명을 매칭시킨다
+                // 큐에서 2명을 가져온다. 두명을 매칭시킨다
+                string? user1ID, user2ID;
+                _reqQueue.TryDequeue(out user1ID);
+                _reqQueue.TryDequeue(out user2ID);
 
+                // Redis list 이용해서 매칭된 유저들을 게임서버에 전달한다.
+                MatchedPlayers matchedData = new MatchedPlayers
+                {
+                    User1ID = user1ID,
+                    User2ID = user2ID
+                };
 
-
-
-
-                //TODO: Redis의 Pub/Sub을 이용해서 매칭된 유저들을 게임서버에 전달한다.
-
-
-
-
-
+                await _redisMatchedPlayerList.RightPushAsync(matchedData);
             }
             catch (Exception ex)
             {
-
+                _logger.LogError
+                    ($"[RunMatching] ErrorCode: {ErrorCode.MatchWorkerException}, {ex.ToString()}");
             }
         }
     }
 
-    void RunMatchingComplete()
+    async void RunMatchingComplete()
     {
         while (true)
         {
             try
             {
-                //TODO: Redis의 Pub/Sub을 이용해서 매칭된 결과를 게임서버로부터 받는다
+                // Redis의 list를 이용해서 매칭된 결과를 게임서버로부터 받는다
+                var matchCmplResult = await _redisCompleteList.LeftPopAsync();
 
-
-
-
-
-
-
-
-                //TODO: 매칭 결과를 _completeDic에 넣는다
-                // 2명이 하므로 각각 유저를 대상으로 총 2개를 _completeDic에 넣어야 한다
-
-
-
-
-
-
+                // 게임 서버는 매칭이 완료된 양쪽의 플레이어 정보를 2번 넣어준다.
+                _completeDic.TryAdd(matchCmplResult.Value.UserID, matchCmplResult.Value);
 
             }
             catch (Exception ex)
             {
-
+                _logger.LogError
+                    ($"[RunMatchingComplete] ErrorCode: {ErrorCode.MatchWorkerException}, {ex.ToString()}");
             }
         }
     }
@@ -144,14 +153,25 @@ public class MatchWoker : IMatchWoker
 // 서버가 pub을 통해 보내주는 매칭 완료 응답
 public class CompleteMatchingData
 {
-    public string ServerAddress { get; set; }
-    public int RoomNumber { get; set; }
+    public string ServerAddress { get; set; } = "";
+    public int RoomNumber { get; set; } = 0;
+    public string UserID { get; set; } = "";
 }
 
+public class PvpServerAddressConfig
+{
+    public List<string> PvpServerAddresses { get; set; }
+}
 
 public class MatchingConfig
 {
-    public string RedisAddress { get; set; }
-    public string PubKey { get; set; }
-    public string SubKey { get; set; }
+    public string GameRedis { get; set; } = "";
+    public string MatchListKey { get; set; } = "";
+    public string MatchCompleteListKey { get; set; } = "";
+}
+
+public class MatchedPlayers
+{
+    public string? User1ID { get; set; } = string.Empty;
+    public string? User2ID { get; set; } = string.Empty;
 }

@@ -12,6 +12,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 IConfiguration configuration = builder.Configuration;
 builder.Services.Configure<MatchingConfig>(configuration.GetSection(nameof(MatchingConfig)));
+builder.Services.Configure<PvpServerAddressConfig>(configuration.GetSection(nameof(PvpServerAddressConfig)));
 
 builder.Services.AddSingleton<IMatchWoker, MatchWoker>();
 builder.Services.AddControllers();
