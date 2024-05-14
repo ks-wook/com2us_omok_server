@@ -1,5 +1,6 @@
 ﻿using MemoryPack;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace GameServer;
 
 public class Room
 {
-    public RoomState State { get; set; } = RoomState.None;
+    public RoomState State { get; set; } = RoomState.Empty;
 
     public DateTime lastTurnChangeTime;
     public string CurTurnUserId { get; set; } = string.Empty; // 현재 턴인 유저 아이디
@@ -54,7 +55,7 @@ public class Room
         return _roomUsers.Find(ru => ru.RoomSessionID == sessionId);
     }
 
-    public ErrorCode RemoveUserBySessionId(string sessioniId)
+    public ErrorCode RemoveUserBySessionId(string sessioniId, ConcurrentQueue<int> playableRoomNumbers)
     {
         RoomUser? roomUser = _roomUsers.Find(ru => ru.RoomSessionID == sessioniId);
         if (roomUser == null)
@@ -65,6 +66,14 @@ public class Room
         if (_roomUsers.Remove(roomUser) == false)
         {
             return ErrorCode.FailRemoveRoomUser;
+        }
+
+        if(_roomUsers.Count == 0) // 모두 나간 상태
+        {
+            this.State = RoomState.Empty;
+
+            // 이 방을 다시 사용할 수 있음을 알린다.
+            playableRoomNumbers.Enqueue(this.RoomNumber);
         }
 
         return ErrorCode.None;
@@ -164,7 +173,7 @@ public class Room
 
     public void OmokGameEnd()
     {
-        State = RoomState.None; // 게임 종료
+        State = RoomState.Full; // 게임 종료
         
         foreach(RoomUser roomUser in _roomUsers)
         {

@@ -80,8 +80,9 @@ public class MatchWoker : IMatchWoker
     {
         // _completeDic에서 검색해서 있으면 반환한다.
         CompleteMatchingData? matchingCmplData;
-        _completeDic.TryGetValue(userID, out matchingCmplData);
-        if(matchingCmplData == null) // 해당 유저에 대해 매칭 완료된 정보가 없는 경우
+        _completeDic.TryRemove(userID, out matchingCmplData);
+
+        if (matchingCmplData == null) // 해당 유저에 대해 매칭 완료된 정보가 없는 경우
         {
             return (false, null);
         }
@@ -95,9 +96,11 @@ public class MatchWoker : IMatchWoker
         {
             try
             {
+                await Console.Out.WriteLineAsync($"Matching Req queue size : {_reqQueue.Count}");
+
                 if (_reqQueue.Count < 2)
                 {
-                    System.Threading.Thread.Sleep(1);
+                    System.Threading.Thread.Sleep(1000);
                     continue;
                 }
 
@@ -106,7 +109,7 @@ public class MatchWoker : IMatchWoker
                 _reqQueue.TryDequeue(out user1ID);
                 _reqQueue.TryDequeue(out user2ID);
 
-                // Redis list 이용해서 매칭된 유저들을 게임서버에 전달한다.
+                // Redis list 이용해서 매칭된 유저들을 redis 에 전달한다.
                 MatchedPlayers matchedData = new MatchedPlayers
                 {
                     User1ID = user1ID,
@@ -131,10 +134,14 @@ public class MatchWoker : IMatchWoker
             {
                 // Redis의 list를 이용해서 매칭된 결과를 게임서버로부터 받는다
                 var matchCmplResult = await _redisCompleteList.LeftPopAsync();
+                if(matchCmplResult.HasValue == false)
+                {
+                    System.Threading.Thread.Sleep(1);
+                    continue;
+                }
 
                 // 게임 서버는 매칭이 완료된 양쪽의 플레이어 정보를 2번 넣어준다.
                 _completeDic.TryAdd(matchCmplResult.Value.UserID, matchCmplResult.Value);
-
             }
             catch (Exception ex)
             {
@@ -154,6 +161,7 @@ public class MatchWoker : IMatchWoker
 public class CompleteMatchingData
 {
     public string ServerAddress { get; set; } = "";
+    public int Port { get; set; }
     public int RoomNumber { get; set; } = 0;
     public string UserID { get; set; } = "";
 }

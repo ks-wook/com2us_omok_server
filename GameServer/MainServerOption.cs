@@ -9,6 +9,9 @@ namespace GameServer
 {
     public class MainServerOption
     {
+        public string PvpServerAddress = "server IP";
+        public int PvpServerPort = 8282;
+
         // [Option("uniqueID", Required = true, HelpText = "Server UniqueID")]
         public int ChatServerUniqueID { get; set; }
 
@@ -39,10 +42,11 @@ namespace GameServer
         // [Option("roomStartNumber", Required = true, HelpText = "RoomStartNumber")]
         public int RoomStartNumber { get; set; } = 0;
 
-
+        // DB Option
         public string MysqlConnectionStr = "Server=localhost;Port=3306;Database=gamedb;Uid=root;Pwd=0000;";
         public string RedisConnectionStr = "localhost:6380";
-
+        public string MatchRequestListKey { get; set; } = "matchRequest";
+        public string MatchCompleteListKey { get; set; } = "matchComplete";
 
 
         // Timer Option
