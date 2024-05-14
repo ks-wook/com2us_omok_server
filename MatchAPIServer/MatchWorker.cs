@@ -46,7 +46,7 @@ public class MatchWoker : IMatchWoker
 
         // 매칭 서버 참조 값 설정
         _redisAddress = matchingConfig.Value.GameRedis;
-        _matchListKey = matchingConfig.Value.MatchListKey;
+        _matchListKey = matchingConfig.Value.MatchRequestListKey;
         _matchCompleteListKey = matchingConfig.Value.MatchCompleteListKey;
         _pvpServerAddressList = pvpServerAddressConfig.Value.PvpServerAddresses;
 
@@ -166,7 +166,7 @@ public class PvpServerAddressConfig
 public class MatchingConfig
 {
     public string GameRedis { get; set; } = "";
-    public string MatchListKey { get; set; } = "";
+    public string MatchRequestListKey { get; set; } = "";
     public string MatchCompleteListKey { get; set; } = "";
 }
 

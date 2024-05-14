@@ -1,6 +1,8 @@
 ﻿using GameServer;
 using GameServer.Packet;
 using MemoryPack;
+using MySqlConnector;
+using SqlKata.Execution;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,4 +99,5 @@ public class BasePacketHandler
 
     public virtual void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap) { }
     public virtual void RegisterPacketHandler(Dictionary<int, Func<MemoryPackBinaryRequestInfo, Task>> packetHandlerMap) { }
+    public virtual void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo, QueryFactory>> packetHandlerMap) { }
 }

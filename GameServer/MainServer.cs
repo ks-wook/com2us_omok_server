@@ -109,7 +109,7 @@ namespace GameServer
             _mainPacketProcessor.CreateAndStart(_mainLogger, _roomManager, _userManager, _mysqlProcessor.Insert, _redisProcessor.Insert); // 프로세서 초기화
 
             // mysql 프로세서
-            _mysqlProcessor.CreateAndStart(_mainLogger, _mainServerOption.MysqlConnectionStr, _mainPacketProcessor.Insert); // 프로세서 초기화
+            _mysqlProcessor.CreateAndStart(_mainLogger, _mainServerOption.MysqlConnectionStr, _mainServerOption.DBThreadCount, _mainPacketProcessor.Insert); // 프로세서 초기화
 
             // redis 프로세서
             _redisProcessor.CreateAndStart(_mainLogger, _mainServerOption.RedisConnectionStr, _mainPacketProcessor.Insert); // 프로세서 초기화
