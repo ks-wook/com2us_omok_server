@@ -1,6 +1,7 @@
 ﻿using GameServer.Packet;
 using MemoryPack;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,7 @@ public class RoomManager
 
     System.Timers.Timer? roomCheckTimer;
 
-    Action<MemoryPackBinaryRequestInfo> _insertInnerPacket;
+    Action<MemoryPackBinaryRequestInfo>? _insertInnerPacket;
     
     double timerWeight = 0.5; // 방 검사 타이머 오차 보정값 네트워크 상황에 따라 조정
     int _roomCheckStartIndex = -1; // 방 검사 시작할 인덱스
@@ -26,7 +27,9 @@ public class RoomManager
     int _checkFrequencyRoom { get; set; } = 0;
     int _checkAtOnceRoomCount { get; set; } = 0;
 
-    public void Init(MainServerOption option, Action<MemoryPackBinaryRequestInfo> InsertInnerPacket)
+    ConcurrentQueue<int> _playableRoomNumbers;
+
+    public void Init(MainServerOption option, Action<MemoryPackBinaryRequestInfo> InsertInnerPacket, ConcurrentQueue<int> playableRoomNumbers)
     {
         // 지정된 개수만큼 룸 생성후 풀링
         _roomMaxCount = option.RoomMaxCount;
@@ -52,6 +55,8 @@ public class RoomManager
         _roomCheckStartIndex = 0;
 
         _insertInnerPacket = InsertInnerPacket;
+
+        _playableRoomNumbers = playableRoomNumbers;
     }
 
     public List<Room> GetRoomList() { return rooms; }
@@ -61,6 +66,7 @@ public class RoomManager
         return rooms.Find(r => r.RoomNumber == roomNumber);
     }
 
+#pragma warning disable 8602
     void CheckRoomState(Object? source, ElapsedEventArgs e)
     {
         for(int i = 0; i < _checkAtOnceRoomCount; i++, _roomCheckStartIndex++)
@@ -72,7 +78,7 @@ public class RoomManager
 
             Room curRoom = rooms[_roomCheckStartIndex];
 
-            if (curRoom.State == RoomState.None)
+            if (curRoom.State != RoomState.InGame) // InGame인 상태만 턴 검사
                 continue;
 
             if(CheckTurnTimeout(curRoom) == false)
@@ -85,9 +91,10 @@ public class RoomManager
             var innerSendPacket = MemoryPackSerializer.Serialize(innerSendData);
             MemoryPackPacketHeadInfo.Write(innerSendPacket, InnerPacketId.PKTInnerNtfTurnChange);
             _insertInnerPacket(new MemoryPackBinaryRequestInfo(innerSendPacket));
-        }
 
+        }
     }
+#pragma warning restore 8602
 
     public bool CheckTurnTimeout(Room room)
     {
@@ -102,11 +109,17 @@ public class RoomManager
         return false;
     }
 
+
+    public ConcurrentQueue<int> GetPlayableRoomNumbers()
+    {
+        return _playableRoomNumbers;
+    }
 }
 
 // 방 상태 조사시 InGame인 상태만 조사한다.
 public enum RoomState
 {
-    None,
+    Full, // 사람이 들어와만 있는 상태(게임 X)
+    Empty, // 방에 아무도 없는 상태
     InGame,
 }

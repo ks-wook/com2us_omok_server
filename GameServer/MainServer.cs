@@ -10,6 +10,8 @@ using GameServer.Packet;
 using MemoryPack;
 using System.Security.Cryptography.Xml;
 using System.Net.Sockets;
+using System.Collections.Concurrent;
+using System.Net;
 
 namespace GameServer
 {
@@ -25,13 +27,14 @@ namespace GameServer
 
         MainServerOption _mainServerOption;
         
+        ConcurrentQueue<int> _playableRoomNumbers = new ConcurrentQueue<int>();
 
         // 매니저 생성
         RoomManager _roomManager = new RoomManager();
         UserManager _userManager = new UserManager();
 
-
-
+        FindPlayableRoomWorker _findPlayableRoomWorker;
+        
         public MainServer()
             : base(new DefaultReceiveFilterFactory<ReceiveFilter, MemoryPackBinaryRequestInfo>())
         {
@@ -55,6 +58,41 @@ namespace GameServer
                 ReceiveBufferSize = option.ReceiveBufferSize, 
                 SendBufferSize = option.SendBufferSize, 
             };
+
+            // 플레이 가능한 룸 번호 삽입
+            for(int i = option.RoomStartNumber; i < option.RoomMaxCount; i++)
+            {
+                _playableRoomNumbers.Enqueue(i);
+            }
+
+            string hostname = Dns.GetHostName();
+
+
+
+
+            // TEST 클라와 같은 네트워크에 물려서 테스트하는 경우
+            // -------------------------------------------------
+            IPHostEntry hostEntry = Dns.GetHostEntry(hostname);
+
+            // 첫 번째 IPv4 주소를 획득
+            foreach (IPAddress ipAddress in hostEntry.AddressList)
+            {
+                if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    option.PvpServerAddress = ipAddress.ToString();
+                    Console.WriteLine($"로컬 IP 주소: {ipAddress.ToString()}");
+                    break;
+                }
+            }
+            // -------------------------------------------------
+
+            
+
+
+            _findPlayableRoomWorker = new FindPlayableRoomWorker(
+                _mainLogger, _playableRoomNumbers,
+                option.RedisConnectionStr, option.MatchRequestListKey,
+                option.MatchCompleteListKey, option.PvpServerAddress);
         }
 
         public void StopServer()
@@ -101,7 +139,7 @@ namespace GameServer
         {
             // 매니저 초기화
             _userManager.Init(_mainServerOption, _mainPacketProcessor.Insert, CloseConnection);
-            _roomManager.Init(_mainServerOption, _mainPacketProcessor.Insert);
+            _roomManager.Init(_mainServerOption, _mainPacketProcessor.Insert, _playableRoomNumbers);
 
             BasePacketHandler.NetSendFunc = SendData;
 
@@ -168,7 +206,7 @@ namespace GameServer
                     Room? room = _roomManager.FindRoomByRoomNumber(user.RoomNumber);
                     if (room != null)
                     {
-                        room.RemoveUserBySessionId(sessionId);
+                        room.RemoveUserBySessionId(sessionId, _playableRoomNumbers);
 
                         _mainLogger.Info($"[{room.RoomNumber}번 room] Uid {sessionId} 퇴장, 현재 인원: {room.GetRoomUserCount()}");
 

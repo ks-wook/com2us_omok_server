@@ -147,7 +147,7 @@ public class PacketHandlerRoom : BasePacketHandler
 
 
         // 룸에서 유저 삭제
-        result = room.RemoveUserBySessionId(sessionId);
+        result = room.RemoveUserBySessionId(sessionId, _roomManager.GetPlayableRoomNumbers());
         if (result != ErrorCode.None)
         {
             Console.WriteLine($"[C_LeaveRoomReqHandler] ErrorCode: {result}");
