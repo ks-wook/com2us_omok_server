@@ -13,30 +13,21 @@ namespace GameServer.PacketHandler;
 public class PacketHandlerGameResult : BasePacketHandler
 {
     ILog _logger;
-
-    MySqlConnection _dbConnector;
-    SqlKata.Compilers.MySqlCompiler _dbCompiler;
-    QueryFactory _queryFactory;
-
     Action<MemoryPackBinaryRequestInfo> _mainPacketInsert;
 
-    public PacketHandlerGameResult(ILog logger, MySqlConnection mysqlGameConnection, Action<MemoryPackBinaryRequestInfo> mainPacketInsert)
+    public PacketHandlerGameResult(ILog logger, Action<MemoryPackBinaryRequestInfo> mainPacketInsert)
     {
         _logger = logger;
-
-        _dbConnector = mysqlGameConnection;
-        _dbCompiler = new SqlKata.Compilers.MySqlCompiler();
-        _queryFactory = new QueryFactory(_dbConnector, _dbCompiler);
         _mainPacketInsert = mainPacketInsert;
     }
 
-    public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo>> packetHandlerMap)
+    public override void RegisterPacketHandler(Dictionary<int, Action<MemoryPackBinaryRequestInfo, QueryFactory>> packetHandlerMap)
     {
         packetHandlerMap.Add((int)InnerPacketId.PKTInnerReqSaveGameResult, PKTInnerReqSaveGameResultHandler);
     }
 
     // 게임 결과 저장
-    public void PKTInnerReqSaveGameResultHandler(MemoryPackBinaryRequestInfo packet)
+    public void PKTInnerReqSaveGameResultHandler(MemoryPackBinaryRequestInfo packet, QueryFactory queryFactory)
     {
         var sessionId = packet.SessionID;
 
@@ -48,7 +39,7 @@ public class PacketHandlerGameResult : BasePacketHandler
             return;
         }
 
-        result = InsertGameResult(bodyData);
+        result = InsertGameResult(bodyData, queryFactory);
         if (result != ErrorCode.None)
         {
             SendInnerFailPacket<PKTNtfEndOmok>(InnerPacketId.PKTInnerResSaveGameResult, ErrorCode.FailInsertGameResult, _mainPacketInsert);
@@ -59,7 +50,7 @@ public class PacketHandlerGameResult : BasePacketHandler
         ResSaveGameResult(bodyData, sessionId);
     }
 
-    public ErrorCode InsertGameResult(PKTInnerReqSaveGameResult packet)
+    public ErrorCode InsertGameResult(PKTInnerReqSaveGameResult packet, QueryFactory queryFactory)
     {
         // string -> Int62 parsing
         long blackUserId = long.Parse(packet.BlackUserId);
@@ -67,7 +58,7 @@ public class PacketHandlerGameResult : BasePacketHandler
         long winUserId = long.Parse(packet.WinUserId);
 
         // 게임 결과 데이터 저장
-        var insertSuccess = _queryFactory.Query("game_result")
+        var insertSuccess = queryFactory.Query("game_result")
                 .Insert(new
                 {
                     black_user_id = blackUserId,
@@ -82,7 +73,6 @@ public class PacketHandlerGameResult : BasePacketHandler
         }
 
         _logger.Info("게임 데이터 저장 성공");
-
 
         return ErrorCode.None;
     }

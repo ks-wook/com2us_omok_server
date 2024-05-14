@@ -1,6 +1,7 @@
 ﻿using GameServer.Packet;
 using GameServer.PacketHandler;
 using MySqlConnector;
+using SqlKata.Execution;
 using SuperSocket.SocketBase.Logging;
 using System;
 using System.Collections.Generic;
@@ -16,21 +17,20 @@ public class MysqlProcessor
 {
     ILog _logger;
 
-    Dictionary<int, Action<MemoryPackBinaryRequestInfo>> _packetHandlerMap = new Dictionary<int, Action<MemoryPackBinaryRequestInfo>>(); // 패킷의 ID와 패킷 핸들러를 같이 등록한다.
+    Dictionary<int, Action<MemoryPackBinaryRequestInfo, QueryFactory>> _packetHandlerMap = new Dictionary<int, Action<MemoryPackBinaryRequestInfo, QueryFactory>>(); // 패킷의 ID와 패킷 핸들러를 같이 등록한다.
 
     PacketHandlerGameResult? _packetHandlerGameResult;
 
-    System.Threading.Thread? _processThread = null; // 패킷 처리용 쓰레드 선언
+    List<Thread> _processThreads = new List<Thread>(); // 패킷 처리용 쓰레드 리스트
+
+    string? _mysqlConnecitonStr;
     bool IsThreadRunning = false;
 
     BufferBlock<MemoryPackBinaryRequestInfo> _mysqlRecvBuffer = new BufferBlock<MemoryPackBinaryRequestInfo>();
 
-    // db 프로세스마다 고유한 db연결객체
-    MySqlConnection? _mysqlConnector;
-
     Action<MemoryPackBinaryRequestInfo>? _mainPacketInsert;
 
-    public void CreateAndStart(ILog logger, string mysqlConnectionStr, Action<MemoryPackBinaryRequestInfo> mainPacketInsert)
+    public void CreateAndStart(ILog logger, string mysqlConnectionStr, int DBThreadCount, Action<MemoryPackBinaryRequestInfo> mainPacketInsert)
     {
         _logger = logger;
 
@@ -40,26 +40,30 @@ public class MysqlProcessor
             throw new NullReferenceException();
         }
 
-        _mysqlConnector = new MySqlConnection(mysqlConnectionStr);
-
         _mainPacketInsert = mainPacketInsert; 
+
+        _mysqlConnecitonStr = mysqlConnectionStr;
 
         RegisterPakcetHandler();
 
         IsThreadRunning = true;
-        _processThread = new System.Threading.Thread(this.MysqlProcess);
-        _processThread.Start();
+        for (int i = 0; i < DBThreadCount; i++)
+        {
+            System.Threading.Thread processThread = new System.Threading.Thread(this.MysqlProcess);
+            _processThreads.Add(processThread);
+            processThread.Start();
+        }
     }
 
     void RegisterPakcetHandler()
     {
-        if (_mysqlConnector == null || _mainPacketInsert == null)
+        if (_mainPacketInsert == null)
         {
             _logger.Error("mysql Processor 패킷 등록에 실패하였습니다.");
             throw new NullReferenceException();
         }
 
-        _packetHandlerGameResult = new PacketHandlerGameResult(_logger, _mysqlConnector, _mainPacketInsert);
+        _packetHandlerGameResult = new PacketHandlerGameResult(_logger, _mainPacketInsert);
         _packetHandlerGameResult.RegisterPacketHandler(_packetHandlerMap);
     }
 
@@ -76,6 +80,15 @@ public class MysqlProcessor
 
     void MysqlProcess()
     {
+        // 쓰레드 마다 고유한 DB 연결객체 생성, queryfactory 객체만 넘겨서 쿼리 실행
+        SqlKata.Compilers.MySqlCompiler dbCompiler;
+        QueryFactory queryFactory;
+
+        MySqlConnection _dbConnector = new MySqlConnection(_mysqlConnecitonStr);
+
+        dbCompiler = new SqlKata.Compilers.MySqlCompiler();
+        queryFactory = new QueryFactory(_dbConnector, dbCompiler);
+
         while (IsThreadRunning)
         {
             try
@@ -87,7 +100,7 @@ public class MysqlProcessor
 
                 if (_packetHandlerMap.ContainsKey(header.Id))
                 {
-                    _packetHandlerMap[header.Id](packet);
+                    _packetHandlerMap[header.Id](packet, queryFactory);
                 }
                 else
                 {

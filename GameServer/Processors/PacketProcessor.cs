@@ -92,8 +92,6 @@ public class PacketProcessor
         _recvBuffer.Post(packet);
     }
 
-
-
     void Process()
     {
         while (IsThreadRunning)
