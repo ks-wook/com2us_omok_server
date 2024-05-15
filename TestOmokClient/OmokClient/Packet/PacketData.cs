@@ -38,6 +38,7 @@ public partial class PKTResRoomEnter : PkResult // 방 입장 요청 응답
 {
     public string UserId { get; set; } = string.Empty; // 입장에 성공한 UserId
     public Int32 RoomNumber { get; set; } // 입장에 성공한 방 number
+    public List<string> RoomUserList { get; set; } = new List<string>();
 }
 
 [MemoryPackable]
@@ -97,6 +98,7 @@ public partial class PKTResPutMok : PkResult // 돌 두기 요청 응답
     public string UserId { get; set; } = string.Empty;
     public int PosX;
     public int PosY;
+    public bool IsBlack { get; set; } = false;
     public bool IsTimeout { get; set; } = false;
 
 }

@@ -29,311 +29,455 @@ namespace OmokClient
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
-            this.textBoxIP = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBoxPort = new System.Windows.Forms.TextBox();
-            this.checkBoxLocalHostIP = new System.Windows.Forms.CheckBox();
-            this.btnConnect = new System.Windows.Forms.Button();
-            this.btnDisconnect = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
-            this.textBoxUserID = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.textBoxAT = new System.Windows.Forms.TextBox();
-            this.button3 = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.button7 = new System.Windows.Forms.Button();
-            this.textBoxRoomSendMsg = new System.Windows.Forms.TextBox();
-            this.listBoxRoomChatMsg = new System.Windows.Forms.ListBox();
-            this.listBoxRoomUserList = new System.Windows.Forms.ListBox();
-            this.button6 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.textBoxRoomNumber = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.listBoxLog = new System.Windows.Forms.ListBox();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.labelStatus = new System.Windows.Forms.Label();
-            this.btnTest = new System.Windows.Forms.Button();
-            this.groupBox1.SuspendLayout();
-            this.SuspendLayout();
+            label1 = new System.Windows.Forms.Label();
+            textBoxIP = new System.Windows.Forms.TextBox();
+            label2 = new System.Windows.Forms.Label();
+            textBoxPort = new System.Windows.Forms.TextBox();
+            checkBoxLocalHostIP = new System.Windows.Forms.CheckBox();
+            btnConnect = new System.Windows.Forms.Button();
+            btnDisconnect = new System.Windows.Forms.Button();
+            label3 = new System.Windows.Forms.Label();
+            textBoxUserID = new System.Windows.Forms.TextBox();
+            label4 = new System.Windows.Forms.Label();
+            textBoxPs = new System.Windows.Forms.TextBox();
+            button3 = new System.Windows.Forms.Button();
+            groupBox1 = new System.Windows.Forms.GroupBox();
+            button7 = new System.Windows.Forms.Button();
+            textBoxRoomSendMsg = new System.Windows.Forms.TextBox();
+            listBoxRoomChatMsg = new System.Windows.Forms.ListBox();
+            listBoxRoomUserList = new System.Windows.Forms.ListBox();
+            button6 = new System.Windows.Forms.Button();
+            button5 = new System.Windows.Forms.Button();
+            button4 = new System.Windows.Forms.Button();
+            textBoxRoomNumber = new System.Windows.Forms.TextBox();
+            label5 = new System.Windows.Forms.Label();
+            groupBox2 = new System.Windows.Forms.GroupBox();
+            TurnTimeoutLabel = new System.Windows.Forms.Label();
+            label9 = new System.Windows.Forms.Label();
+            UserIDLabel = new System.Windows.Forms.Label();
+            label11 = new System.Windows.Forms.Label();
+            LoseCountLabel = new System.Windows.Forms.Label();
+            WinCountLabel = new System.Windows.Forms.Label();
+            label8 = new System.Windows.Forms.Label();
+            label7 = new System.Windows.Forms.Label();
+            MatchRequestBtn = new System.Windows.Forms.Button();
+            label6 = new System.Windows.Forms.Label();
+            listBoxLog = new System.Windows.Forms.ListBox();
+            panel1 = new System.Windows.Forms.Panel();
+            GameResultText = new System.Windows.Forms.Label();
+            labelStatus = new System.Windows.Forms.Label();
+            btnCreateAccount = new System.Windows.Forms.Button();
+            groupBox1.SuspendLayout();
+            groupBox2.SuspendLayout();
+            panel1.SuspendLayout();
+            SuspendLayout();
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(16, 15);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 17);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "서버 주소";
+            label1.AutoSize = true;
+            label1.Location = new System.Drawing.Point(3, 11);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(81, 15);
+            label1.TabIndex = 0;
+            label1.Text = "API 서버 주소";
             // 
             // textBoxIP
             // 
-            this.textBoxIP.Location = new System.Drawing.Point(82, 10);
-            this.textBoxIP.Name = "textBoxIP";
-            this.textBoxIP.Size = new System.Drawing.Size(85, 25);
-            this.textBoxIP.TabIndex = 1;
+            textBoxIP.Location = new System.Drawing.Point(90, 8);
+            textBoxIP.Name = "textBoxIP";
+            textBoxIP.Size = new System.Drawing.Size(85, 23);
+            textBoxIP.TabIndex = 1;
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(181, 13);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(65, 17);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "포트 번호";
+            label2.AutoSize = true;
+            label2.Location = new System.Drawing.Point(181, 11);
+            label2.Name = "label2";
+            label2.Size = new System.Drawing.Size(59, 15);
+            label2.TabIndex = 2;
+            label2.Text = "포트 번호";
             // 
             // textBoxPort
             // 
-            this.textBoxPort.Location = new System.Drawing.Point(249, 10);
-            this.textBoxPort.Name = "textBoxPort";
-            this.textBoxPort.Size = new System.Drawing.Size(46, 25);
-            this.textBoxPort.TabIndex = 3;
+            textBoxPort.Location = new System.Drawing.Point(249, 9);
+            textBoxPort.Name = "textBoxPort";
+            textBoxPort.Size = new System.Drawing.Size(46, 23);
+            textBoxPort.TabIndex = 3;
+            textBoxPort.Text = "";
             // 
             // checkBoxLocalHostIP
             // 
-            this.checkBoxLocalHostIP.AutoSize = true;
-            this.checkBoxLocalHostIP.Checked = true;
-            this.checkBoxLocalHostIP.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLocalHostIP.Location = new System.Drawing.Point(304, 14);
-            this.checkBoxLocalHostIP.Name = "checkBoxLocalHostIP";
-            this.checkBoxLocalHostIP.Size = new System.Drawing.Size(111, 21);
-            this.checkBoxLocalHostIP.TabIndex = 4;
-            this.checkBoxLocalHostIP.Text = "localhost 사용";
-            this.checkBoxLocalHostIP.UseVisualStyleBackColor = true;
+            checkBoxLocalHostIP.AutoSize = true;
+            checkBoxLocalHostIP.Checked = true;
+            checkBoxLocalHostIP.CheckState = System.Windows.Forms.CheckState.Checked;
+            checkBoxLocalHostIP.Location = new System.Drawing.Point(304, 12);
+            checkBoxLocalHostIP.Name = "checkBoxLocalHostIP";
+            checkBoxLocalHostIP.Size = new System.Drawing.Size(102, 19);
+            checkBoxLocalHostIP.TabIndex = 4;
+            checkBoxLocalHostIP.Text = "localhost 사용";
+            checkBoxLocalHostIP.UseVisualStyleBackColor = true;
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(418, 10);
-            this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(70, 27);
-            this.btnConnect.TabIndex = 5;
-            this.btnConnect.Text = "접속하기";
-            this.btnConnect.UseVisualStyleBackColor = true;
-            this.btnConnect.Click += new System.EventHandler(this.button1_Click);
+            btnConnect.Enabled = false;
+            btnConnect.Location = new System.Drawing.Point(418, 9);
+            btnConnect.Name = "btnConnect";
+            btnConnect.Size = new System.Drawing.Size(70, 24);
+            btnConnect.TabIndex = 5;
+            btnConnect.Text = "접속하기";
+            btnConnect.UseVisualStyleBackColor = true;
+            btnConnect.Click += button1_Click;
             // 
             // btnDisconnect
             // 
-            this.btnDisconnect.Location = new System.Drawing.Point(494, 10);
-            this.btnDisconnect.Name = "btnDisconnect";
-            this.btnDisconnect.Size = new System.Drawing.Size(77, 27);
-            this.btnDisconnect.TabIndex = 6;
-            this.btnDisconnect.Text = "접속 끊기";
-            this.btnDisconnect.UseVisualStyleBackColor = true;
-            this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
+            btnDisconnect.Location = new System.Drawing.Point(494, 9);
+            btnDisconnect.Name = "btnDisconnect";
+            btnDisconnect.Size = new System.Drawing.Size(77, 24);
+            btnDisconnect.TabIndex = 6;
+            btnDisconnect.Text = "접속 끊기";
+            btnDisconnect.UseVisualStyleBackColor = true;
+            btnDisconnect.Click += btnDisconnect_Click;
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(16, 56);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(48, 17);
-            this.label3.TabIndex = 7;
-            this.label3.Text = "UserID";
+            label3.AutoSize = true;
+            label3.Location = new System.Drawing.Point(16, 49);
+            label3.Name = "label3";
+            label3.Size = new System.Drawing.Size(42, 15);
+            label3.TabIndex = 7;
+            label3.Text = "UserID";
             // 
             // textBoxUserID
             // 
-            this.textBoxUserID.Location = new System.Drawing.Point(68, 53);
-            this.textBoxUserID.Name = "textBoxUserID";
-            this.textBoxUserID.Size = new System.Drawing.Size(85, 25);
-            this.textBoxUserID.TabIndex = 8;
+            textBoxUserID.Location = new System.Drawing.Point(68, 47);
+            textBoxUserID.Name = "textBoxUserID";
+            textBoxUserID.Size = new System.Drawing.Size(85, 23);
+            textBoxUserID.TabIndex = 8;
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(173, 57);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(74, 17);
-            this.label4.TabIndex = 9;
-            this.label4.Text = "AuthToken";
+            label4.AutoSize = true;
+            label4.Location = new System.Drawing.Point(173, 50);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(57, 15);
+            label4.TabIndex = 9;
+            label4.Text = "Password";
             // 
-            // textBoxAT
+            // textBoxPs
             // 
-            this.textBoxAT.Location = new System.Drawing.Point(249, 53);
-            this.textBoxAT.Name = "textBoxAT";
-            this.textBoxAT.Size = new System.Drawing.Size(85, 25);
-            this.textBoxAT.TabIndex = 10;
+            textBoxPs.Location = new System.Drawing.Point(249, 47);
+            textBoxPs.Name = "textBoxPs";
+            textBoxPs.Size = new System.Drawing.Size(85, 23);
+            textBoxPs.TabIndex = 10;
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(345, 51);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(70, 27);
-            this.button3.TabIndex = 11;
-            this.button3.Text = "LogIn";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            button3.Location = new System.Drawing.Point(345, 45);
+            button3.Name = "button3";
+            button3.Size = new System.Drawing.Size(70, 24);
+            button3.TabIndex = 11;
+            button3.Text = "LogIn";
+            button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click;
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.button7);
-            this.groupBox1.Controls.Add(this.textBoxRoomSendMsg);
-            this.groupBox1.Controls.Add(this.listBoxRoomChatMsg);
-            this.groupBox1.Controls.Add(this.listBoxRoomUserList);
-            this.groupBox1.Controls.Add(this.button6);
-            this.groupBox1.Controls.Add(this.button5);
-            this.groupBox1.Controls.Add(this.button4);
-            this.groupBox1.Controls.Add(this.textBoxRoomNumber);
-            this.groupBox1.Controls.Add(this.label5);
-            this.groupBox1.Location = new System.Drawing.Point(16, 84);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(399, 279);
-            this.groupBox1.TabIndex = 12;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Room";
+            groupBox1.Controls.Add(button7);
+            groupBox1.Controls.Add(textBoxRoomSendMsg);
+            groupBox1.Controls.Add(listBoxRoomChatMsg);
+            groupBox1.Controls.Add(listBoxRoomUserList);
+            groupBox1.Controls.Add(button6);
+            groupBox1.Controls.Add(button5);
+            groupBox1.Controls.Add(button4);
+            groupBox1.Controls.Add(textBoxRoomNumber);
+            groupBox1.Controls.Add(label5);
+            groupBox1.Location = new System.Drawing.Point(16, 74);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new System.Drawing.Size(399, 246);
+            groupBox1.TabIndex = 12;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Room";
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(340, 228);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(44, 26);
-            this.button7.TabIndex = 18;
-            this.button7.Text = "채팅";
-            this.button7.UseVisualStyleBackColor = true;
-            this.button7.Click += new System.EventHandler(this.button7_Click);
+            button7.Location = new System.Drawing.Point(340, 201);
+            button7.Name = "button7";
+            button7.Size = new System.Drawing.Size(44, 23);
+            button7.TabIndex = 18;
+            button7.Text = "채팅";
+            button7.UseVisualStyleBackColor = true;
+            button7.Click += button7_Click;
             // 
             // textBoxRoomSendMsg
             // 
-            this.textBoxRoomSendMsg.Location = new System.Drawing.Point(19, 228);
-            this.textBoxRoomSendMsg.Name = "textBoxRoomSendMsg";
-            this.textBoxRoomSendMsg.Size = new System.Drawing.Size(315, 25);
-            this.textBoxRoomSendMsg.TabIndex = 17;
+            textBoxRoomSendMsg.Location = new System.Drawing.Point(19, 201);
+            textBoxRoomSendMsg.Name = "textBoxRoomSendMsg";
+            textBoxRoomSendMsg.Size = new System.Drawing.Size(315, 23);
+            textBoxRoomSendMsg.TabIndex = 17;
             // 
             // listBoxRoomChatMsg
             // 
-            this.listBoxRoomChatMsg.FormattingEnabled = true;
-            this.listBoxRoomChatMsg.ItemHeight = 17;
-            this.listBoxRoomChatMsg.Location = new System.Drawing.Point(123, 65);
-            this.listBoxRoomChatMsg.Name = "listBoxRoomChatMsg";
-            this.listBoxRoomChatMsg.Size = new System.Drawing.Size(261, 157);
-            this.listBoxRoomChatMsg.TabIndex = 16;
+            listBoxRoomChatMsg.FormattingEnabled = true;
+            listBoxRoomChatMsg.ItemHeight = 15;
+            listBoxRoomChatMsg.Location = new System.Drawing.Point(123, 57);
+            listBoxRoomChatMsg.Name = "listBoxRoomChatMsg";
+            listBoxRoomChatMsg.Size = new System.Drawing.Size(261, 139);
+            listBoxRoomChatMsg.TabIndex = 16;
             // 
             // listBoxRoomUserList
             // 
-            this.listBoxRoomUserList.FormattingEnabled = true;
-            this.listBoxRoomUserList.ItemHeight = 17;
-            this.listBoxRoomUserList.Location = new System.Drawing.Point(18, 65);
-            this.listBoxRoomUserList.Name = "listBoxRoomUserList";
-            this.listBoxRoomUserList.Size = new System.Drawing.Size(99, 157);
-            this.listBoxRoomUserList.TabIndex = 15;
+            listBoxRoomUserList.FormattingEnabled = true;
+            listBoxRoomUserList.ItemHeight = 15;
+            listBoxRoomUserList.Location = new System.Drawing.Point(18, 57);
+            listBoxRoomUserList.Name = "listBoxRoomUserList";
+            listBoxRoomUserList.Size = new System.Drawing.Size(99, 139);
+            listBoxRoomUserList.TabIndex = 15;
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(259, 27);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(102, 26);
-            this.button6.TabIndex = 14;
-            this.button6.Text = "게임 Ready";
-            this.button6.UseVisualStyleBackColor = true;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
+            button6.Location = new System.Drawing.Point(259, 24);
+            button6.Name = "button6";
+            button6.Size = new System.Drawing.Size(102, 23);
+            button6.TabIndex = 14;
+            button6.Text = "게임 Ready";
+            button6.UseVisualStyleBackColor = true;
+            button6.Click += button6_Click;
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(188, 27);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(65, 26);
-            this.button5.TabIndex = 13;
-            this.button5.Text = "나가기";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
+            button5.Location = new System.Drawing.Point(188, 24);
+            button5.Name = "button5";
+            button5.Size = new System.Drawing.Size(65, 23);
+            button5.TabIndex = 13;
+            button5.Text = "나가기";
+            button5.UseVisualStyleBackColor = true;
+            button5.Click += button5_Click;
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(117, 26);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(65, 26);
-            this.button4.TabIndex = 12;
-            this.button4.Text = "입장";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            button4.Location = new System.Drawing.Point(117, 23);
+            button4.Name = "button4";
+            button4.Size = new System.Drawing.Size(65, 23);
+            button4.TabIndex = 12;
+            button4.Text = "입장";
+            button4.UseVisualStyleBackColor = true;
+            button4.Click += button4_Click;
             // 
             // textBoxRoomNumber
             // 
-            this.textBoxRoomNumber.Location = new System.Drawing.Point(65, 27);
-            this.textBoxRoomNumber.Name = "textBoxRoomNumber";
-            this.textBoxRoomNumber.Size = new System.Drawing.Size(46, 25);
-            this.textBoxRoomNumber.TabIndex = 9;
+            textBoxRoomNumber.Location = new System.Drawing.Point(65, 24);
+            textBoxRoomNumber.Name = "textBoxRoomNumber";
+            textBoxRoomNumber.Size = new System.Drawing.Size(46, 23);
+            textBoxRoomNumber.TabIndex = 9;
             // 
             // label5
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(13, 31);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(52, 17);
-            this.label5.TabIndex = 8;
-            this.label5.Text = "방 번호";
+            label5.AutoSize = true;
+            label5.Location = new System.Drawing.Point(13, 27);
+            label5.Name = "label5";
+            label5.Size = new System.Drawing.Size(47, 15);
+            label5.TabIndex = 8;
+            label5.Text = "방 번호";
+            // 
+            // groupBox2
+            // 
+            groupBox2.Controls.Add(TurnTimeoutLabel);
+            groupBox2.Controls.Add(label9);
+            groupBox2.Controls.Add(UserIDLabel);
+            groupBox2.Controls.Add(label11);
+            groupBox2.Controls.Add(LoseCountLabel);
+            groupBox2.Controls.Add(WinCountLabel);
+            groupBox2.Controls.Add(label8);
+            groupBox2.Controls.Add(label7);
+            groupBox2.Controls.Add(MatchRequestBtn);
+            groupBox2.Controls.Add(label6);
+            groupBox2.Location = new System.Drawing.Point(421, 74);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new System.Drawing.Size(150, 246);
+            groupBox2.TabIndex = 9;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "나의 정보";
+            // 
+            // TurnTimeoutLabel
+            // 
+            TurnTimeoutLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            TurnTimeoutLabel.Location = new System.Drawing.Point(47, 150);
+            TurnTimeoutLabel.Name = "TurnTimeoutLabel";
+            TurnTimeoutLabel.Size = new System.Drawing.Size(43, 31);
+            TurnTimeoutLabel.TabIndex = 0;
+            TurnTimeoutLabel.Text = "-1";
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new System.Drawing.Point(29, 124);
+            label9.Name = "label9";
+            label9.Size = new System.Drawing.Size(99, 15);
+            label9.TabIndex = 21;
+            label9.Text = "나의 턴 잔여시간";
+            // 
+            // UserIDLabel
+            // 
+            UserIDLabel.AutoSize = true;
+            UserIDLabel.Location = new System.Drawing.Point(83, 32);
+            UserIDLabel.Name = "UserIDLabel";
+            UserIDLabel.Size = new System.Drawing.Size(29, 15);
+            UserIDLabel.TabIndex = 20;
+            UserIDLabel.Text = "Null";
+            // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.Location = new System.Drawing.Point(29, 32);
+            label11.Name = "label11";
+            label11.Size = new System.Drawing.Size(49, 15);
+            label11.TabIndex = 19;
+            label11.Text = "UserID: ";
+            // 
+            // LoseCountLabel
+            // 
+            LoseCountLabel.AutoSize = true;
+            LoseCountLabel.Location = new System.Drawing.Point(83, 82);
+            LoseCountLabel.Name = "LoseCountLabel";
+            LoseCountLabel.Size = new System.Drawing.Size(19, 15);
+            LoseCountLabel.TabIndex = 18;
+            LoseCountLabel.Text = "-1";
+            // 
+            // WinCountLabel
+            // 
+            WinCountLabel.AutoSize = true;
+            WinCountLabel.Location = new System.Drawing.Point(83, 57);
+            WinCountLabel.Name = "WinCountLabel";
+            WinCountLabel.Size = new System.Drawing.Size(19, 15);
+            WinCountLabel.TabIndex = 17;
+            WinCountLabel.Text = "-1";
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Location = new System.Drawing.Point(29, 82);
+            label8.Name = "label8";
+            label8.Size = new System.Drawing.Size(38, 15);
+            label8.TabIndex = 16;
+            label8.Text = "Lose: ";
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new System.Drawing.Point(29, 57);
+            label7.Name = "label7";
+            label7.Size = new System.Drawing.Size(35, 15);
+            label7.TabIndex = 15;
+            label7.Text = "Win: ";
+            // 
+            // MatchRequestBtn
+            // 
+            MatchRequestBtn.Enabled = false;
+            MatchRequestBtn.Location = new System.Drawing.Point(29, 200);
+            MatchRequestBtn.Name = "MatchRequestBtn";
+            MatchRequestBtn.Size = new System.Drawing.Size(92, 23);
+            MatchRequestBtn.TabIndex = 14;
+            MatchRequestBtn.Text = "매칭 시작";
+            MatchRequestBtn.UseVisualStyleBackColor = true;
+            MatchRequestBtn.Click += button2_Click;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new System.Drawing.Point(173, 37);
+            label6.Name = "label6";
+            label6.Size = new System.Drawing.Size(47, 15);
+            label6.TabIndex = 8;
+            label6.Text = "방 번호";
             // 
             // listBoxLog
             // 
-            this.listBoxLog.FormattingEnabled = true;
-            this.listBoxLog.ItemHeight = 17;
-            this.listBoxLog.Location = new System.Drawing.Point(12, 369);
-            this.listBoxLog.Name = "listBoxLog";
-            this.listBoxLog.Size = new System.Drawing.Size(403, 259);
-            this.listBoxLog.TabIndex = 17;
+            listBoxLog.FormattingEnabled = true;
+            listBoxLog.ItemHeight = 15;
+            listBoxLog.Location = new System.Drawing.Point(12, 326);
+            listBoxLog.Name = "listBoxLog";
+            listBoxLog.Size = new System.Drawing.Size(559, 229);
+            listBoxLog.TabIndex = 17;
             // 
             // panel1
             // 
-            this.panel1.BackColor = System.Drawing.Color.Peru;
-            this.panel1.Location = new System.Drawing.Point(427, 53);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(603, 659);
-            this.panel1.TabIndex = 18;
-            this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
-            this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
-            this.panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseMove);
+            panel1.BackColor = System.Drawing.Color.Peru;
+            panel1.Controls.Add(GameResultText);
+            panel1.Location = new System.Drawing.Point(584, 45);
+            panel1.Name = "panel1";
+            panel1.Size = new System.Drawing.Size(603, 581);
+            panel1.TabIndex = 18;
+            panel1.Paint += panel1_Paint;
+            panel1.MouseDown += panel1_MouseDown;
+            panel1.MouseMove += panel1_MouseMove;
+            // 
+            // GameResultText
+            // 
+            GameResultText.AutoSize = true;
+            GameResultText.Enabled = false;
+            GameResultText.Font = new System.Drawing.Font("Microsoft Sans Serif", 100F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            GameResultText.Location = new System.Drawing.Point(156, 179);
+            GameResultText.Name = "GameResultText";
+            GameResultText.Size = new System.Drawing.Size(328, 153);
+            GameResultText.TabIndex = 22;
+            GameResultText.Text = "결과!";
+            GameResultText.Visible = false;
             // 
             // labelStatus
             // 
-            this.labelStatus.AutoSize = true;
-            this.labelStatus.Location = new System.Drawing.Point(16, 647);
-            this.labelStatus.Name = "labelStatus";
-            this.labelStatus.Size = new System.Drawing.Size(68, 17);
-            this.labelStatus.TabIndex = 19;
-            this.labelStatus.Text = "서버 상태:";
+            labelStatus.AutoSize = true;
+            labelStatus.Location = new System.Drawing.Point(16, 571);
+            labelStatus.Name = "labelStatus";
+            labelStatus.Size = new System.Drawing.Size(62, 15);
+            labelStatus.TabIndex = 19;
+            labelStatus.Text = "서버 상태:";
             // 
-            // btnTest
+            // btnCreateAccount
             // 
-            this.btnTest.Location = new System.Drawing.Point(594, 12);
-            this.btnTest.Name = "btnTest";
-            this.btnTest.Size = new System.Drawing.Size(75, 24);
-            this.btnTest.TabIndex = 20;
-            this.btnTest.Text = "test 패킷 전송";
-            this.btnTest.UseVisualStyleBackColor = true;
-            this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
+            btnCreateAccount.Location = new System.Drawing.Point(421, 46);
+            btnCreateAccount.Name = "btnCreateAccount";
+            btnCreateAccount.Size = new System.Drawing.Size(75, 21);
+            btnCreateAccount.TabIndex = 20;
+            btnCreateAccount.Text = "계정 생성";
+            btnCreateAccount.UseVisualStyleBackColor = true;
+            btnCreateAccount.Click += btnCreateAccount_Click;
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1047, 724);
-            this.Controls.Add(this.btnTest);
-            this.Controls.Add(this.labelStatus);
-            this.Controls.Add(this.panel1);
-            this.Controls.Add(this.listBoxLog);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.textBoxAT);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.textBoxUserID);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.btnDisconnect);
-            this.Controls.Add(this.btnConnect);
-            this.Controls.Add(this.checkBoxLocalHostIP);
-            this.Controls.Add(this.textBoxPort);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.textBoxIP);
-            this.Controls.Add(this.label1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
-            this.Name = "MainForm";
-            this.Text = "Form1";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
-            this.Load += new System.EventHandler(this.MainForm_Load);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(1199, 639);
+            Controls.Add(btnCreateAccount);
+            Controls.Add(labelStatus);
+            Controls.Add(panel1);
+            Controls.Add(listBoxLog);
+            Controls.Add(groupBox1);
+            Controls.Add(groupBox2);
+            Controls.Add(button3);
+            Controls.Add(textBoxPs);
+            Controls.Add(label4);
+            Controls.Add(textBoxUserID);
+            Controls.Add(label3);
+            Controls.Add(btnDisconnect);
+            Controls.Add(btnConnect);
+            Controls.Add(checkBoxLocalHostIP);
+            Controls.Add(textBoxPort);
+            Controls.Add(label2);
+            Controls.Add(textBoxIP);
+            Controls.Add(label1);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            Name = "MainForm";
+            Text = "Form1";
+            FormClosing += MainForm_FormClosing;
+            Load += MainForm_Load;
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
+            groupBox2.ResumeLayout(false);
+            groupBox2.PerformLayout();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -348,7 +492,7 @@ namespace OmokClient
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBoxUserID;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox textBoxAT;
+        private System.Windows.Forms.TextBox textBoxPs;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button button7;
@@ -363,7 +507,19 @@ namespace OmokClient
         private System.Windows.Forms.ListBox listBoxLog;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label labelStatus;
-        private System.Windows.Forms.Button btnTest;
+        private System.Windows.Forms.Button btnCreateAccount;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Button MatchRequestBtn;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label LoseCountLabel;
+        private System.Windows.Forms.Label WinCountLabel;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label UserIDLabel;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label TurnTimeoutLabel;
+        private System.Windows.Forms.Label GameResultText;
     }
 }
 
