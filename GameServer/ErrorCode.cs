@@ -36,17 +36,15 @@ namespace GameServer
         FailReadyOmok = 23002,
 
 
-
-
-
-
         // ------- Mysql --------
         // GameResult 50001 ~
         FailInsertGameResult = 50001,
+        NullUserGameData = 50002,
 
 
 
         // ------- Redis --------
+        // Token 60001 ~
         NullLoginToken = 60001,
     }
 }

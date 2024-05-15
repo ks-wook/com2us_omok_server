@@ -10,17 +10,9 @@ namespace CSCommon
 
         const int 바둑판크기 = 19;
         
-        
         int[,] 바둑판 = new int[바둑판크기, 바둑판크기];
-        public bool 흑돌차례 { get; private set; } = true;
 
         public bool 게임종료 { get; private set; } = true;
-        
-        //bool AI모드 = true;
-        //돌종류 컴퓨터돌;
-
-        public int CurTuenCount { get; private set; } = 0;
-
 
         public int 전돌x좌표 { get; private set; } = -1;
         public int 전돌y좌표 { get; private set; } = -1;
@@ -35,8 +27,6 @@ namespace CSCommon
             Array.Clear(바둑판, 0, 바둑판크기 * 바둑판크기);
             전돌x좌표 = 전돌y좌표 = -1;
             현재돌x좌표 = 현재돌y좌표 = -1;
-            흑돌차례 = true;
-            CurTuenCount = 1;
             게임종료 = false;
             
             st.Clear();            
@@ -52,16 +42,14 @@ namespace CSCommon
             return 바둑판[x,y];
         }
 
-        public bool Is흑돌차례()
+        public 돌두기_결과 돌두기(int x, int y, bool isBlack)
         {
-            return ((CurTuenCount % 2) == 1);
-        }
+            if (바둑판[x, y] != (int)돌종류.없음)
+            {
+                return 돌두기_결과.Fail;
+            }
 
-        public 돌두기_결과 돌두기(int x, int y)
-        {
-            //TODO 서버로 부터 받은 결과가 실패인 경우 현재 둔 돌의 정보를 지워야 한다
-
-            if (흑돌차례)
+            if (isBlack)
             {   // 검은 돌
                 바둑판[x, y] = (int)돌종류.흑돌;
             }
@@ -71,41 +59,21 @@ namespace CSCommon
                 바둑판[x, y] = (int)돌종류.백돌;
             }
 
-            if (삼삼확인(x, y) && 흑돌차례)
-            {
-                //오류효과음.Play();
-                //MessageBox.Show("금수자리입니다. \r다른곳에 놓아주세요.", "금수 - 쌍삼");
-                바둑판[x, y] = (int)돌종류.없음;
-                return 돌두기_결과.SamSam;
-            }
-            else
-            {
-                전돌x좌표 = 현재돌x좌표;
-                전돌y좌표 = 현재돌y좌표;
+            전돌x좌표 = 현재돌x좌표;
+            전돌y좌표 = 현재돌y좌표;
 
-                현재돌x좌표 = x;
-                현재돌y좌표 = y;
-
-                흑돌차례 = !흑돌차례;                   // 차례 변경
-
-                //바둑돌소리.Play();
-            }
-
-            ++CurTuenCount;
-            st.Push(new Point(x, y));
+            현재돌x좌표 = x;
+            현재돌y좌표 = y;
 
             return 돌두기_결과.Success;
         }
 
 
-        public void 차례바꾸기()
-        {
-            흑돌차례 = !흑돌차례;                   // 차례 변경
-            ++CurTuenCount;
-        }
-
-
-
+        //public void 차례바꾸기()
+        //{
+        //    흑돌차례 = !흑돌차례;                   // 차례 변경
+        //    ++CurTuenCount;
+        //}
 
         public void 한수무르기()
         {
@@ -480,5 +448,6 @@ namespace CSCommon
     {
         Success = 0,
         SamSam = 1,
+        Fail = 2,
     }
 }

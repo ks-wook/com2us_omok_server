@@ -127,6 +127,13 @@ public class PacketHandlerRoom : BasePacketHandler
         PKTResRoomEnter sendData = new PKTResRoomEnter();
         sendData.UserId = user.Id;
         sendData.RoomNumber = packet.RoomNumber;
+
+        foreach(RoomUser ru in room.GetRoomUserList())
+        {
+            Console.WriteLine($"entered: {user.Id}, list: {ru.UserId}");
+            sendData.RoomUserList.Add(ru.UserId);
+        }
+
         room.NotifyRoomUsers(NetSendFunc, sendData, PACKETID.PKTResRoomEnter);
 
         // 서버 유저 상태 변경

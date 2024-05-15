@@ -30,13 +30,15 @@ public class CheckMatchingController : Controller
         HttpClient client = new();
 
         HttpResponseMessage httpRes = await client.PostAsJsonAsync<CheckMatchingReq>(_checkMatchAPI, request);
-
+        
         if (httpRes == null || httpRes.StatusCode != System.Net.HttpStatusCode.OK)
         {
-            _logger.ZLogDebug($"[RequestCheckMatchingComplete] ErrorCode:{ErrorCode.FailCheckMatch}, " +
+            _logger.ZLogError($"[RequestCheckMatchingComplete] ErrorCode:{ErrorCode.FailCheckMatch}, " +
                 $"userId = {request.UserID}, StatusCode = {httpRes?.StatusCode}");
             return new CheckMatchingRes { Result = ErrorCode.FailCheckMatch };
         }
+
+        _logger.ZLogDebug($"[RequestCheckMatchingComplete] 매칭 서버로부터 매칭 완료 정보 수신");
 
         CheckMatchingRes res = await httpRes.Content.ReadFromJsonAsync<CheckMatchingRes>() 
             ?? new CheckMatchingRes { Result = ErrorCode.FailCheckMatch };
@@ -53,6 +55,9 @@ public class CheckMatchingReq
 public class CheckMatchingRes
 {
     public ErrorCode Result { get; set; } = ErrorCode.None;
+    public string UserID { get; set; } = string.Empty;
+    public bool IsMatched { get; set; } = false;
     public string ServerAddress { get; set; } = "";
+    public int Port { get; set; }
     public int RoomNumber { get; set; } = 0;
 }

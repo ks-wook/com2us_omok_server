@@ -10,7 +10,6 @@ namespace GameServer
     public class MainServerOption
     {
         public string PvpServerAddress = "server IP";
-        public int PvpServerPort = 8282;
 
         // [Option("uniqueID", Required = true, HelpText = "Server UniqueID")]
         public int ChatServerUniqueID { get; set; }

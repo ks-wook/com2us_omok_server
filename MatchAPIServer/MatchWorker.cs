@@ -14,7 +14,7 @@ public interface IMatchWoker : IDisposable
 {
     public void AddUser(string userID);
 
-    public (bool, CompleteMatchingData?) GetCompleteMatching(string userID);
+    public (bool, MatchingCompleteData?) GetCompleteMatching(string userID);
 }
 
 public class MatchWoker : IMatchWoker
@@ -24,7 +24,7 @@ public class MatchWoker : IMatchWoker
     List<string> _pvpServerAddressList = new();
 
     RedisList<MatchedPlayers> _redisMatchedPlayerList;
-    RedisList<CompleteMatchingData> _redisCompleteList;
+    RedisList<MatchingCompleteData> _redisCompleteList;
 
     System.Threading.Thread _reqWorker = null;
     ConcurrentQueue<string> _reqQueue = new();
@@ -32,7 +32,7 @@ public class MatchWoker : IMatchWoker
     System.Threading.Thread _completeWorker = null;
 
     // key는 유저ID
-    ConcurrentDictionary<string, CompleteMatchingData> _completeDic = new();
+    ConcurrentDictionary<string, MatchingCompleteData> _completeDic = new();
 
     string _redisAddress = "";
     string _matchListKey = "";
@@ -62,7 +62,7 @@ public class MatchWoker : IMatchWoker
         // 소켓 서버 매칭 요청 리스트, 매칭 요청 완료 리스트
         var defalutExpiry = TimeSpan.FromDays(1);
         _redisMatchedPlayerList = new RedisList<MatchedPlayers>(_redisConnector, _matchListKey, defalutExpiry);
-        _redisCompleteList = new RedisList<CompleteMatchingData>(_redisConnector, _matchCompleteListKey, defalutExpiry);
+        _redisCompleteList = new RedisList<MatchingCompleteData>(_redisConnector, _matchCompleteListKey, defalutExpiry);
 
         _reqWorker = new System.Threading.Thread(this.RunMatching);
         _reqWorker.Start();
@@ -76,10 +76,10 @@ public class MatchWoker : IMatchWoker
         _reqQueue.Enqueue(userID);
     }
 
-    public (bool, CompleteMatchingData?) GetCompleteMatching(string userID)
+    public (bool, MatchingCompleteData?) GetCompleteMatching(string userID)
     {
         // _completeDic에서 검색해서 있으면 반환한다.
-        CompleteMatchingData? matchingCmplData;
+        MatchingCompleteData? matchingCmplData;
         _completeDic.TryRemove(userID, out matchingCmplData);
 
         if (matchingCmplData == null) // 해당 유저에 대해 매칭 완료된 정보가 없는 경우
@@ -157,13 +157,15 @@ public class MatchWoker : IMatchWoker
     }
 }
 
-// 서버가 pub을 통해 보내주는 매칭 완료 응답
-public class CompleteMatchingData
+// 대전서버에서 보내주는 매칭 완료 응답
+public class MatchingCompleteData
 {
+    public ErrorCode Result { get; set; } = ErrorCode.None;
+    public string UserID { get; set; } = string.Empty;
+    public bool IsMatched { get; set; } = false;
     public string ServerAddress { get; set; } = "";
     public int Port { get; set; }
     public int RoomNumber { get; set; } = 0;
-    public string UserID { get; set; } = "";
 }
 
 public class PvpServerAddressConfig

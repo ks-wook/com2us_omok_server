@@ -68,8 +68,6 @@ namespace GameServer
             string hostname = Dns.GetHostName();
 
 
-
-
             // TEST 클라와 같은 네트워크에 물려서 테스트하는 경우
             // -------------------------------------------------
             IPHostEntry hostEntry = Dns.GetHostEntry(hostname);
@@ -80,19 +78,12 @@ namespace GameServer
                 if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
                 {
                     option.PvpServerAddress = ipAddress.ToString();
-                    Console.WriteLine($"로컬 IP 주소: {ipAddress.ToString()}");
+                    Console.WriteLine($"로컬 IP 주소: {ipAddress.ToString()}, Port: {option.Port}");
                     break;
                 }
             }
             // -------------------------------------------------
-
-            
-
-
-            _findPlayableRoomWorker = new FindPlayableRoomWorker(
-                _mainLogger, _playableRoomNumbers,
-                option.RedisConnectionStr, option.MatchRequestListKey,
-                option.MatchCompleteListKey, option.PvpServerAddress);
+ 
         }
 
         public void StopServer()
@@ -151,6 +142,13 @@ namespace GameServer
 
             // redis 프로세서
             _redisProcessor.CreateAndStart(_mainLogger, _mainServerOption.RedisConnectionStr, _mainPacketProcessor.Insert); // 프로세서 초기화
+
+            // 매칭 worker
+            _findPlayableRoomWorker = new FindPlayableRoomWorker(
+                _mainLogger, _playableRoomNumbers,
+                _mainServerOption.RedisConnectionStr, _mainServerOption.MatchRequestListKey,
+                _mainServerOption.MatchCompleteListKey, _mainServerOption.PvpServerAddress, _mainServerOption.Port);
+
 
             _mainLogger.Info("CreateComponent - Success");
             return ErrorCode.None;

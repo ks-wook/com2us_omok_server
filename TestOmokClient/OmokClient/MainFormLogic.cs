@@ -192,6 +192,11 @@ namespace OmokClient
             }
         }
 
+        void ClearRoomUserList()
+        {
+            listBoxRoomUserList.Items.Clear();
+        }
+
         string GetOtherPlayer(string myName)
         {
             if (listBoxRoomUserList.Items.Count != 2)

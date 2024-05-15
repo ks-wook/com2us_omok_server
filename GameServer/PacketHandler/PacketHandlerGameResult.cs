@@ -1,4 +1,5 @@
-﻿using GameServer.Packet;
+﻿using GameAPIServer.Model.DAO.GameDb;
+using GameServer.Packet;
 using MySqlConnector;
 using SqlKata.Execution;
 using SuperSocket.SocketBase.Logging;
@@ -43,7 +44,15 @@ public class PacketHandlerGameResult : BasePacketHandler
         if (result != ErrorCode.None)
         {
             SendInnerFailPacket<PKTNtfEndOmok>(InnerPacketId.PKTInnerResSaveGameResult, ErrorCode.FailInsertGameResult, _mainPacketInsert);
-            _logger.Error("게임 데이터 저장 실패");
+            _logger.Error("[PKTInnerReqSaveGameResultHandler] 게임 데이터 저장 실패");
+            return;
+        }
+
+        result = UpdateUserGameRecord(bodyData, queryFactory);
+        if (result != ErrorCode.None)
+        {
+            SendInnerFailPacket<PKTNtfEndOmok>(InnerPacketId.PKTInnerResSaveGameResult, ErrorCode.NullUserGameData, _mainPacketInsert);
+            _logger.Error("[PKTInnerReqSaveGameResultHandler] 유저 전적 업데이트 실패");
             return;
         }
 
@@ -73,6 +82,51 @@ public class PacketHandlerGameResult : BasePacketHandler
         }
 
         _logger.Info("게임 데이터 저장 성공");
+
+        return ErrorCode.None;
+    }
+
+    // 유저 전적 업데이트
+    public ErrorCode UpdateUserGameRecord(PKTInnerReqSaveGameResult packet, QueryFactory queryFactory)
+    {
+        string loseUserId = "";
+
+        if (packet.BlackUserId == packet.WinUserId)
+        {
+            loseUserId = packet.WhiteUserId;
+        }
+        else
+        {
+            loseUserId = packet.BlackUserId;
+        }
+
+        // 승자 전적
+        var winUserGameData = queryFactory.Query("user_game_data").Where("account_id", packet.WinUserId).FirstOrDefault<UserGameData>();
+
+        if(winUserGameData == null)
+        {
+            _logger.Error($"[UpdateUserGameRecord] ErrorCode: {ErrorCode.NullUserGameData}");
+            return ErrorCode.NullUserGameData;
+        }
+
+        queryFactory.Query("user_game_data").Where("account_id", packet.WinUserId).Update(new
+        {
+            total_win_cnt = winUserGameData.total_win_cnt + 1
+        });
+
+        // 패자 전적
+        var loseUserGameData = queryFactory.Query("user_game_data").Where("account_id", loseUserId).FirstOrDefault<UserGameData>();
+
+        if (loseUserGameData == null)
+        {
+            _logger.Error($"[UpdateUserGameRecord] ErrorCode: {ErrorCode.NullUserGameData}");
+            return ErrorCode.NullUserGameData;
+        }
+
+        queryFactory.Query("user_game_data").Where("account_id", loseUserId).Update(new
+        {
+            total_lose_cnt = loseUserGameData.total_lose_cnt + 1
+        });
 
         return ErrorCode.None;
     }

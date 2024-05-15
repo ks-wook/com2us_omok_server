@@ -15,7 +15,9 @@ namespace OmokClient
 {
     public partial class MainForm : Form
     {
-        public string ClientUserId { get; set; } = string.Empty;
+        static public string ClientUserId { get; set; } = string.Empty;
+        static public string ClientLoginToken { get; set; } = string.Empty;
+        static public bool IsBlackUser { get; set; } = false;
 
         Dictionary<UInt16, Action<byte[]>> _packetHandlerMap = new Dictionary<UInt16, Action<byte[]>>();
 
@@ -36,8 +38,6 @@ namespace OmokClient
             //PacketFuncDic.Add(PacketID.ResPutMok, PacketProcess_PutMokResponse);
             //PacketFuncDic.Add(PacketID.NTFPutMok, PacketProcess_PutMokNotify);
             //PacketFuncDic.Add(PacketID.NTFEndOmok, PacketProcess_EndOmokNotify);
-
-
 
 
             _packetHandlerMap.Add((int)PACKETID.PKTResLogin, PKTResLoginHandler);
@@ -77,6 +77,7 @@ namespace OmokClient
         }
 
 
+        // 대전 서버 로그인 패킷
         void PKTResLoginHandler(byte[] packetData)
         {
             var responsePkt = MemoryPackSerializer.Deserialize<PKTResLogin>(packetData);
@@ -85,9 +86,16 @@ namespace OmokClient
             {
                 CurSceen = ClientSceen.LOGIN;
                 ClientUserId = responsePkt.UserId;
-                DevLog.Write($"UserId: {ClientUserId} 로그인 성공");
-            }
+                DevLog.Write($"UserId: {ClientUserId}, 대전 서버 로그인 성공");
 
+                // 배정된 방으로 접속
+                var enterRoomReq = new PKTReqRoomEnter();
+                enterRoomReq.RoomNumber = Int32.Parse(textBoxRoomNumber.Text);
+                var packet = MemoryPackSerializer.Serialize(enterRoomReq);
+
+                PostSendPacket((int)PACKETID.PKTReqRoomEnter, packet);
+                DevLog.Write($"방 입장 요청:  {textBoxRoomNumber.Text} 번");
+            }
         }
 
         void PKTResRoomEnterHandler(byte[] packetData)
@@ -99,11 +107,22 @@ namespace OmokClient
             {
                 CurSceen = ClientSceen.ROOM;
                 AddRoomChatMessageList("Note", $"{responsePkt.RoomNumber}번 방에 입장하였습니다.");
+                button6.Enabled = true; // 준비 버튼
+
+                // 기존의 모든 방 유저들을 방 유저 리스트에 추가한다.
+                foreach(string userId in responsePkt.RoomUserList)
+                {
+                    AddRoomUserList("User " + userId);
+                }
             }
             else // 다른 사람의 방 입장
             {
                 AddRoomChatMessageList("Note", $"유저 '{responsePkt.UserId}' 가 입장하였습니다.");
+
+                //  상대의 정보만 방 유저 리스트에 추가한다.
+                AddRoomUserList("User " + responsePkt.UserId);
             }
+
         }
 
         void PacketProcess_RoomUserList(byte[] packetData)
@@ -134,10 +153,13 @@ namespace OmokClient
             DevLog.Write(responsePkt.UserId);
             if (responsePkt.UserId == ClientUserId) // 자신 퇴장
             {
+                ClearRoomUserList();
                 AddRoomChatMessageList("Note", "방에서 퇴장하였습니다.");
+                button6.Enabled = false; // 준비 버튼
             }
             else // 상대 퇴장
             {
+                RemoveRoomUserList("User " + responsePkt.UserId);
                 AddRoomChatMessageList("Note", $"유저 '{responsePkt.UserId}'가 퇴장하였습니다.");
             }
         }
@@ -208,20 +230,21 @@ namespace OmokClient
         void PKTNtfStartOmokHandler(byte[] packetData)
         {
             IsMyTurn = false;
+            IsBlackUser = false;
 
             var notifyPkt = MemoryPackSerializer.Deserialize<PKTNtfStartOmok>(packetData);
 
             DevLog.Write($"게임 시작. 흑돌 플레이어: {notifyPkt.BlackUserId}");
+            
+            GameResultText.Enabled = false;
+            GameResultText.Visible = false;
 
-
-            if (notifyPkt.BlackUserId == textBoxUserID.Text) // 내가 선공
+            if (notifyPkt.BlackUserId == ClientUserId) // 내가 선공
             {
                 IsMyTurn = true;
+                IsBlackUser = true;
 
                 DevLog.Write($"나의 턴!!!");
-
-                timer.Enabled = true;
-                timer.Start();
             }
 
             CurSceen = ClientSceen.GAME_PLAYING;
@@ -256,40 +279,29 @@ namespace OmokClient
 
             // 내 돌은 클릭하는 순간에 그려졌다.
 
-            if (notifyPkt.UserId != textBoxUserID.Text && notifyPkt.IsTimeout == false) // 상대가 시간안에 돌을 둔 경우
+            if (notifyPkt.UserId != ClientUserId && notifyPkt.IsTimeout == false) // 상대가 시간안에 돌을 둔 경우
             {
-                플레이어_돌두기(false, notifyPkt.PosX, notifyPkt.PosY);
+                플레이어_돌두기(false, notifyPkt.PosX, notifyPkt.PosY, notifyPkt.IsBlack);
                 DevLog.Write($"오목 정보: X: {notifyPkt.PosX},  Y: {notifyPkt.PosY},   알:{notifyPkt.UserId}");
             }
-            else if (notifyPkt.UserId != textBoxUserID.Text && notifyPkt.IsTimeout == true)
+            else if (notifyPkt.UserId != ClientUserId && notifyPkt.IsTimeout == true)
             {
-                플레이어_차례바꾸기();
                 DevLog.Write("상대가 돌을 두지 않았습니다.");
             }
 
-            if (notifyPkt.UserId != textBoxUserID.Text) // 상대의 턴이었던 경우
+            if (notifyPkt.UserId != ClientUserId) // 상대의 턴이었던 경우
             {
+                remainingTurnTime = 10;
+                TurnTimeoutLabel.Text = remainingTurnTime.ToString();
                 DevLog.Write($"나의 턴!!!");
-                timer.Enabled = true;
-                timer.Start();
             }
             else
             {
                 DevLog.Write($"상대의 턴!!!");
-                timer.Stop(); // 타이머 종료
-                timer.Enabled = false;
             }
 
             // 상대가 시간안에 돌을 두지않은경우 돌을 그리지않고 바로 나의턴을 시작
-
             IsMyTurn = !IsMyTurn;
-        }
-
-        void TimerElapsed(object sender, ElapsedEventArgs e)
-        {
-            DevLog.Write("나의 턴이 얼마남지 않았다!");
-            timer.Stop(); // 타이머 종료
-            timer.Enabled = false;
         }
 
         void PKTNtfEndOmokHandler(byte[] packetData)
@@ -300,15 +312,30 @@ namespace OmokClient
 
             CurSceen = ClientSceen.ROOM;
             DevLog.Write($"오목 GameOver: Win: {notifyPkt.WinUserId}");
+
+            if(ClientUserId == notifyPkt.WinUserId)
+            {
+                GameResultText.Text = "승리!";
+                int tmp = Int32.Parse(WinCountLabel.Text);
+                WinCountLabel.Text = (tmp + 1).ToString();
+            }
+            else
+            {
+                GameResultText.Text = "패배!";
+                int tmp = Int32.Parse(LoseCountLabel.Text);
+                LoseCountLabel.Text = (tmp + 1).ToString();
+            }
+
+            GameResultText.Enabled = true;
+            GameResultText.Visible = true;
+
+            turnTimeoutTimer.Dispose();
         }
 
         void PKTReqPingHandler(byte[] packetData)
         {
             var pingRes = new PKTResPing();
             var packet = MemoryPackSerializer.Serialize(pingRes);
-
-            //DevLog.Write("ping");
-
 
             PostSendPacket((int)PACKETID.PKTResPing, packet);
         }

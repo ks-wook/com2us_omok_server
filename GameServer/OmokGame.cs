@@ -16,7 +16,7 @@ public enum StoneType
 
 public class OmokRule
 {
-    public static double MaxTurnTime = 6; // 한번에 주어지는 턴의 시간
+    public static double MaxTurnTime = 10; // 한번에 주어지는 턴의 시간 sec 기준
     public static int MaxTimeoutTurn = 6; // 연속으로 턴이 넘어가면 게임이 종료되는 턴 수
 }
 

@@ -5,14 +5,15 @@ using System.Linq;
 using System.Media;
 using System.Text;
 using System.Threading.Tasks;
-using System.Timers;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace OmokClient
 {
     public partial class MainForm : Form
     {
-        System.Timers.Timer timer = new System.Timers.Timer(3000);
+        private System.Threading.Timer turnTimeoutTimer;
+        private int remainingTurnTime = 0; // 초 단위
 
         CSCommon.OmokRule OmokLogic = new CSCommon.OmokRule();
 
@@ -69,6 +70,9 @@ namespace OmokClient
         //오목 게임 시작
         void StartGame(bool isMyTurn, string myPlayerName, string otherPlayerName)
         {
+            turnTimeoutTimer = new System.Threading.Timer(UpdateTimer, null, 0, 1000);
+            remainingTurnTime = 10;
+
             MyPlayerName = myPlayerName;
 
             if (isMyTurn)
@@ -106,6 +110,8 @@ namespace OmokClient
             MyPlayerName = "";
             백돌플레이어Name = "";
             흑돌플레이어Name = "";
+
+            turnTimeoutTimer.Dispose();
         }
                       
 
@@ -210,23 +216,46 @@ namespace OmokClient
             string str;
             Font 글꼴 = new Font("HY견고딕", 15);
 
-            if (OmokLogic.Is흑돌차례())
+            if (IsMyTurn)
             {
-                str = "현재 턴 돌";
-                g.FillEllipse(검은색, 시작위치 + 115, 599, 돌크기, 돌크기);
-                g.DrawString(str, 글꼴, 검은색, 시작위치, 600);
+                if(IsBlackUser)
+                {
+                    str = "현재 턴 돌";
+                    g.FillEllipse(검은색, 시작위치 + 115, 599, 돌크기, 돌크기);
+                    g.DrawString(str, 글꼴, 검은색, 시작위치, 600);
 
-                g.DrawString($"PlayerName: {흑돌플레이어Name }", 글꼴, 검은색, (시작위치 + 120 + 돌크기), 600);
+                    g.DrawString($"PlayerName: {흑돌플레이어Name}", 글꼴, 검은색, (시작위치 + 120 + 돌크기), 600);
+                }
+                else
+                {
+                    str = "현재 턴 돌";
+                    g.FillEllipse(흰색, 시작위치 + 115, 599, 돌크기, 돌크기);
+                    g.DrawString(str, 글꼴, 검은색, 시작위치, 600);
+
+                    g.DrawString($"PlayerName: {백돌플레이어Name}", 글꼴, 검은색, (시작위치 + 120 + 돌크기), 600);
+                } 
+            }
+            else // 다음 돌 표시
+            {
+                if (IsBlackUser == false)
+                {
+                    str = "현재 턴 돌";
+                    g.FillEllipse(검은색, 시작위치 + 115, 599, 돌크기, 돌크기);
+                    g.DrawString(str, 글꼴, 검은색, 시작위치, 600);
+
+                    g.DrawString($"PlayerName: {흑돌플레이어Name}", 글꼴, 검은색, (시작위치 + 120 + 돌크기), 600);
+                }
+                else
+                {
+                    str = "현재 턴 돌";
+                    g.FillEllipse(흰색, 시작위치 + 115, 599, 돌크기, 돌크기);
+                    g.DrawString(str, 글꼴, 검은색, 시작위치, 600);
+
+                    g.DrawString($"PlayerName: {백돌플레이어Name}", 글꼴, 검은색, (시작위치 + 120 + 돌크기), 600);
+                }
             }
 
-            else                 // 다음 돌 표시(흰 돌)
-            {
-                str = "현재 턴 돌";
-                g.FillEllipse(흰색, 시작위치 + 115, 599, 돌크기, 돌크기);
-                g.DrawString(str, 글꼴, 검은색, 시작위치, 600);
 
-                g.DrawString($"PlayerName: {백돌플레이어Name }", 글꼴, 검은색, (시작위치 + 120 + 돌크기), 600);
-            }
         }
 
 
@@ -256,30 +285,33 @@ namespace OmokClient
             {
                 return;
             }
-            // 바둑판 해당 좌표에 아무것도 없고, 게임이 끝나지 않았으면
-            //else if (OmokLogic.바둑판알(x, y) == (int)CSCommon.OmokRule.돌종류.없음 && !OmokLogic.게임종료)
-            //{
-            //    플레이어_돌두기(true, x, y);
-            //}
 
-            timer.Stop(); // 타이머 종료
-            timer.Enabled = false;
-
-            플레이어_돌두기(true, x, y);
+            if(IsBlackUser) // 내가 흑돌
+            {
+                플레이어_돌두기(true, x, y, true);
+            }
+            else // 내가 백돌
+            {
+                플레이어_돌두기(true, x, y, false);
+            }
         }
 
-        
-
-
         // isNotify가 false인 경우 상대의 돌, true인 경우 나의 돌로 간주
-        void 플레이어_돌두기(bool isNotify, int x, int y)
+        void 플레이어_돌두기(bool isNotify, int x, int y, bool isBlack)
         {
-            var ret = OmokLogic.돌두기(x, y);
-            if (ret != CSCommon.돌두기_결과.Success)
+            if(isBlack)
             {
-                //Rectangle r = new Rectangle(시작위치, 590, 시작위치 + 돌크기 + 160, 돌크기 + 10);
-                //panel1.Invalidate(r);
-                //DevLog.Write($"돌 두기 실패: {(CSCommon.돌두기_결과)ret}");
+                DevLog.Write("흑돌");
+            }
+            else
+            {
+                DevLog.Write("백돌");
+            }
+
+            var ret = OmokLogic.돌두기(x, y, isBlack);
+
+            if(ret != CSCommon.돌두기_결과.Success)
+            {
                 return;
             }
 
@@ -287,16 +319,10 @@ namespace OmokClient
             현재돌표시();
             OmokLogic.오목확인(x, y);
 
-
             // 내가 돌을 두는 경우가 Notify = true인 경우다.
             if (isNotify == true)
             {
-                IsMyTurn = true;
                 SendPacketOmokPut(x, y);
-            }
-            else
-            {
-                IsMyTurn = false;
             }
             
             Rectangle r = new Rectangle(시작위치, 590, 시작위치 + 돌크기 + 350, 돌크기 + 10);
@@ -305,7 +331,7 @@ namespace OmokClient
 
         void 플레이어_차례바꾸기()
         {
-            OmokLogic.차례바꾸기();
+            // OmokLogic.차례바꾸기();
         }
 
         private void panel1_MouseMove(object sender, MouseEventArgs e)     // 현재 차례의 돌 잔상 구현 (마우스 움직일때)
@@ -348,7 +374,7 @@ namespace OmokClient
                 // 먼저 그린 잔상을 지우고 새로운 잔상을 그린다.
                 panel1.Invalidate(앞에찍은돌을지우기위한구역);
 
-                if (OmokLogic.Is흑돌차례())
+                if (IsBlackUser)
                     g.FillEllipse(투명한검은색, r);
                 else
                     g.FillEllipse(투명한흰색, r);
@@ -363,18 +389,39 @@ namespace OmokClient
 
         void 컴퓨터두기()
         {
-            int x = 0, y = 0;
-            CSCommon.돌두기_결과 ret;
+            //int x = 0, y = 0;
+            //CSCommon.돌두기_결과 ret;
 
-            do
+            //do
+            //{
+            //    OmokAI.AI_PutAIPlayer(ref x, ref y, false, 2);
+            //    ret = OmokLogic.돌두기(x, y);
+            //} while (ret != CSCommon.돌두기_결과.Success);
+
+            //돌그리기(x, y);
+            //현재돌표시();
+            //OmokLogic.오목확인(x, y);
+        }
+
+
+        private void UpdateTimer(object state)
+        {
+            if(remainingTurnTime <= 0)
             {
-                OmokAI.AI_PutAIPlayer(ref x, ref y, false, 2);
-                ret = OmokLogic.돌두기(x, y);
-            } while (ret != CSCommon.돌두기_결과.Success);
+                return;
+            }
 
-            돌그리기(x, y);
-            현재돌표시();
-            OmokLogic.오목확인(x, y);
+            if(IsMyTurn == false || CurSceen != ClientSceen.GAME_PLAYING) // 내 턴에만 동작
+            {
+                remainingTurnTime = 10;
+                return;
+            }
+
+            // 남은 시간 감소
+            remainingTurnTime--;
+
+            // Label 컨트롤 텍스트 업데이트
+            TurnTimeoutLabel.Text = remainingTurnTime.ToString();
         }
     }
 }

@@ -19,7 +19,7 @@ public class FindPlayableRoomWorker : IDisposable
     ConcurrentQueue<int> _playableRoomNumbers;
 
     RedisList<MatchedPlayers> _redisMatchedPlayerList;
-    RedisList<CompleteMatchingData> _redisCompleteList;
+    RedisList<MatchingCompleteData> _redisCompleteList;
 
     Thread _findPlayableRoomWorkerThread;
     bool IsThreadRunning = false;
@@ -31,8 +31,9 @@ public class FindPlayableRoomWorker : IDisposable
     RedisConnection _redisConnector;
 
     string _pvpServerAddress;
+    int _pvpServerPort;
 
-    public FindPlayableRoomWorker(ILog logger, ConcurrentQueue<int> playableRoomNumbers, string redisAddress, string matchRequestListKey, string matchCompleteListKey, string pvpServerAddress)
+    public FindPlayableRoomWorker(ILog logger, ConcurrentQueue<int> playableRoomNumbers, string redisAddress, string matchRequestListKey, string matchCompleteListKey, string pvpServerAddress, int pvpServerPort)
     {
         _logger = logger;
 
@@ -53,7 +54,7 @@ public class FindPlayableRoomWorker : IDisposable
 
         var defalutExpiry = TimeSpan.FromDays(1);
         _redisMatchedPlayerList = new RedisList<MatchedPlayers>(_redisConnector, _matchListKey, defalutExpiry);
-        _redisCompleteList = new RedisList<CompleteMatchingData>(_redisConnector, _matchCompleteListKey, defalutExpiry);
+        _redisCompleteList = new RedisList<MatchingCompleteData>(_redisConnector, _matchCompleteListKey, defalutExpiry);
 
         IsThreadRunning = true;
 
@@ -61,6 +62,7 @@ public class FindPlayableRoomWorker : IDisposable
         _findPlayableRoomWorkerThread.Start();
 
         _pvpServerAddress = pvpServerAddress;
+        _pvpServerPort = pvpServerPort;
     }
 
     public void Dispose()
@@ -84,7 +86,8 @@ public class FindPlayableRoomWorker : IDisposable
             int reservedRoomNum = -1;
             bool result = _playableRoomNumbers.TryDequeue(out reservedRoomNum);
 
-            await Console.Out.WriteLineAsync($"매칭 완료 수신 방 배정 : {reservedRoomNum}");
+            _logger.Debug($"[RunFindPlayableRoom] 현재 대전 가능한 방 수 : {_playableRoomNumbers.Count}");
+            _logger.Debug($"[RunFindPlayableRoom] 매칭 완료 수신 방 배정 : {reservedRoomNum}");
 
             if (result == false) // 남은 방이 없다면
             {
@@ -94,17 +97,21 @@ public class FindPlayableRoomWorker : IDisposable
             }
 
             // 플레이 가능한 방 정보를 리스트에 넣는다.
-            await _redisCompleteList.RightPushAsync(new CompleteMatchingData
+            await _redisCompleteList.RightPushAsync(new MatchingCompleteData
             {
                 UserID = matchReq.Value.User1ID,
+                IsMatched = true,
                 ServerAddress = _pvpServerAddress,
+                Port = _pvpServerPort,
                 RoomNumber = reservedRoomNum
             });
 
-            await _redisCompleteList.RightPushAsync(new CompleteMatchingData
+            await _redisCompleteList.RightPushAsync(new MatchingCompleteData
             {
                 UserID = matchReq.Value.User2ID,
+                IsMatched = true,
                 ServerAddress = _pvpServerAddress,
+                Port = _pvpServerPort,
                 RoomNumber = reservedRoomNum
             });
         }
@@ -112,11 +119,13 @@ public class FindPlayableRoomWorker : IDisposable
     }
 }
 
-public class CompleteMatchingData
+public class MatchingCompleteData
 {
-    public string UserID { get; set; } = "";
-    public int Port { get; set; }
+    public ErrorCode Result { get; set; } = ErrorCode.None;
+    public string UserID { get; set; } = string.Empty;
+    public bool IsMatched { get; set; } = false;
     public string ServerAddress { get; set; } = "";
+    public int Port { get; set; }
     public int RoomNumber { get; set; } = 0;
 }
 
