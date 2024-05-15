@@ -37,6 +37,7 @@ public partial class PKTResRoomEnter : PkResult // 방 입장 요청 응답
 {
     public string UserId { get; set; } = string.Empty; // 입장에 성공한 UserId
     public Int32 RoomNumber { get; set; } // 입장에 성공한 방 number
+    public List<string> RoomUserList { get; set; } = new List<string>();
 }
 
 [MemoryPackable]

@@ -4,17 +4,17 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ZLogger;
-using static APIServer.Controllers.CheckMatching;
+using static APIServer.Controllers.CheckMatchingController;
 
 namespace APIServer.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class CheckMatching : Controller
+public class CheckMatchingController : Controller
 {
     IMatchWoker _matchWorker;
 
-    public CheckMatching(IMatchWoker matchWorker)
+    public CheckMatchingController(IMatchWoker matchWorker)
     {
         _matchWorker = matchWorker;
     }
@@ -34,6 +34,7 @@ public class CheckMatching : Controller
         {
             response.IsMatched = true;
             response.ServerAddress = completeMatchingData.ServerAddress;
+            response.Port = completeMatchingData.Port;
             response.RoomNumber = completeMatchingData.RoomNumber;
         }
 
@@ -51,5 +52,6 @@ public class CheckMatchingRes
     public ErrorCode Result { get; set; } = ErrorCode.None;
     public bool IsMatched { get; set; } = false;
     public string ServerAddress { get; set; } = "";
+    public int Port { get; set; }
     public int RoomNumber { get; set; } = 0;
 }

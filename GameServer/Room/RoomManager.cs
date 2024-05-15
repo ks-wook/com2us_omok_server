@@ -38,7 +38,7 @@ public class RoomManager
         _checkFrequencyRoom = option.CheckFrequencyRoom;
         _checkAtOnceRoomCount = option.CheckAtOnceRoomCount;
 
-        for (int i = 0; i < _roomMaxCount; i++)
+        for (int i = 0; i <= _roomMaxCount; i++)
         {
             var room = new Room();
             room.Init(_roomStartNumber + i, _roomMaxUserCount);
