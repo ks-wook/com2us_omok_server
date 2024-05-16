@@ -105,7 +105,7 @@ public class FindPlayableRoomWorker : IDisposable
 
             _logger.Debug($"[RunFindPlayableRoom] 매칭 완료 수신 방 배정 : {reservedRoomNum}");
 
-            // 플레이 가능한 방 정보를 리스트에 넣는다.
+            // 플레이 가능한 방 정보를 redis 에 넣는다.
             _ = _redisCompleteList.RightPushAsync(new MatchingCompleteData
             {
                 UserID = matchReq.Value.User1ID,
