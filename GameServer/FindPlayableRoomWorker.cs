@@ -70,50 +70,59 @@ public class FindPlayableRoomWorker : IDisposable
         IsThreadRunning = false;
     }
 
-    async void RunFindPlayableRoom()
+    void RunFindPlayableRoom()
     {
         while(IsThreadRunning)
         {
-            var matchReq = await _redisMatchedPlayerList.LeftPopAsync();
+            // redis 에서 값을 빼내기 전에 남은 방이 있는 지 검사한다.
+            if(_playableRoomNumbers.Count == 0) // 남은 방이 없다면
+            {
+                // 잠시 대기 후에 다시 돌아간다.
+                Thread.Sleep(1000);
+                continue;
+            }
 
+            _logger.Debug($"[RunFindPlayableRoom] 현재 대전 가능한 방 수 : {_playableRoomNumbers.Count}");
 
-            if(matchReq.HasValue == false) // 매칭 완료된 유저 정보가 없는 경우
+            var matchReq = _redisMatchedPlayerList.LeftPopAsync().Result;
+
+            if (matchReq.HasValue == false) // 매칭 완료된 유저 정보가 없는 경우
             {
                 Thread.Sleep(1000);
                 continue;
             }
 
+            // 플레이 가능한 방을 가져온다.
             int reservedRoomNum = -1;
             bool result = _playableRoomNumbers.TryDequeue(out reservedRoomNum);
 
-            _logger.Debug($"[RunFindPlayableRoom] 현재 대전 가능한 방 수 : {_playableRoomNumbers.Count}");
-            _logger.Debug($"[RunFindPlayableRoom] 매칭 완료 수신 방 배정 : {reservedRoomNum}");
-
-            if (result == false) // 남은 방이 없다면
+            if (result == false)
             {
-                // redis에 매칭된 유저 정보를 다시 넣는다.
-                await _redisMatchedPlayerList.RightPushAsync(matchReq.Value);
+                // 잠시 대기 후에 다시 돌아간다.
+                Thread.Sleep(1000);
                 continue;
             }
 
+            _logger.Debug($"[RunFindPlayableRoom] 매칭 완료 수신 방 배정 : {reservedRoomNum}");
+
             // 플레이 가능한 방 정보를 리스트에 넣는다.
-            await _redisCompleteList.RightPushAsync(new MatchingCompleteData
+            _ = _redisCompleteList.RightPushAsync(new MatchingCompleteData
             {
                 UserID = matchReq.Value.User1ID,
                 IsMatched = true,
                 ServerAddress = _pvpServerAddress,
                 Port = _pvpServerPort,
                 RoomNumber = reservedRoomNum
-            });
+            }).Result;
 
-            await _redisCompleteList.RightPushAsync(new MatchingCompleteData
+            _ = _redisCompleteList.RightPushAsync(new MatchingCompleteData
             {
                 UserID = matchReq.Value.User2ID,
                 IsMatched = true,
                 ServerAddress = _pvpServerAddress,
                 Port = _pvpServerPort,
                 RoomNumber = reservedRoomNum
-            });
+            }).Result;
         }
 
     }
