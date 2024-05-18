@@ -1,6 +1,7 @@
 # __GameDb__
 ### schema
-![스크린샷(154)](https://github.com/ks-wook/com2us_omok_server/assets/76806695/23804df1-9ea8-4735-bd6b-96bc86685049)
+![gamedb erd](https://github.com/ks-wook/com2us_omok_server/assets/76806695/3fe43308-8255-4b39-9729-dc871c9a0b7a)
+
 ---
 
 
