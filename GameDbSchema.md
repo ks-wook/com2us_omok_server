@@ -132,11 +132,13 @@ CREATE TABLE game_result
     `white_user_id`             BIGINT         NOT NULL    COMMENT '백돌 유저 아이디',
     `win_user_id`               BIGINT         NOT NULL    COMMENT '승자 유저 아이디',
     `created_at`                DATETIME       NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '게임 종료 일시', 
-     PRIMARY KEY (game_result_id)
+     PRIMARY KEY (game_result_id),
+     FOREIGN KEY (`black_user_id`) REFERENCES `user_game_data` (`uid`),
+     FOREIGN KEY (`white_user_id`) REFERENCES `user_game_data` (`uid`),
+     FOREIGN KEY (`win_user_id`) REFERENCES `user_game_data` (`uid`)
 );
 ```
-하이브 계정에 묶인 유저의 정보에 대해 저장하는 테이블.
-
+완료된 게임 정보가 저장되는 테이블
 
 ---
 
