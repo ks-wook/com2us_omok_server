@@ -68,6 +68,42 @@ sequenceDiagram
 
 ---
 
+# 게임 API 매칭 요청
 
+```mermaid
+sequenceDiagram
+    
+    participant Client
+    participant GameAPIServer
+    participant MatchServer
+    participant GameRedis
+    participant PvpSocketServer
+
+
+    Client             ->> GameAPIServer:     매칭 요청 ( /RequestMatch )
+    GameAPIServer      ->> MatchServer:       매칭 서버에게 매칭 큐에 유저 삽입 요청
+    alt 매칭 큐에 두 명이상 모인경우 
+        MatchServer    -->> GameRedis:        매칭된 유저 정보를 Redis에 저장
+    end
+
+    GameRedis          ->> PvpSocketServer:   Session을 생성가능한 대전서버에게 매칭 완료된 유저 정보 전달 
+    PvpSocketServer    ->> GameRedis:         입장해야할 방 정보와 접속할 실시간 대전서버의 주소와 포트번호를 Redis에 저장
+    GameRedis          ->> MatchServer:       실시간 대전서버로부터 받은 입장 정보를 매칭 서버에게 전달, 매칭서버는 해당 정보를 저장한다.
+
+
+    Client             ->> GameAPIServer:     매칭 요청을 보낸 후, 지정된 시간마다 매칭 완료 확인 요청 ( /CheckMatching )
+    GameAPIServer      ->> MatchServer:       매칭 서버에게 해당 유저의 매칭이 완료되었는지 확인 요청 ( /CheckMathcing )
+    alt 매칭이 완료된 경우
+        MatchServer    ->> GameAPIServer:     클라이언트가 접속할 대전서버와 방 정보 전달
+        GameAPIServer  ->> Client:            클라이언트에게 매칭 완료및 접속 대전 서버 정보 전달
+        Client ->> PvpSocketServer:           전달받은 정보를 기반으로 대전서버에 접속 요청 및 대전 룸 입장
+    else
+        MatchServer ->> GameAPIServer:        매칭 미완료 응답
+        GameAPIServer  ->> Client:            매칭 미완료로 클라이언트에게 응답
+    end
+
+```
+
+---
 
 
