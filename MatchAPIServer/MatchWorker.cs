@@ -116,8 +116,7 @@ public class MatchWoker : IMatchWoker
                     User2ID = user2ID
                 };
 
-                var matchedDataPushResult = _redisMatchedPlayerList.RightPushAsync(matchedData).Result;
-                
+                await _redisMatchedPlayerList.RightPushAsync(matchedData);
             }
             catch (Exception ex)
             {
@@ -127,17 +126,17 @@ public class MatchWoker : IMatchWoker
         }
     }
 
-    void RunMatchingComplete()
+    async void RunMatchingComplete()
     {
         while (true)
         {
             try
             {
-                // redis를 이용해서 매칭된 결과를 게임서버로부터 받는다
-                var matchCmplResult = _redisCompleteList.LeftPopAsync().Result;
+                // Redis의 list를 이용해서 매칭된 결과를 게임서버로부터 받는다
+                var matchCmplResult = await _redisCompleteList.LeftPopAsync();
                 if(matchCmplResult.HasValue == false)
                 {
-                    System.Threading.Thread.Sleep(1000);
+                    System.Threading.Thread.Sleep(1);
                     continue;
                 }
 
