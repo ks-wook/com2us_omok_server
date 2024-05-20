@@ -1,4 +1,4 @@
-﻿namespace PacketData;
+﻿namespace GameServer;
 
 public enum PACKETID : short
 {

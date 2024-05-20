@@ -96,7 +96,7 @@ public class MatchWoker : IMatchWoker
         {
             try
             {
-                // await Console.Out.WriteLineAsync($"Matching Req queue size : {_reqQueue.Count}");
+                await Console.Out.WriteLineAsync($"Matching Req queue size : {_reqQueue.Count}");
 
                 if (_reqQueue.Count < 2)
                 {

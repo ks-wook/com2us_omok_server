@@ -2,7 +2,6 @@
 using GameServer.Packet;
 using MemoryPack;
 using MySqlConnector;
-using PacketData;
 using SqlKata.Execution;
 using System;
 using System.Collections.Generic;

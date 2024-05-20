@@ -1,6 +1,5 @@
 ﻿using GameServer.Packet;
 using MemoryPack;
-using PacketData;
 using SuperSocket.SocketBase.Logging;
 using System;
 using System.Collections.Generic;
@@ -131,6 +130,7 @@ public class PacketHandlerRoom : BasePacketHandler
 
         foreach(RoomUser ru in room.GetRoomUserList())
         {
+            Console.WriteLine($"entered: {user.Id}, list: {ru.UserId}");
             sendData.RoomUserList.Add(ru.UserId);
         }
 

@@ -1,6 +1,5 @@
 ﻿using GameServer.Packet;
 using MemoryPack;
-using PacketData;
 using SuperSocket.SocketBase.Logging;
 using System;
 using System.Collections.Generic;
