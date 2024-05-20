@@ -2,6 +2,7 @@
 using OmokClient;
 using OmokClient.Game;
 using OmokClient.Hive;
+using PacketData;
 using System;
 using System.DirectoryServices;
 using System.Net.Http;
