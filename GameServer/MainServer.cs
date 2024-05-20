@@ -12,6 +12,7 @@ using System.Security.Cryptography.Xml;
 using System.Net.Sockets;
 using System.Collections.Concurrent;
 using System.Net;
+using PacketData;
 
 namespace GameServer
 {

@@ -1,6 +1,7 @@
 ﻿using GameAPIServer.Model.DAO.GameDb;
 using GameServer.Packet;
 using MySqlConnector;
+using PacketData;
 using SqlKata.Execution;
 using SuperSocket.SocketBase.Logging;
 using System;
