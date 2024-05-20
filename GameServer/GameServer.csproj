@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GameAPIServer\GameAPIServer.csproj" />
+    <ProjectReference Include="..\ServerClientShare\ServerClientShare.csproj" />
     <ProjectReference Include="..\SuperSocketLite\SuperSocketLite.csproj" />
   </ItemGroup>
 

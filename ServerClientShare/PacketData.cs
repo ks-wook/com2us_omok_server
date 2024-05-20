@@ -1,4 +1,4 @@
-﻿using CSCommon;
+﻿using GameServer;
 using MemoryPack;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OmokClient;
+namespace PacketData;
+
+
+[MemoryPackable]
+public partial class PkHeader
+{
+    public UInt16 TotalSize { get; set; } = 0;
+    public UInt16 Id { get; set; } = 0;
+    public byte Type { get; set; } = 0;
+}
+
 
 [MemoryPackable]
 public partial class PkResult : PkHeader // 결과가 포함된 패킷
@@ -109,10 +119,12 @@ public partial class PKTNtfEndOmok : PkResult // 게임 종료 통보 패킷
     public string WinUserId { get; set; } = string.Empty; // 승리한 유저 ID
 }
 
+
 [MemoryPackable]
 public partial class PKTReqPing : PkHeader // 유저 상태 검사
 {
 }
+
 
 [MemoryPackable]
 public partial class PKTResPing : PkResult // 유저 상태 검사 응답
