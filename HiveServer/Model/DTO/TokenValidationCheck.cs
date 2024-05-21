@@ -2,7 +2,7 @@
 {
     public class TokenValidationCheckReq
     {
-        public Int64 AccountId { get; set; }
+        public Int64 Uid { get; set; }
         public string Token { get; set; } = string.Empty;
     }
 

@@ -33,6 +33,11 @@ public enum ErrorCode : short
 
     // Token 14001 ~
     NullGameLoginToken = 14002,
+    TokenNotExistInHeader = 14003,
+    TokenMismatch = 14004,
+    UidNotExsistInHeader = 14005,
+    FailSetUserLockKey = 14006,
+    FailDelUserLockKey = 14007,
 
     // Login 15001 ~
     GameLoginFail = 15001,

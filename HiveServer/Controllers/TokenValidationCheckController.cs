@@ -29,13 +29,13 @@ namespace HiveServer.Controllers
 
             LoginToken? searchedToken;
 
-            // hive redis에서 account 값을 이용해 토큰값 검색
-            (res.Result, searchedToken) = await _memoryDb.GetHiveTokenByAccountId(req.AccountId);
+            // hive redis에서 uid 값을 이용해 토큰값 검색
+            (res.Result, searchedToken) = await _memoryDb.GetHiveTokenByUid(req.Uid);
 
             if(res.Result != ErrorCode.None || searchedToken == null) 
             {
                 _logger.ZLogError
-                    ($"[TokenValidationCheck] Uid:{req.AccountId}, Token:{req.Token} ErrorCode: {ErrorCode.TokenValidationCheckFail}");
+                    ($"[TokenValidationCheck] AccountId:{req.Uid}, Token:{req.Token} ErrorCode: {ErrorCode.TokenValidationCheckFail}");
                 res.Result = ErrorCode.TokenValidationCheckFail;
                 return res;
             }
@@ -44,7 +44,7 @@ namespace HiveServer.Controllers
             if(string.CompareOrdinal(req.Token, searchedToken.Token) != 0) // 토큰이 일치하지 않는 경우
             {
                 _logger.ZLogError
-                    ($"[TokenValidationCheck] Uid:{req.AccountId}, Token:{req.Token} ErrorCode: {ErrorCode.TokenMismatch}");
+                    ($"[TokenValidationCheck] AccountId:{req.Uid}, Token:{req.Token} ErrorCode: {ErrorCode.TokenMismatch}");
                 res.Result = ErrorCode.TokenMismatch;
                 return res;
             }

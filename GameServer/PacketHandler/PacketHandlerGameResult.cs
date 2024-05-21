@@ -102,7 +102,7 @@ public class PacketHandlerGameResult : BasePacketHandler
         }
 
         // 승자 전적
-        var winUserGameData = queryFactory.Query("user_game_data").Where("account_id", packet.WinUserId).FirstOrDefault<UserGameData>();
+        var winUserGameData = queryFactory.Query("user_game_data").Where("uid", packet.WinUserId).FirstOrDefault<UserGameData>();
 
         if(winUserGameData == null)
         {
@@ -110,13 +110,13 @@ public class PacketHandlerGameResult : BasePacketHandler
             return ErrorCode.NullUserGameData;
         }
 
-        queryFactory.Query("user_game_data").Where("account_id", packet.WinUserId).Update(new
+        queryFactory.Query("user_game_data").Where("uid", packet.WinUserId).Update(new
         {
             total_win_cnt = winUserGameData.total_win_cnt + 1
         });
 
         // 패자 전적
-        var loseUserGameData = queryFactory.Query("user_game_data").Where("account_id", loseUserId).FirstOrDefault<UserGameData>();
+        var loseUserGameData = queryFactory.Query("user_game_data").Where("uid", loseUserId).FirstOrDefault<UserGameData>();
 
         if (loseUserGameData == null)
         {
@@ -124,7 +124,7 @@ public class PacketHandlerGameResult : BasePacketHandler
             return ErrorCode.NullUserGameData;
         }
 
-        queryFactory.Query("user_game_data").Where("account_id", loseUserId).Update(new
+        queryFactory.Query("user_game_data").Where("uid", loseUserId).Update(new
         {
             total_lose_cnt = loseUserGameData.total_lose_cnt + 1
         });

@@ -29,7 +29,7 @@ public partial class PKTInnerResSaveGameResult : PkResult // 게임 결과 저�
 [MemoryPackable]
 public partial class PKTInnerReqVerifyToken : PkHeader // 로그인 토큰 검증 요청
 {
-    public Int64 AccountId { get; set; } // redis에 저장되는 토큰은 userId가 아닌 accountId를 key로 저장
+    public Int64 Uid { get; set; } // redis에 저장되는 토큰은 userId 를 키값으로 저장
     public string Token { get; set; } = string.Empty;
 }
 

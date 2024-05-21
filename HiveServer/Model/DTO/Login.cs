@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-
 // annotation 방식 이메일 형식 검사
 namespace HiveServer.Model.DTO
 {
@@ -21,7 +20,7 @@ namespace HiveServer.Model.DTO
     public class LoginRes
     {
         public ErrorCode Result { get; set; } = ErrorCode.None;
-        public Int64 AccountId { get; set; }
+        public Int64 UserId { get; set; }
         public string Token { get; set; } = string.Empty;
     }
 }
