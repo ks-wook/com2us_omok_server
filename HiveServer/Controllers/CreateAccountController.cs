@@ -29,13 +29,13 @@ public class CreateAccountController : ControllerBase
     {
         CreateAccountRes res = new CreateAccountRes();
 
-        if (!HiveServerSequrity.IsValidEmail(req.Email))
+        if (!HiveServerSequrity.IsValidEmail(req.Id))
         {
             res.result = HiveServer.ErrorCode.InvalidEmailFormat;
             return res;
         }
 
-        (res.result, Int64 accountId) = await _hiveDb.CreateAccountAsync(req.Email, req.Password);
+        (res.result, Int64 accountId) = await _hiveDb.CreateAccountAsync(req.Id, req.Password);
 
         // game api 서버로 UserGameData 생성 요청
         res.result = await CreateUserGameDataReq(accountId);

@@ -4,7 +4,7 @@
     public class Account
     {
         public Int64 account_id { get; set; }
-        public string email { get; set; } = string.Empty;
+        public string id { get; set; } = string.Empty;
         public string password { get; set; } = string.Empty;
         public string saltValue { get; set; } = string.Empty;
         public string created_at { get; set; } = string.Empty;

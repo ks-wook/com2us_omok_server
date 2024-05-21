@@ -27,7 +27,7 @@ public enum ErrorCode : short
 
     // Login 5001 ~
     HiveLoginFail = 5001,
-    EmailOrPasswordMismatch = 5002,
+    IDOrPasswordMismatch = 5002,
     HiveLoginTokenRedisFail = 5003,
     HiveRedisConnectionFail = 5004,
     FailGetUidByAccountId = 5005,

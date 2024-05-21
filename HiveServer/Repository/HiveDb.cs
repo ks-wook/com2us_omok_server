@@ -64,13 +64,13 @@ public class HiveDb : IHiveDb
 
 
     // 하이브 계정 생성
-    public async Task<(ErrorCode, Int64)> CreateAccountAsync(string email, string password)
+    public async Task<(ErrorCode, Int64)> CreateAccountAsync(string id, string password)
     {
         try
         {
-            // 이메일 중복 check
+            // 아이디 중복 check
             dynamic? data = await _queryFactory.Query("account")
-                .Where("email", "=", email).FirstOrDefaultAsync();
+                .Where("id", "=", id).FirstOrDefaultAsync();
 
             if (data != null)
             {
@@ -85,14 +85,14 @@ public class HiveDb : IHiveDb
             // 계정 정보 삽입
             var insertSuccess = await _queryFactory.Query("account").InsertAsync(new
             {
-                Email = email,
+                Id = id,
                 Password = hashedPassword,
                 SaltValue = saltValue,
             });
 
 
             _logger.ZLogDebug
-                ($"[CreateAccount] email: {email}, salt_value : {saltValue}, hashed_pw:{hashedPassword}");
+                ($"[CreateAccount] id: {id}, salt_value : {saltValue}, hashed_pw:{hashedPassword}");
 
             if (insertSuccess != 1)
             {
@@ -101,7 +101,7 @@ public class HiveDb : IHiveDb
                 return (ErrorCode.InsertAccountFail, -1);
             }
 
-            return await GetAccountIdByIDAsync(email);
+            return await GetAccountIdByIDAsync(id);
         }
         catch
         {
@@ -112,13 +112,13 @@ public class HiveDb : IHiveDb
     }
 
     // 하이브 계정 로그인
-    public async Task<(ErrorCode, Int64)> VerifyUserAndGetAccountIdAsync(string email, string password)
+    public async Task<(ErrorCode, Int64)> VerifyUserAndGetAccountIdAsync(string id, string password)
     {
         try
         {
             // 하이브 계정 검색
             Account? data = await _queryFactory.Query("account")
-                .Where("email", email).FirstOrDefaultAsync<Account>();
+                .Where("id", id).FirstOrDefaultAsync<Account>();
             if(data == null) // 하이브 계정이 존재하지 않는 경우
             {
                 return (ErrorCode.InvalidAccountEmail, -1);
@@ -134,7 +134,7 @@ public class HiveDb : IHiveDb
             // 검색된 계정의 해시값과 방금 생성한 해시값 비교
             if(data.password != hashedPassword) // 비밀번호 불일치
             {
-                return (ErrorCode.EmailOrPasswordMismatch, -1);
+                return (ErrorCode.IDOrPasswordMismatch, -1);
             }
 
             // 계정정보 탐색 성공
@@ -153,7 +153,7 @@ public class HiveDb : IHiveDb
         {
             // 하이브 계정 검색
             Account? data = await _queryFactory.Query("account")
-                .Where("email", id).FirstOrDefaultAsync<Account>();
+                .Where("id", id).FirstOrDefaultAsync<Account>();
             if (data == null) // 하이브 계정이 존재하지 않는 경우
             {
                 return (ErrorCode.InvalidAccountEmail, -1);

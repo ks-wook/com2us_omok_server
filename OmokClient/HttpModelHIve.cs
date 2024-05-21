@@ -14,7 +14,7 @@ public class CreateAccountReq
     [MinLength(1, ErrorMessage = "EMAIL CANNOT BE EMPTY")]
     [StringLength(50, ErrorMessage = "EMAIL IS TOO LONG")]
     [RegularExpression("^[a-zA-Z0-9_\\.-]+@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$", ErrorMessage = "E-mail is not valid")]
-    public string Email { get; set; } = string.Empty;
+    public string Id { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "PASSWORD CANNOT BE EMPTY")]
     [MinLength(1, ErrorMessage = "PASSWORD CANNOT BE EMPTY")]
@@ -33,7 +33,7 @@ public class LoginReq
     [MinLength(1, ErrorMessage = "EMAIL CANNOT BE EMPTY")]
     [StringLength(50, ErrorMessage = "EMAIL IS TOO LONG")]
     [RegularExpression("^[a-zA-Z0-9_\\.-]+@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$", ErrorMessage = "E-mail is not valid")]
-    public string Email { get; set; } = string.Empty;
+    public string Id { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "PASSWORD CANNOT BE EMPTY")]
     [MinLength(1, ErrorMessage = "PASSWORD CANNOT BE EMPTY")]
