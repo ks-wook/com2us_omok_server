@@ -18,7 +18,7 @@ CREATE TABLE account
     `created_at`        DATETIME        NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '계정 생성 일시',
     `recent_login_at`   DATETIME        NOT NULL    DEFAULT CURRENT_TIMESTAMP COMMENT '가장 최근 로그인 일시',
      PRIMARY KEY (account_id),
-     UNIQUE KEY (email)
+     UNIQUE KEY (id)
 );
 ```
 
