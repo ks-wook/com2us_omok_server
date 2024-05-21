@@ -103,7 +103,7 @@ namespace OmokClient
             Network.Close();
         }
 
-        // 로그인 요청 -> 하이브 -> 게임 api -> 게임 서버 순으로 진행
+        // 로그인 요청 -> 하이브 -> 게임 api 순으로 진행
         private async void button3_Click(object sender, EventArgs e)
         {
             DevLog.Write("로그인 시도");
@@ -139,11 +139,10 @@ namespace OmokClient
 
                 OmokClient.Hive.LoginRes hiveLoginRes = await httpHiveLoginRes.Content.ReadFromJsonAsync<OmokClient.Hive.LoginRes>();
 
-
                 // 게임 api 서버 로그인 요청
                 OmokClient.Game.LoginReq gameLoginReq = new OmokClient.Game.LoginReq()
                 {
-                    AccountId = hiveLoginRes.AccountId,
+                    Uid = hiveLoginRes.UserId,
                     Token = hiveLoginRes.Token,
                 };
 
@@ -161,29 +160,18 @@ namespace OmokClient
 
                 // 얻어온 정보로 나의 정보 업데이트
                 UserGameData userGameData = gameLoginRes.UserGameData;
-                UserIDLabel.Text = userGameData.account_id.ToString();
+                UserIDLabel.Text = userGameData.uid.ToString();
                 WinCountLabel.Text = userGameData.total_win_cnt.ToString();
                 LoseCountLabel.Text = userGameData.total_lose_cnt.ToString();
 
                 // 아이디 및 토큰 저장
-                ClientUserId = userGameData.account_id.ToString();
+                ClientUserId = userGameData.uid.ToString();
                 ClientLoginToken = hiveLoginRes.Token;
 
                 // 매칭 요청 버튼 활성화
                 MatchRequestBtn.Enabled = true;
 
                 DevLog.Write($"GameAPI 서버 로그인 성공");
-
-
-                //// 소켓 서버 로그인 요청
-                //var loginReq = new PKTReqLogin();
-                //loginReq.UserId = hiveLoginRes.AccountId.ToString();
-                //loginReq.AuthToken = hiveLoginRes.Token;
-                //var packet = MemoryPackSerializer.Serialize(loginReq);
-
-                //PostSendPacket((int)PACKETID.PKTReqLogin, packet);
-                //DevLog.Write($"소켓 게임 서버로 로그인 중...");
-
             }
             catch (Exception ex)
             {
@@ -310,6 +298,11 @@ namespace OmokClient
             try
             {
                 HttpClient client = new HttpClient();
+
+                // 요청 헤더 설정
+                client.DefaultRequestHeaders.Add("uid", ClientUserId);
+                client.DefaultRequestHeaders.Add("token", ClientLoginToken);
+                
                 OmokClient.Game.MatchingRequest matchingRequest = new OmokClient.Game.MatchingRequest()
                 {
                     UserID = ClientUserId
@@ -338,9 +331,7 @@ namespace OmokClient
                 DevLog.Write($"{ex.ToString()}");
             }
 
-            
         }
-
 
         private async void CheckMatchComplete(object obj)
         {
@@ -353,6 +344,11 @@ namespace OmokClient
 
             // 2초에 한번씩 매칭이 완료되었는지 http 요청 전송
             HttpClient client = new HttpClient();
+
+            // 요청 헤더 설정
+            client.DefaultRequestHeaders.Add("uid", ClientUserId);
+            client.DefaultRequestHeaders.Add("token", ClientLoginToken);
+
             OmokClient.Game.CheckMatchingReq checkMatchingReq = new OmokClient.Game.CheckMatchingReq()
             {
                 UserID = ClientUserId

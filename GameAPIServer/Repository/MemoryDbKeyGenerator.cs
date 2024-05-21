@@ -3,10 +3,17 @@
 public static class MemoryDbKeyGenerator
 {
     // 로그인
-    readonly static string LoginTokenKey = "UID_";
+    readonly static string LoginTokenKey = "LoginToken_";
+    readonly static string UserLockKey = "UserLock_";
 
-    public static string GenLoginTokenKey(string accountId)
+    // 로그인 토큰값은 uid 통해 key를 생성한다.
+    public static string GenLoginTokenKey(string uid)
     {
-        return LoginTokenKey + accountId;
+        return LoginTokenKey + uid;
+    }
+
+    public static string GenUserLockKey(string uid)
+    {
+        return UserLockKey + uid;
     }
 }

@@ -25,13 +25,13 @@ public class MemoryDb : IMemoryDb
     }
 
     // 로그인 유저 토큰 삽입
-    public async Task<ErrorCode> InsertHiveLoginTokenAsync(Int64 accountId, string token)
+    public async Task<ErrorCode> InsertHiveLoginTokenAsync(Int64 uid, string token)
     {
-        var key = MemoryDbKeyGenerator.GenLoginTokenKey(accountId.ToString());
+        var key = MemoryDbKeyGenerator.GenLoginTokenKey(uid.ToString());
 
         LoginToken loginToken = new LoginToken()
         {
-            Uid = accountId,
+            Uid = uid,
             Token = token,
         };
 
@@ -46,28 +46,25 @@ public class MemoryDb : IMemoryDb
             if (await redis.SetAsync(loginToken) == false)
             {
                 _logger.ZLogError
-                    ($"[InsertHiveLoginTokenAsync] Uid:{accountId}, Token:{token} ErrorCode: {ErrorCode.HiveLoginTokenRedisFail}");
+                    ($"[InsertHiveLoginTokenAsync] Uid:{uid}, Token:{token} ErrorCode: {ErrorCode.HiveLoginTokenRedisFail}");
                 return ErrorCode.HiveLoginTokenRedisFail;
             }
 
+            return ErrorCode.None;
         }
         catch
         {
             _logger.ZLogError
-                    ($"[InsertHiveLoginTokenAsync] Uid:{accountId}, Token:{token} ErrorCode: {ErrorCode.HiveRedisConnectionFail}");
+                    ($"[InsertHiveLoginTokenAsync] Uid:{uid}, Token:{token} ErrorCode: {ErrorCode.HiveRedisConnectionFail}");
             return ErrorCode.HiveRedisConnectionFail;
         }
-
-        return ErrorCode.None;
     }
 
-
-
-    // 유저 accountId로 유효 토큰 검색
-    public async Task<(ErrorCode, LoginToken?)> GetHiveTokenByAccountId(long accountId)
+    // 유저 아이디로 유효 토큰 검색
+    public async Task<(ErrorCode, LoginToken?)> GetHiveTokenByUid(long uid)
     {
         // accountId를 이용해서 토큰을 검색한 후 검색된 반환한다.
-        var key = MemoryDbKeyGenerator.GenLoginTokenKey(accountId.ToString());
+        var key = MemoryDbKeyGenerator.GenLoginTokenKey(uid.ToString());
 
         try
         {
@@ -85,7 +82,7 @@ public class MemoryDb : IMemoryDb
         catch
         {
             _logger.ZLogError
-                ($"[GetHiveTokenByAccountId] UID:{accountId}, Fail Get Hive Login Token");
+                ($"[GetHiveTokenByAccountId] UID:{uid}, Fail Get Hive Login Token");
             return (ErrorCode.NullHiveLoginToken, null);
         }
 

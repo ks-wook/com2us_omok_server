@@ -1,8 +1,11 @@
-﻿namespace GameAPIServer.Repository;
+﻿using GameAPIServer.Model.DAO.MemoryDb;
+
+namespace GameAPIServer.Repository;
 
 public interface IMemoryDb
 {
-    public Task<(ErrorCode, string)> GetGameTokenByAccountId(Int64 accountId);
-    public Task<ErrorCode> InsertGameLoginTokenAsync(Int64 accountId, string token);
-
+    public Task<(ErrorCode, LoginToken?)> GetGameTokenByUidAsync(Int64 uid);
+    public Task<ErrorCode> InsertGameLoginTokenAsync(Int64 uid, string token);
+    public Task<ErrorCode> SetUserReqLockAsync(string userLockKey);
+    public Task<ErrorCode> DelUserReqLockAsync(string userLockKey);
 }

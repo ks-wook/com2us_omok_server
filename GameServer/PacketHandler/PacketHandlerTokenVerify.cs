@@ -55,7 +55,7 @@ public class PacketHandlerTokenVerify : BasePacketHandler
             return;
         }
 
-        (result, LoginToken? loginToken) = await GetTokenByAccountId(bodyData.AccountId);
+        (result, LoginToken? loginToken) = await GetTokenByUid(bodyData.Uid);
         if (result != ErrorCode.None || loginToken == null)
         {
             _logger.Error("토큰 검증 실패");
@@ -63,14 +63,14 @@ public class PacketHandlerTokenVerify : BasePacketHandler
             return;
         }
 
-        ResVerifyToken(bodyData.Token, loginToken.Token, sessionId, bodyData.AccountId.ToString());
+        ResVerifyToken(bodyData.Token, loginToken.Token, sessionId, bodyData.Uid.ToString());
     }
 
-    // 유저 accountId로 유효 토큰 검색
-    public async Task<(ErrorCode, LoginToken?)> GetTokenByAccountId(long accountId)
+    // 유저 uid 로 유효 토큰 검색
+    public async Task<(ErrorCode, LoginToken?)> GetTokenByUid(long uid)
     {
-        // accountId를 이용해서 토큰을 검색한 후 검색된 반환한다.
-        var key = MemoryDbKeyGenerator.GenLoginTokenKey(accountId.ToString());
+        // uid를 이용해서 토큰을 검색한 후 검색된 반환한다.
+        var key = MemoryDbKeyGenerator.GenLoginTokenKey(uid.ToString());
 
         try
         {

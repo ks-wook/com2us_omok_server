@@ -41,7 +41,7 @@ public class PacketHandlerUser : BasePacketHandler
 
 
         // Inner Packet
-        packetHandlerMap.Add((int)InnerPacketId.PKTInnerResVerifyToken, MQResVerifyTokenHandler);
+        packetHandlerMap.Add((int)InnerPacketId.PKTInnerResVerifyToken, PKTInnerResVerifyTokenHandler);
         packetHandlerMap.Add((int)InnerPacketId.PKTInnerNtfSendPing, PKTInnerNtfSendPingHandler);
         packetHandlerMap.Add((int)InnerPacketId.PKTInnerNtfCloseConnection, PKTInnerNtfCloseConnectionHandler);
     }
@@ -68,7 +68,7 @@ public class PacketHandlerUser : BasePacketHandler
         }
     }
 
-    public void MQResVerifyTokenHandler(MemoryPackBinaryRequestInfo packet)
+    public void PKTInnerResVerifyTokenHandler(MemoryPackBinaryRequestInfo packet)
     {
         var sessionId = packet.SessionID;
 
@@ -119,7 +119,7 @@ public class PacketHandlerUser : BasePacketHandler
         {
             // 레디스에서 토큰 검증
             PKTInnerReqVerifyToken sendData = new PKTInnerReqVerifyToken();
-            sendData.AccountId = Int64.Parse(bodyData.UserId);
+            sendData.Uid = Int64.Parse(bodyData.UserId);
             sendData.Token = bodyData.AuthToken;
             SendInnerReqPacket<PKTInnerReqVerifyToken>(sendData, InnerPacketId.PKTInnerReqVerifyToken, sessionId, _redisInsert);
 

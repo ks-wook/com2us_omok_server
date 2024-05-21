@@ -19,8 +19,6 @@ public class GameService : IGameService
         _memoryDb = memoryDb;
     }
 
-    
-
     public async Task<(ErrorCode, UserGameData?)> InitNewUserGameData(Int64 accountId)
     {
         // 게임을 새로 시작한 유저의 데이터를 만들고 반환
@@ -46,11 +44,9 @@ public class GameService : IGameService
 
     public async Task<(ErrorCode, UserGameData?)> GetGameDataByAccountId(Int64 accountId)
     {
-
         // accountId를 이용하여 유저 게임 데이터 검색
         (ErrorCode result, UserGameData? userGameData) = 
             await _gameDb.GetUserGameDataByAccountId(accountId);
-
 
         if(result != ErrorCode.None) // 데이터 검색에서 오류
         {
@@ -68,15 +64,13 @@ public class GameService : IGameService
         }
 
         return (result, userGameData);
-        
     }
 
-    public async Task<(ErrorCode, UserGameData?)> GetGameDataByUid(Int64 uid)
+    public async Task<(ErrorCode, UserGameData?)> GetUserGameDataByUid(Int64 uid)
     {
         // uid를 이용하여 유저 게임 데이터 검색
         (ErrorCode result, UserGameData? userGameData) =
             await _gameDb.GetGameDataByUid(uid);
-
 
         if (result != ErrorCode.None) // 데이터 검색에서 오류
         {
@@ -96,7 +90,6 @@ public class GameService : IGameService
         return (result, userGameData);
     }
 
-
     public async Task<ErrorCode> UpdateGameDataRecentLoginByUid(Int64 uid)
     {
         // 최근 로그인 시간 업데이트
@@ -111,8 +104,6 @@ public class GameService : IGameService
 
         return result;
     }
-
-
 
     public async Task<(ErrorCode, IEnumerable<Item>?)> GetItemListByUid(Int64 uid)
     {
@@ -129,21 +120,36 @@ public class GameService : IGameService
         return (result,  itemList);
     }
 
-    public async Task<UserGameData?> LoadGameData(Int64 accountId)
+    public async Task<UserGameData?> LoadGameDataByUserId(Int64 uid)
     {
         // accountId 값을 사용하여 게임 데이터를 검색
-        (ErrorCode result, UserGameData? userGameData) = await GetGameDataByAccountId(accountId);
+        (ErrorCode result, UserGameData? userGameData) = await GetUserGameDataByUid(uid);
 
-        if (userGameData == null)
+        if (userGameData == null) // UserGameData가 존재하지 않는 경우
         {
-            // UserGameData가 존재하지 않는 경우 새로운 유저 게임 데이터를 생성하여 반환
-            (result, userGameData) = await InitNewUserGameData(accountId);
-            return userGameData;
+            _logger.ZLogError
+                ($"[LoadGameDataByAccountId] ErrorCode: {ErrorCode.NullUserGameData}");
+            return null;
         }
 
         // 로그인 시간 업데이트
         result = await UpdateGameDataRecentLoginByUid(userGameData.uid);
 
         return userGameData;
+    }
+
+    public async Task<(ErrorCode, long)> GetUserIdByAccountId(long accountId)
+    {
+        // accountId 값을 사용하여 게임 데이터를 검색
+        (ErrorCode result, UserGameData? userGameData) = await GetGameDataByAccountId(accountId);
+
+        if (userGameData == null) // UserGameData가 존재하지 않는 경우
+        {
+            _logger.ZLogError
+                ($"[GetUserIdByAccountId] ErrorCode: {ErrorCode.NullUserGameData}");
+            return (ErrorCode.NullUserGameData, -1);
+        }
+
+        return (ErrorCode.None, userGameData.uid);
     }
 }

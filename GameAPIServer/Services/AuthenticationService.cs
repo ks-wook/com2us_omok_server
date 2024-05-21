@@ -23,24 +23,24 @@ public class AuthenticationService : IAuthenticationService
     }
 
     // 게임 API 서버 로그인 처리
-    public async Task<ErrorCode> Login(Int64 accountId, string loginToken)
+    public async Task<ErrorCode> Login(Int64 uid, string loginToken)
     {
         // 토큰을 hive서버로 보내서 유효성 검사
-        ErrorCode result = await LoginTokenVerify(accountId, loginToken);
+        ErrorCode result = await LoginTokenVerify(uid, loginToken);
 
         if (result != ErrorCode.None)
         {
             _logger.ZLogError(
-               $"[Login] UID = {accountId}, TokenValidationCheckFail");
+               $"[Login] UID = {uid}, TokenValidationCheckFail");
             return result;
         }
 
         // Game redis에 인증된 토큰을 삽입한다.
-        result = await _memoryDb.InsertGameLoginTokenAsync(accountId, loginToken);
+        result = await _memoryDb.InsertGameLoginTokenAsync(uid, loginToken);
         if (result != ErrorCode.None)
         {
             _logger.ZLogError(
-               $"[Login] UID = {accountId}, Login Token Insert Fail");
+               $"[Login] UID = {uid}, Login Token Insert Fail");
             return result;
         }
 
@@ -48,14 +48,14 @@ public class AuthenticationService : IAuthenticationService
     }
 
     // Hive 서버로 로그인한 계정의 토큰 유효성 검증을 요청
-    public async Task<ErrorCode> LoginTokenVerify(Int64 accuountId, string loginToken)
+    public async Task<ErrorCode> LoginTokenVerify(Int64 uid, string loginToken)
     {
         try
         {
             HttpClient client = new HttpClient();
             TokenValidationCheckReq req = new TokenValidationCheckReq()
             {
-                AccountId = accuountId,
+                Uid = uid,
                 Token = loginToken
             };
 
@@ -64,7 +64,7 @@ public class AuthenticationService : IAuthenticationService
             if(httpRes == null || httpRes.StatusCode != System.Net.HttpStatusCode.OK) 
             {
                 _logger.ZLogDebug($"[LoginTokenVerify] ErrorCode:{ErrorCode.InvalidResFromHive}, " +
-                    $"AccountId = {accuountId}, Token = {loginToken}, StatusCode = {httpRes?.StatusCode}");
+                    $"Uid = {uid}, Token = {loginToken}, StatusCode = {httpRes?.StatusCode}");
                 return ErrorCode.InvalidResFromHive;
             }
 
@@ -74,7 +74,7 @@ public class AuthenticationService : IAuthenticationService
             if(res.Result != ErrorCode.None)
             {
                 _logger.ZLogInformation
-                    ($"[LoginTokenVerify] ErrorCode:{ErrorCode.InvalidResFromHive}, AccountId = {accuountId}, Token = {loginToken}");
+                    ($"[LoginTokenVerify] ErrorCode:{ErrorCode.InvalidResFromHive}, Uid = {uid}, Token = {loginToken}");
                 return ErrorCode.InvalidResFromHive;
             }
 
@@ -83,7 +83,7 @@ public class AuthenticationService : IAuthenticationService
         catch
         {
             _logger.ZLogError($"[LoginTokenVerify] " +
-                $"ErrorCode:{ErrorCode.InvalidResFromHive}, AccountId = {accuountId}, Token = {loginToken}");
+                $"ErrorCode:{ErrorCode.InvalidResFromHive}, Uid = {uid}, Token = {loginToken}");
             return ErrorCode.InvalidResFromHive;
         }
     }

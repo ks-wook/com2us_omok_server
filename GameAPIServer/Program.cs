@@ -1,3 +1,4 @@
+using GameAPIServer.Middleware;
 using GameAPIServer.Repository;
 using GameAPIServer.Services;
 using Microsoft.Extensions.Logging;
@@ -28,13 +29,7 @@ Host.CreateDefaultBuilder()
     {
         logging.ClearProviders();
 
-        // TEST 콘솔에 로그 출력
         logging.AddZLoggerConsole();
-
-        // TODO 날짜에 따라 파일에 로그 출력
-        // logging.AddZLoggerFile("fileName.log");
-        // 날짜에 따라 다른 파일을 생성하여 로깅을 구조화
-        // logging.AddZLoggerRollingFile((dt, x) => $"logs/{dt.ToLocalTime():yyyy-MM-dd}_{x:000}.log", x => x.ToLocalTime().Date, 1024);
 
         logging.AddZLoggerConsole(options =>
         {
@@ -46,7 +41,7 @@ Host.CreateDefaultBuilder()
 
 var app = builder.Build();
 
-
+app.UseMiddleware<UserTokenValidationCheck>();
 
 app.UseRouting();
 

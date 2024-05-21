@@ -64,7 +64,7 @@ public class HiveDb : IHiveDb
 
 
     // 하이브 계정 생성
-    public async Task<ErrorCode> CreateAccountAsync(string email, string password)
+    public async Task<(ErrorCode, Int64)> CreateAccountAsync(string email, string password)
     {
         try
         {
@@ -74,9 +74,8 @@ public class HiveDb : IHiveDb
 
             if (data != null)
             {
-                return ErrorCode.DuplicatedEmail;
+                return (ErrorCode.DuplicatedEmail, -1);
             }
-
 
             // 패스워드 salting
             string saltValue, hashedPassword;
@@ -99,24 +98,21 @@ public class HiveDb : IHiveDb
             {
                 _logger.ZLogError(
                     $"[CreateAccount] ErrorCode: {ErrorCode.InsertAccountFail}");
-                return ErrorCode.InsertAccountFail;
+                return (ErrorCode.InsertAccountFail, -1);
             }
 
+            return await GetAccountIdByIDAsync(email);
         }
-        catch (Exception e) 
+        catch
         {
             _logger.ZLogError(
                 $"[CreateAccount] ErrorCode: {ErrorCode.CreateAccountFail}");
-            return ErrorCode.CreateAccountFail;
+            return (ErrorCode.CreateAccountFail, -1);
         }
-        
-        // 하이브 계정 생성 성공
-        return ErrorCode.None;
     }
 
-
     // 하이브 계정 로그인
-    public async Task<(ErrorCode, Int64)> VerifyUserAsync(string email, string password)
+    public async Task<(ErrorCode, Int64)> VerifyUserAndGetAccountIdAsync(string email, string password)
     {
         try
         {
@@ -128,7 +124,6 @@ public class HiveDb : IHiveDb
                 return (ErrorCode.InvalidAccountEmail, -1);
             }
 
-
             // Base64 문자열을 바이트 배열로 디코딩 -> 전달된 패스워드로 해시값 재생성
             string base64String = data.saltValue;
             byte[] saltByteArray = Convert.FromBase64String(base64String);
@@ -136,20 +131,40 @@ public class HiveDb : IHiveDb
             string hashedPassword;
             (_, hashedPassword) = HiveServerSequrity.HashingWithSaltValue(saltByteArray, password);
 
-
-
             // 검색된 계정의 해시값과 방금 생성한 해시값 비교
             if(data.password != hashedPassword) // 비밀번호 불일치
             {
                 return (ErrorCode.EmailOrPasswordMismatch, -1);
             }
 
-
             // 계정정보 탐색 성공
             return (ErrorCode.None, data.account_id);
         }
-        catch (Exception e)
+        catch
         {
+            _logger.LogError
+                ($"[VerifyUserAndGetAccountIdAsync] ErrorCode: {ErrorCode.FailVerifyUser}");
+            return (ErrorCode.HiveLoginFail, -1);
+        }
+    }
+    public async Task<(ErrorCode, Int64)> GetAccountIdByIDAsync(string id)
+    {
+        try
+        {
+            // 하이브 계정 검색
+            Account? data = await _queryFactory.Query("account")
+                .Where("email", id).FirstOrDefaultAsync<Account>();
+            if (data == null) // 하이브 계정이 존재하지 않는 경우
+            {
+                return (ErrorCode.InvalidAccountEmail, -1);
+            }
+
+            return (ErrorCode.None, data.account_id);
+        }
+        catch
+        {
+            _logger.LogError
+                ($"[GetAccountIdByIDAsync] ErrorCode: {ErrorCode.NullAccountData}");
             return (ErrorCode.HiveLoginFail, -1);
         }
     }
@@ -161,8 +176,6 @@ public class HiveDb : IHiveDb
     }
 }
 
-
-// Appsettings 파일에 정의된 내용을 이름 그대로 가져온다
 public class DbConfig
 {
     public string HiveDb { get; set; } = string.Empty;
