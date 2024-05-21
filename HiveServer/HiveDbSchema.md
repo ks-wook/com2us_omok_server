@@ -1,7 +1,8 @@
 
 # __HiveDb__
 ### schema
-![스크린샷(155)](https://github.com/ks-wook/com2us_omok_server/assets/76806695/5d801330-5eab-4b78-8504-f6295b00ffc5)
+![스크린샷(122)](https://github.com/ks-wook/com2us_omok_server/assets/76806695/80c00a95-2351-4c90-8249-7b2da3146641)
+
 ---
 
 
