@@ -42,7 +42,7 @@ public class LoginController : ControllerBase
         }
 
         // 전달된 패스워드를 이용해 해싱값을 만들고 일치하는지 검사
-        (res.Result, Int64 accountId) = await _hiveDb.VerifyUserAndGetAccountIdAsync(req.Email, req.Password);
+        (res.Result, Int64 accountId) = await _hiveDb.VerifyUserAndGetAccountIdAsync(req.Id, req.Password);
 
         if(res.Result != ErrorCode.None)
         {

@@ -123,7 +123,7 @@ namespace OmokClient
                 HttpClient client = new HttpClient();
                 OmokClient.Hive.LoginReq hiveLoginReq = new OmokClient.Hive.LoginReq()
                 {
-                    Email = textBoxUserID.Text,
+                    Id = textBoxUserID.Text,
                     Password = textBoxPs.Text,
                 };
 
@@ -249,7 +249,7 @@ namespace OmokClient
                 HttpClient client = new HttpClient();
                 OmokClient.Hive.CreateAccountReq hiveCreateAccountReq = new OmokClient.Hive.CreateAccountReq()
                 {
-                    Email = textBoxUserID.Text,
+                    Id = textBoxUserID.Text,
                     Password = textBoxPs.Text,
                 };
 
