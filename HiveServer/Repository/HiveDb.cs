@@ -49,7 +49,6 @@ public class HiveDb : IHiveDb
         return ErrorCode.None;
     }
 
-
     // disconnect with db
     private void DbDisconnect()
     {

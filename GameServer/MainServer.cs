@@ -68,9 +68,7 @@ namespace GameServer
 
             string hostname = Dns.GetHostName();
 
-
-            // TEST 클라와 같은 네트워크에 물려서 테스트하는 경우
-            // -------------------------------------------------
+            // 클라와 같은 네트워크에 물려서 테스트
             IPHostEntry hostEntry = Dns.GetHostEntry(hostname);
 
             // 첫 번째 IPv4 주소를 획득
@@ -79,11 +77,9 @@ namespace GameServer
                 if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
                 {
                     option.PvpServerAddress = ipAddress.ToString();
-                    Console.WriteLine($"로컬 IP 주소: {ipAddress.ToString()}, Port: {option.Port}");
                     break;
                 }
             }
-            // -------------------------------------------------
  
         }
 

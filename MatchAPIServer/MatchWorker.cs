@@ -96,8 +96,6 @@ public class MatchWoker : IMatchWoker
         {
             try
             {
-                // await Console.Out.WriteLineAsync($"Matching Req queue size : {_reqQueue.Count}");
-
                 if (_reqQueue.Count < 2)
                 {
                     System.Threading.Thread.Sleep(1000);
