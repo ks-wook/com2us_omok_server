@@ -34,7 +34,7 @@ namespace GameServer
         RoomManager _roomManager = new RoomManager();
         UserManager _userManager = new UserManager();
 
-        FindPlayableRoomWorker _findPlayableRoomWorker;
+        RedisMatchingWorker _findPlayableRoomWorker;
         
         public MainServer()
             : base(new DefaultReceiveFilterFactory<ReceiveFilter, MemoryPackBinaryRequestInfo>())
@@ -141,7 +141,7 @@ namespace GameServer
             _redisProcessor.CreateAndStart(_mainLogger, _mainServerOption.RedisConnectionStr, _mainPacketProcessor.Insert); // 프로세서 초기화
 
             // 매칭 worker
-            _findPlayableRoomWorker = new FindPlayableRoomWorker(
+            _findPlayableRoomWorker = new RedisMatchingWorker(
                 _mainLogger, _playableRoomNumbers,
                 _mainServerOption.RedisConnectionStr, _mainServerOption.MatchRequestListKey,
                 _mainServerOption.MatchCompleteListKey, _mainServerOption.PvpServerAddress, _mainServerOption.Port);

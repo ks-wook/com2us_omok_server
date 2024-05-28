@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace GameServer;
 
-public class FindPlayableRoomWorker : IDisposable
+public class RedisMatchingWorker : IDisposable
 {
     ILog _logger;
 
@@ -33,7 +33,7 @@ public class FindPlayableRoomWorker : IDisposable
     string _pvpServerAddress;
     int _pvpServerPort;
 
-    public FindPlayableRoomWorker(ILog logger, ConcurrentQueue<int> playableRoomNumbers, string redisAddress, string matchRequestListKey, string matchCompleteListKey, string pvpServerAddress, int pvpServerPort)
+    public RedisMatchingWorker(ILog logger, ConcurrentQueue<int> playableRoomNumbers, string redisAddress, string matchRequestListKey, string matchCompleteListKey, string pvpServerAddress, int pvpServerPort)
     {
         _logger = logger;
 
