@@ -82,8 +82,6 @@ public class FindPlayableRoomWorker : IDisposable
                 continue;
             }
 
-            _logger.Debug($"[RunFindPlayableRoom] 현재 대전 가능한 방 수 : {_playableRoomNumbers.Count}");
-
             var matchReq = _redisMatchedPlayerList.LeftPopAsync().Result;
 
             if (matchReq.HasValue == false) // 매칭 완료된 유저 정보가 없는 경우
