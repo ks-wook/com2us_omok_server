@@ -22,7 +22,6 @@ builder.Services.AddControllers();
 
 builder.WebHost.UseUrls("http://*:5015");
 
-
 // Logger Setting
 Host.CreateDefaultBuilder()
     .ConfigureLogging(logging =>
@@ -37,18 +36,11 @@ Host.CreateDefaultBuilder()
         });
     });
 
-
-
 var app = builder.Build();
 
 app.UseMiddleware<UserTokenValidationCheck>();
 
 app.UseRouting();
-
-#pragma warning disable ASP0014
-app.UseEndpoints(endpoints => { _ = endpoints.MapControllers(); });
-#pragma warning restore ASP0014
-
-
+app.MapDefaultControllerRoute();
 
 app.Run();
