@@ -36,7 +36,6 @@ Host.CreateDefaultBuilder()
 
 var app = builder.Build();
 
-app.UseRouting();
 app.MapDefaultControllerRoute();
 
 app.Run();

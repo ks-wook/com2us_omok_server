@@ -40,7 +40,6 @@ var app = builder.Build();
 
 app.UseMiddleware<UserTokenValidationCheck>();
 
-app.UseRouting();
 app.MapDefaultControllerRoute();
 
 app.Run();
