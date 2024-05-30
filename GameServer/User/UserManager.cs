@@ -96,7 +96,6 @@ public class UserManager
 
         if (timeSpan.TotalSeconds > _maxPingDelayTime + _timerWeight)
         {
-            // Console.WriteLine($"ping : {timeSpan.TotalSeconds}  {user.Id} 시간차");
             return true;
         }
 

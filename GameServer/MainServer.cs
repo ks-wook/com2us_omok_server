@@ -66,6 +66,11 @@ namespace GameServer
                 _playableRoomNumbers.Enqueue(i);
             }
 
+
+
+
+            // TEST: 로컬 테스트용 코드 
+
             string hostname = Dns.GetHostName();
 
             // 클라와 같은 네트워크에 물려서 테스트
@@ -80,7 +85,8 @@ namespace GameServer
                     break;
                 }
             }
- 
+            
+
         }
 
         public void StopServer()
@@ -254,9 +260,7 @@ namespace GameServer
         }
 
         void OnPacketReceived(ClientSession clientSession, MemoryPackBinaryRequestInfo requestInfo)
-        {
-            // MainLogger.Debug(string.Format("세션 번호 {0} 받은 데이터 크기: {1}, ThreadId: {2}", clientSession.SessionID, requestInfo.Body.Length, System.Threading.Thread.CurrentThread.ManagedThreadId));
-            
+        {            
             requestInfo.SessionID = clientSession.SessionID;
             _mainPacketProcessor.Insert(requestInfo);
         }

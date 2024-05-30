@@ -28,10 +28,6 @@ public class MemoryPackBinaryRequestInfo : BinaryRequestInfo
 
 }
 
-
-
-
-
 public class ReceiveFilter : FixedHeaderReceiveFilter<MemoryPackBinaryRequestInfo>
 {
     public ReceiveFilter() : base(MemoryPackBinaryRequestInfo.HEADERE_SIZE)
@@ -61,14 +57,14 @@ public class ReceiveFilter : FixedHeaderReceiveFilter<MemoryPackBinaryRequestInf
         // body 데이터가 있는 경우
         if (length > 0)
         {
-            if (offset >= MemoryPackBinaryRequestInfo.HEADERE_SIZE)
+            if (offset >= MemoryPackBinaryRequestInfo.HEADERE_SIZE) // 헤더와 바디가 일렬로 있는 경우
             {
-                var packetStartPos = offset - MemoryPackBinaryRequestInfo.HEADERE_SIZE;
-                var packetSize = length + MemoryPackBinaryRequestInfo.HEADERE_SIZE;
+                var packetStartPos = offset - MemoryPackBinaryRequestInfo.HEADERE_SIZE; // 헤더의 시작 위치
+                var packetSize = length + MemoryPackBinaryRequestInfo.HEADERE_SIZE; // 헤더 + 페이로드
 
                 return new MemoryPackBinaryRequestInfo(readBuffer.CloneRange(packetStartPos, packetSize));
             }
-            else
+            else // 헤더와 바디가 분리된경우
             {
                 //offset 이 헤더 크기보다 작으므로 헤더와 보디를 직접 합쳐야 한다.
                 var packetData = new byte[length + MemoryPackBinaryRequestInfo.HEADERE_SIZE];
@@ -82,6 +78,5 @@ public class ReceiveFilter : FixedHeaderReceiveFilter<MemoryPackBinaryRequestInf
         // body 데이터가 없는 경우
         return new MemoryPackBinaryRequestInfo(header.CloneRange(header.Offset, header.Count));
     }
-
 
 }
